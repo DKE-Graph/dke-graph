@@ -20,7 +20,7 @@ bool is_server(string ip){
 int main(int argc, char* argv[]){
   if(argc != 2)
   {
-    cerr << argv[0] << " <MY IP>  " << endl;
+    cerr << argv[0] << " <MY IP> " << endl;
     exit(1);
   }
   if(server_ip != node[0]){
@@ -40,7 +40,7 @@ int main(int argc, char* argv[]){
   string msg;
   string opcode = "send"; //send, send_with_imm, write, write_with_imm
 
-  if (argv[1] == server_ip){
+  if (strcmp(argv[2],server_ip) == 0){
     cin >> msg;
     myrdma.rdma_send(msg,1);
   }
