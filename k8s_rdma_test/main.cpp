@@ -1,4 +1,5 @@
 #include "myRDMA.hpp"
+#include <string.h>
 #include <fstream>
 #include <sstream>
 #include <ctime>
