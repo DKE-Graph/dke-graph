@@ -45,7 +45,7 @@ int main(int argc, char* argv[]){
     myrdma.rdma_send(msg,1);
   }
   else{
-    myrdma.rdma_recv_msg(1);
+    myrdma.rdma_send_recv(1);
     cerr << recv_buffer[0] << endl;
   }
   
