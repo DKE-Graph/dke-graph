@@ -43,10 +43,10 @@ int main(int argc, char* argv[]){
 
   if (strcmp(argv[2],server_ip) == 0){
     cin >> msg;
-    myrdma.rdma_send(msg,1);
+    myrdma.rdma_send(msg,0);
   }
   else{
-    myrdma.rdma_send_recv(1);
+    myrdma.rdma_send_recv(0);
     cerr << recv_buffer[0] << endl;
   }
   
