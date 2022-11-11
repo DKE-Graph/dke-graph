@@ -13,30 +13,21 @@
 #include <thread>
 #include <mutex>
 #include "map"
-#define PORT1 40100
-#define BUF_SIZE 100
-#define NAME_SIZE 20
-#define NumOfServer 8
+#define number_of_sock 100
 
 using namespace std;
 class TCP{
     public:
-        void Server();
-        void Server_t();
-        void Run(const char* iip);
-        void Client(const char* iip);
-        void Client_t(const char* iip);
-        void check_ip(const char* iip);
-        void send_msg(void * arg);
-        void Send_Msg(const char* m,int ip);
-        void Recv_Msg(int ip);
-        void recv_msg(void * arg);
-        int Scnt();
-        int *connect_sock();
+        void server(string server[]);
+        void connect_tcp(const char* ip, string server[], int number_of_server, int Port);
+        void client(string ip, int idx);
+        void client_t(const char* ip, string server[]);
+        void send_msg(const char* m,int ip);
+        int recv_msg(int ip);
         int *client_sock();
-        map<string, string> ReadRDMAInfo(int ip);
+        map<string, string> read_rdma_info(int ip);
     private:
-        const char* server[NumOfServer] = {"192.168.0.107", "192.168.0.108"};
+        int num_of_server;
         int sock;
         struct sockaddr_in serv_addr;
         struct sockaddr_in serv_adr, clnt_adr;
@@ -47,4 +38,8 @@ class TCP{
         int valread;
         string result;
         string read_char;
+        int clnt_cnt=0;
+        int new_sock[number_of_sock];
+        int clnt_socks[number_of_sock];
+        int Port;
 };
