@@ -1,15 +1,10 @@
-# CMake 프로그램의 최소 버전
-cmake_minimum_required(VERSION 3.11)
+cmake_minimum_required(VERSION 3.16)
 
-# 프로젝트 정보
-project(
-  ModooCode
-  VERSION 0.1
-  DESCRIPTION "예제 프로젝트"
-  LANGUAGES CXX)
+project(TCPtest)
+set(CMAKE_CXX_COMPILER "/usr/bin/g++")
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src/network)
 
-add_subdirectory(src)
-add_executable (program main.cpp)
-target_link_libraries(program tcp)
-target_compile_options(program PUBLIC -Wall -Werror)
-#target_include_directories(program PUBLIC includes)
+add_executable (k8s_tcp_test ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
+
+target_link_libraries(k8s_tcp_test PRIVATE network)
+target_compile_features(k8s_tcp_test PRIVATE cxx_std_17)
