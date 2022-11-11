@@ -1,5 +1,5 @@
 #include "tcp.hpp"
-#define port 40146
+#define port 40145
 #define num_of_node 2
 #define server_ip "192.168.0.107"
 #define buf_size 1024 //버프사이즈 정의
@@ -12,16 +12,24 @@ int main(int argc, char* argv[]){
         std::cout << argv[0] << " MY IP" << std::endl;
         exit(1);
     }
+    vector<int> sock_idx;
     TCP tcp;
     tcp.connect_tcp(argv[1], node, num_of_node, port);
 
+
+    int *clnt_socks = tcp.client_sock();
+    for(int idx=0; idx < num_of_node;idx++){
+        if(clnt_socks[idx]!=0){
+            sock_idx.push_back(idx);
+        }
+    }
     char msg[100];
     if (strcmp(argv[1],server_ip) == 0){
         cin >> msg;
-        tcp.send_msg(msg, 0);
+        tcp.send_msg(msg, sock_idx[0]);
     }
     else{
-        tcp.recv_msg(0);
+        tcp.recv_msg(sock_idx[0]);
     }
 
 
