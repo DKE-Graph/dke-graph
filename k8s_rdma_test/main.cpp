@@ -29,7 +29,7 @@ int main(int argc, char* argv[]){
         exit(1);
     }
     myRDMA myrdma;
-
+    
     myrdma.initialize_rdma_connection(argv[1], node, num_of_node, port,send_buffer,recv_buffer);
  
     myrdma.create_rdma_info();
