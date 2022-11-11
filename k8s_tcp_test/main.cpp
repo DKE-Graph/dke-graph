@@ -15,6 +15,17 @@ int main(int argc, char* argv[]){
     TCP tcp;
     tcp.connect_tcp(argv[1], node, num_of_node, port);
 
+    cerr << "Complete Connection" << endl;
+
+    char msg[100];
+    if (strcmp(argv[1],server_ip) == 0){
+        cin >> msg;
+        tcp.send_msg(msg, 0);
+    }
+    else{
+        tcp.recv_msg(0);
+    }
+
 
   return 0;
 }
