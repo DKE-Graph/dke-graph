@@ -1,0 +1,1 @@
+/usr/bin/g++ CMakeFiles/k8s_rdma_test.dir/main.cpp.o -o k8s_rdma_test  src/network/libnetwork.a -lpthread -libverbs 
