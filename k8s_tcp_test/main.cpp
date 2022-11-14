@@ -1,10 +1,10 @@
 #include "tcp.hpp"
 #define port 40145
 #define num_of_node 2
-#define server_ip "192.168.0.107"
+#define server_ip "172.17.0.2"
 #define buf_size 1024 //버프사이즈 정의
 
-string node[num_of_node] = {server_ip,"192.168.0.108"};
+string node[num_of_node] = {server_ip,"172.17.0.3"};
 
 int main(int argc, char* argv[]){
     if(argc != 2)
@@ -27,6 +27,7 @@ int main(int argc, char* argv[]){
     if (strcmp(argv[1],server_ip) == 0){
         cin >> msg;
         tcp.send_msg(msg, sock_idx[0]);
+        cerr << "SEND SUCCESS" << endl;
     }
     else{
         tcp.recv_msg(sock_idx[0]);
