@@ -8,5 +8,5 @@ spec:
   selector:
     app: k8s-tcp-test
   ports:
-  - port: 40145
+  - port: 80
     targetPort: 8080

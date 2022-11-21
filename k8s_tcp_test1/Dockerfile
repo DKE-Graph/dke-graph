@@ -11,4 +11,4 @@ RUN cd build
 RUN cmake .
 RUN make
 # Launch built application
-CMD ["./k8s_tcp_test","172.16.46.85"]
+CMD ["./k8s_tcp_test","10.104.1.254"]

@@ -1,10 +1,10 @@
 #include "tcp.hpp"
 #define port 40145
 #define num_of_node 2
-#define server_ip "172.16.46.84"
+#define server_ip "10.105.109.85"
 #define buf_size 1024 //버프사이즈 정의
 
-string node[num_of_node] = {server_ip,"172.16.46.85"};
+string node[num_of_node] = {server_ip,"10.104.1.254"};
 
 int main(int argc, char* argv[]){
     if(argc != 2)
@@ -35,7 +35,7 @@ int main(int argc, char* argv[]){
     while(1){
         cout << "이걸 보고 계신다면" << endl;
         cout << "성공 하신겁니다." << endl;
-        sleep(5);
+        sleep(1000);
     }
 
   return 0;
