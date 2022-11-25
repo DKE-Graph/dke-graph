@@ -8,6 +8,7 @@
 #include <iostream>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include <ifaddrs.h>
 #include <string>
 #include <vector>
 #include <thread>
@@ -25,6 +26,8 @@ class TCP{
         void send_msg(const char* m,int ip);
         int recv_msg(int ip);
         int *client_sock();
+        string domain_to_ip(string domain);
+        string check_my_ip();
         map<string, string> read_rdma_info(int ip);
     private:
         int num_of_server;

@@ -2,11 +2,10 @@ apiVersion: v1
 kind: Service
 metadata:
   name: svc-k8s-tcp-test
-spec:
-  type: ClusterIP
-  clusterIP: 10.105.109.85
+spec: 
   selector:
     app: k8s-tcp-test
   ports:
   - port: 80
     targetPort: 8080
+  clusterIP: None
