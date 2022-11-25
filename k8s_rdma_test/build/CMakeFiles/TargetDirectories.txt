@@ -1,6 +1,0 @@
-/home/lwjeong/dke-graph/k8s_rdma_test/build/CMakeFiles/k8s_rdma_test.dir
-/home/lwjeong/dke-graph/k8s_rdma_test/build/CMakeFiles/edit_cache.dir
-/home/lwjeong/dke-graph/k8s_rdma_test/build/CMakeFiles/rebuild_cache.dir
-/home/lwjeong/dke-graph/k8s_rdma_test/build/src/network/CMakeFiles/network.dir
-/home/lwjeong/dke-graph/k8s_rdma_test/build/src/network/CMakeFiles/edit_cache.dir
-/home/lwjeong/dke-graph/k8s_rdma_test/build/src/network/CMakeFiles/rebuild_cache.dir

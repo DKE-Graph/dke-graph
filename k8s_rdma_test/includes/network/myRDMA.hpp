@@ -2,6 +2,7 @@
 #include <string>
 #include <iostream>
 #include <stdio.h>
+#include <string.h>
 #include "map"
 #define buf_size 1048576*64 +1
 
