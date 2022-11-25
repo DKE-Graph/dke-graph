@@ -16,6 +16,7 @@ string TCP::domain_to_ip(string domain){
    addr.sin_addr.s_addr=inet_addr(domain_ch);
    host=gethostbyaddr((char*)&addr.sin_addr, 4, AF_INET);
 
+   int i = 0;
    while(1){
       host = gethostbyname(domain_ch);
       if(host){
@@ -26,9 +27,10 @@ string TCP::domain_to_ip(string domain){
          return result;
       }
       else{
-         printf(".\n");
+         if(i == 0)
+            printf("Progressing...\n");
+         i = 2;
       }
-      sleep(0.5);
    }
 }
 string TCP::check_my_ip(){
