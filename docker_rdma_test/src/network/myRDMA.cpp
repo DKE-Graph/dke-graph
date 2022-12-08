@@ -217,14 +217,13 @@ void myRDMA::send_info_change_qp(){
                 oss << &myrdma.send_buffer[j];
             else
                 oss << &myrdma.recv_buffer[j];
-            
             tcp.send_msg(change(oss.str()+"\n"),myrdma.sock_idx[j]);
+            
             tcp.send_msg(change(to_string(get<5>(myrdma.rdma_info[k][j])->length)+"\n"),myrdma.sock_idx[j]);
             tcp.send_msg(change(to_string(get<5>(myrdma.rdma_info[k][j])->lkey)+"\n"),myrdma.sock_idx[j]);
             tcp.send_msg(change(to_string(get<5>(myrdma.rdma_info[k][j])->rkey)+"\n"),myrdma.sock_idx[j]);
             tcp.send_msg(change(to_string(get<6>(myrdma.rdma_info[k][j]))+"\n"),myrdma.sock_idx[j]);
             tcp.send_msg(change(to_string(get<7>(myrdma.rdma_info[k][j]))+"\n"),myrdma.sock_idx[j]);
-            
         }
         cerr << "[ SUCCESS ]" <<endl;
         //Read RDMA info
@@ -271,29 +270,28 @@ void myRDMA::create_rdma_info(){
         }
         for(int i =0;i<myrdma.connect_num;i++){
             struct ibv_context* context = rdma.createContext();
-            cout << "create Context Done "<< context << endl;
             struct ibv_pd* protection_domain = rdma.alloc_protection_domain(context);
             if (!protection_domain){
                 cout << "ibv_alloc_pd error" << endl;
             }
-            cout << "ibv_alloc_pd Done" << endl;
+            cout << protection_domain << endl;
             int cq_size = 0x10;
             struct ibv_cq* completion_queue = ibv_create_cq(context, cq_size, nullptr, nullptr, 0);
-            cout << "ibv_create_cq( Done" << endl;
             struct ibv_qp* qp = rdma.createQueuePair(protection_domain, completion_queue);
-            cout << "createQueuePair Done" << endl;
             struct ibv_mr *mr = rdma.registerMemoryRegion(protection_domain, 
                                                     buf[i], sizeof(buf[i]));
-            cout << "createQueuePair Done" << endl;
+            if (mr == 0){
+                cout << "memory region error" << endl;
+                exit(0);
+            }
             uint16_t lid = rdma.getLocalId(context, PORT);
-            cout << "createQueuePair Done" << endl;
             uint32_t qp_num = rdma.getQueuePairNumber(qp);
-            cout << "createQueuePair Done" << endl;
             myrdma.rdma_info[j].push_back(make_tuple(context,protection_domain,cq_size,
                                             completion_queue,qp,mr,lid,qp_num));
         }
     }
     cerr << "[ SUCCESS ]" << endl;
+    //myRDMA::send_info_change_qp();
 }
 void myRDMA::set_buffer(char send[][buf_size], char recv[][buf_size], int num_of_server){
     myrdma.send_buffer = &send[0];
