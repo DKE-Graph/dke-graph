@@ -15,11 +15,14 @@ spec:
   containers:
   - name: container
     image: laewonjeong/k8s_rdma_test
+    volumeMounts:
+    - mountPath: /dev/infiniband
+      name: dev-infiniband
+    securityContext:
+      privileged: true
     ports:
     - containerPort: 8080
-  command:
-    - sh
-    - -c
-    - |
-      ls -l /dev/infiniband
-      sleep 1000000
+  volumes:
+  - name: dev-infiniband
+    hostPath:
+      path: /dev/infiniband
