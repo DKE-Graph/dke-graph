@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-k8s-rdma-test
+  labels:
+     app: k8s-rdma-test
+spec:
+  hostname: pod-a
+  subdomain: svc-k8s-rdma-test
+  nodeSelector:
+    kubernetes.io/hostname: sn08
+  resources:
+    limits:
+      squat.ai/rdma: 1
+  containers:
+  - name: container
+    image: laewonjeong/k8s_rdma_test
+    volumeMounts:
+    - mountPath: /dev/infiniband
+      name: dev-infiniband
+    securityContext:
+      privileged: true
+    ports:
+    - containerPort: 8080
+  volumes:
+  - name: dev-infiniband
+    hostPath:
+      path: /dev/infiniband

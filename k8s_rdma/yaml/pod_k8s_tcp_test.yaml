@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-k8s-tcp-test
+  labels:
+     app: k8s-tcp-test
+spec:
+  hostname: pod-a
+  subdomain: svc-k8s-tcp-test
+  nodeSelector:
+    kubernetes.io/hostname: sn08
+  containers:
+  - name: container
+    image: laewonjeong/k8s_tcp_test
+    ports:
+    - containerPort: 8080
