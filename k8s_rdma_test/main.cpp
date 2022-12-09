@@ -1,6 +1,5 @@
 #include "myRDMA.hpp"
 #include "tcp.hpp"
-#include <infiniband/verbs.h>
 
 #define port 40145
 #define num_of_node 2
@@ -24,9 +23,6 @@ int main(int argc, char* argv[]){
         cerr << "node[0] is not server_ip" << endl;
         exit(1);
     }
-    struct ibv_device **dev_list;
-    dev_list = ibv_get_device_list(NULL);
-    cout << dev_list << endl;
 
     TCP tcp;
 
