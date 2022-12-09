@@ -275,7 +275,6 @@ void myRDMA::create_rdma_info(){
             if (!protection_domain){
                 cout << "ibv_alloc_pd error" << endl;
             }
-            cout << "ibv_alloc_pd Done" << endl;
             int cq_size = 0x10;
             struct ibv_cq* completion_queue = ibv_create_cq(context, cq_size, nullptr, nullptr, 0);
             struct ibv_qp* qp = rdma.createQueuePair(protection_domain, completion_queue);

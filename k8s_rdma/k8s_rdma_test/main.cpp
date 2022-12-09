@@ -65,7 +65,7 @@ int main(int argc, char* argv[]){
   sleep(5);
   while(1){
     cerr << "Success RDMA communication" <<endl;
-    sleep(5);
+    sleep(1000);
   }
   
   return 0;
