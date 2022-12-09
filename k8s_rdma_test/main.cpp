@@ -52,6 +52,7 @@ int main(int argc, char* argv[]){
     if (strcmp(my_ip.c_str(),node[0].c_str()) == 0){
         msg = "Hello k8s RDMA";
         myrdma.rdma_send(msg,0);
+        cerr << "Send success" << endl;
     }
     else{
         myrdma.rdma_send_recv(0);
@@ -60,6 +61,12 @@ int main(int argc, char* argv[]){
   
 
   myrdma.exit_rdma();
+  
+  sleep(5);
+  while(1){
+    cerr << "Success RDMA communication" <<end;
+    sleep(5)
+  }
   
   return 0;
 }
