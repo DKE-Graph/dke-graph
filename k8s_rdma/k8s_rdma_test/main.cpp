@@ -48,16 +48,6 @@ int main(int argc, char* argv[]){
   
     string msg;
     string opcode = "send"; //send, send_with_imm, write, write_with_imm
-
-    /*if (strcmp(my_ip.c_str(),node[0].c_str()) == 0){
-        msg = "Hello k8s RDMA";
-        myrdma.rdma_send(msg,0);
-        cerr << "Send success" << endl;
-    }
-    else{
-        myrdma.rdma_send_recv(0);
-        cerr << recv_buffer[0] << endl;
-    }*/
     
     msg = "[ " + my_ip + " ] Hello k8s RDMA";
     myrdma.rdma_comm(opcode, msg);
