@@ -1,0 +1,2 @@
+/usr/bin/ar qc libnetwork.a CMakeFiles/network.dir/RDMA.cpp.o CMakeFiles/network.dir/myRDMA.cpp.o CMakeFiles/network.dir/tcp.cpp.o
+/usr/bin/ranlib libnetwork.a
