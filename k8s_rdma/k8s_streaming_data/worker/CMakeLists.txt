@@ -4,7 +4,7 @@ project(k8s_streaming_data)
 set(CMAKE_CXX_COMPILER "/usr/bin/g++")
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src/network)
 
-add_executable (k8s_master_streaming_data ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
+add_executable (k8s_worker_streaming_data ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
 
-target_link_libraries(k8s_master_streaming_data PRIVATE network)
-target_compile_features(k8s_master_streaming_data PRIVATE cxx_std_17)
+target_link_libraries(k8s_worker_streaming_data PRIVATE network)
+target_compile_features(k8s_worker_streaming_data PRIVATE cxx_std_17)

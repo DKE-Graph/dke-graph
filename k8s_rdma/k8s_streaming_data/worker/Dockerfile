@@ -12,4 +12,4 @@ RUN cd build
 RUN cmake .
 RUN make
 # Launch built application
-CMD ["./k8s_master_streaming_data"]
+CMD ["./k8s_worker_streaming_data"]
