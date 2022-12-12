@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-k8s-streaming-worker
+  labels:
+     app: k8s-streaming
+spec:
+  hostname: pod-b
+  subdomain: svc-k8s-streaming
+  nodeSelector:
+    kubernetes.io/hostname: sn08
+  resources:
+    limits:
+      squat.ai/rdma: 1
+  containers:
+  - name: container
+    image: laewonjeong/worker_streaming_data
+    volumeMounts:
+    - mountPath: /dev/infiniband
+      name: dev-infiniband
+    securityContext:
+      privileged: true
+    ports:
+    - containerPort: 8080
+  volumes:
+  - name: dev-infiniband
+    hostPath:
+      path: /dev/infiniband
