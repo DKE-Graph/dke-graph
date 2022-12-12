@@ -58,7 +58,9 @@ int main(int argc, char* argv[]){
         myrdma.rdma_send_recv(0);
         cerr << recv_buffer[0] << endl;
     }*/
-
+    
+    msg = "Hello k8s RDMA";
+    myrdma.rdma_comm(opcode, msg);
 
     myrdma.exit_rdma();
   
