@@ -1,1 +1,0 @@
-/usr/bin/g++ CMakeFiles/k8s_master_streaming_data.dir/main.cpp.o -o k8s_master_streaming_data  src/network/libnetwork.a -lpthread -libverbs 
