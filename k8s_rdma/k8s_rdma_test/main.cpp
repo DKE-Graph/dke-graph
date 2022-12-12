@@ -59,7 +59,7 @@ int main(int argc, char* argv[]){
         cerr << recv_buffer[0] << endl;
     }*/
     
-    msg = "[ " + ip + " ] Hello k8s RDMA";
+    msg = "[ " + my_ip + " ] Hello k8s RDMA";
     myrdma.rdma_comm(opcode, msg);
     printf("recv_buffer[0]: %s\n", recv_buffer[0]); 
     
