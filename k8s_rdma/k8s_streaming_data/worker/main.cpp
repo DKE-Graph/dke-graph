@@ -2,15 +2,25 @@
 #include "tcp.hpp"
 
 #define port 40145
-#define num_of_node 4
+#define num_of_node 5
 #define server_ip "pod-a.svc-k8s-streaming"
 
-string node_domain[num_of_node] = {server_ip,"pod-b.svc-k8s-streaming","pod-c.svc-k8s-streaming","pod-d.svc-k8s-streaming"};
+string node_domain[num_of_node] = {server_ip,"pod-b.svc-k8s-streaming","pod-c.svc-k8s-streaming","pod-d.svc-k8s-streaming", "pod-e.svc-k8s-streaming"};
 string node[num_of_node];
 string my_ip;
 
 char send_buffer[num_of_node][buf_size];
 char recv_buffer[num_of_node][buf_size];
+
+vector<string> split(string s, string divid) {
+	vector<string> v;
+	char* c = strtok((char*)s.c_str(), divid.c_str());
+	while (c) {
+		v.push_back(c);
+		c = strtok(NULL, divid.c_str());
+	}
+	return v;
+}
 
 bool is_server(string ip){
     if(ip == server_ip)
@@ -49,7 +59,14 @@ int main(int argc, char* argv[]){
     while(1){
 
         myrdma.rdma_send_recv(0);
-        cout << recv_buffer[0] << endl;
+
+        string recv(recv_buffer[0]);
+
+        vector<string> v = split(recv, " ");
+        
+        string result = "{ time: " + v[0] + ", name: " + v[1] + ", age: "+ v[2] + " }";
+
+        myrdma.rdma_send(result, num_of_node-2);
     }
 
 
