@@ -48,7 +48,7 @@ int main(int argc, char* argv[]){
     
     while(1){
 
-        myrdma.rdma_recv_msg(0);
+        myrdma.rdma_send_recv(0);
         cout << recv_buffer[0] << endl;
     }
 

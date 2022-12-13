@@ -8,7 +8,7 @@ spec:
   hostname: pod-a
   subdomain: svc-k8s-streaming
   nodeSelector:
-    kubernetes.io/hostname: sn08
+    kubernetes.io/hostname: sn07
   resources:
     limits:
       squat.ai/rdma: 1

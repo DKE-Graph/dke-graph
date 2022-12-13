@@ -1,5 +1,8 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include "myRDMA.hpp"
 #include "tcp.hpp"
+#include "time.h"
+#include <regex>
 
 #define port 40145
 #define num_of_node 4
@@ -46,14 +49,22 @@ int main(int argc, char* argv[]){
 
     cerr << "====================================================" << endl;
     
-    string streaming_data[5] = {"Laewonjeong 25", "Laewonjeong 26","Yisakhong 25","Yisakhong 26","Laewonjeong 27"};
+    string streaming_data[5] = {" Laewonjeong 25", " Laewonjeong 26"," Yisakhong 25"," Yisakhong 26"," Laewonjeong 27"};
     
     int index =0;
     while(1){
         for(int i =0;i<5;i++){
-            myrdma.rdma_send(streaming_data[i], index);
+            time_t timer;
+            timer = time(NULL);
+            string current_time = ctime(&timer);
+            current_time = regex_replace(current_time, regex(" "), "-");
+            current_time = regex_replace(current_time, regex("\n"), "");
+            string msg = current_time + streaming_data[i];
+
+            myrdma.rdma_send(msg, index);
+            cout << "send " << msg << " to " << node[index] << endl;
             index++;
-            if(index > num_of_node-1){
+            if(index >= num_of_node-1){
                 index = 0;
             }
             sleep(3);

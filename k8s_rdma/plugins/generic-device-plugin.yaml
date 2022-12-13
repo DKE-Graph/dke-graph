@@ -24,7 +24,7 @@ spec:
       - image: squat/generic-device-plugin
         args:
         - --device
-        - '{"name": "rdma", "groups": [{"paths": [{"path": "/dev/infiniband/uverbs0"}]},
+        - '{"name": "rdma", "groups": [{"paths": [{"path": "/dev/infiniband/uverbs*"}]},
                                        {"paths": [{"path": "/dev/infiniband/rdma_cm"}]}
                                        ]}'
         name: generic-device-plugin

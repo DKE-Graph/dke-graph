@@ -79,8 +79,8 @@ void myRDMA::rdma_send_recv(int i){
     if(!rdma.pollCompletion(get<3>(myrdma.rdma_info[1][i])))
         cerr << "recv failed" << endl;
     else{
-        cerr << strlen(myrdma.recv_buffer[i])/(1024*1024) <<"Mb data ";
-        cerr << "receive success" << endl;
+        //cerr << strlen(myrdma.recv_buffer[i])/(1024*1024) <<"Mb data ";
+        //cerr << "receive success" << endl;
     }
 }
 
