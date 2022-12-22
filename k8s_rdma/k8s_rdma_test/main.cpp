@@ -5,7 +5,7 @@
 #define num_of_node 2
 #define server_ip "pod-a.svc-k8s-rdma-test"
 
-string node_domain[num_of_node] = {server_ip,"pod-b.svc-k8s-rdma-test"};
+string node_domain[num_of_node] = {server_ip,"pod-b.svc-k8s-rdma-test","pod-c.svc-k8s-rdma-test","pod-d.svc-k8s-rdma-test"};
 string node[num_of_node];
 string my_ip;
 
