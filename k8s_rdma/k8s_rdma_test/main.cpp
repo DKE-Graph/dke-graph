@@ -2,7 +2,7 @@
 #include "tcp.hpp"
 
 #define port 40145
-#define num_of_node 2
+#define num_of_node 4
 #define server_ip "pod-a.svc-k8s-rdma-test"
 
 string node_domain[num_of_node] = {server_ip,"pod-b.svc-k8s-rdma-test","pod-c.svc-k8s-rdma-test","pod-d.svc-k8s-rdma-test"};
@@ -51,8 +51,9 @@ int main(int argc, char* argv[]){
     
     msg = "[ " + my_ip + " ] Hello k8s RDMA";
     myrdma.rdma_comm(opcode, msg);
-    printf("recv_buffer[0]: %s\n", recv_buffer[0]); 
-    
+    for(int i=0;i<num_of_node-1;i++){
+        printf("recv_buffer[%d]: %s\n", i, recv_buffer[i]); 
+    }
 
     myrdma.exit_rdma();
   
