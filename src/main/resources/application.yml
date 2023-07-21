@@ -1,0 +1,5 @@
+MGR_ENDPOINT:
+  dashboard.rook.221.154.134.31.traefik.me:10017/
+RGW_ENDPOINT:
+  object-storage.rook.221.154.134.31.traefik.me:10017/
+
