@@ -46,11 +46,6 @@ public class RGWService {
         return bucketList;
     }
 
-    // TODO: 2023.7.22 Keycloak과 연동해 관리자 확인하는 코드 추가해야 함.
-    public boolean validAccess(Key key) {
-        return true;
-    }
-
     public List<BObject> getObjects(Key key, String bucketName) {
         AmazonS3 conn = getClient(key);
 
@@ -98,5 +93,10 @@ public class RGWService {
                 .withClientConfiguration(clientConfiguration)
                 .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
                 .build();
+    }
+
+    // TODO: 2023.7.22 Keycloak과 연동해 관리자 확인하는 코드 추가해야 함.
+    public boolean validAccess(Key key) {
+        return true;
     }
 }
