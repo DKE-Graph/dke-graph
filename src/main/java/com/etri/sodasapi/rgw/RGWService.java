@@ -28,11 +28,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RGWService {
 
-    @Value("${MGR_ENDPOINT}")
-    public String MGR_ENDPOINT;
-
     @Value("${RGW_ENDPOINT}")
-    public String RGW_ENDPOINT;
+    private String RGW_ENDPOINT;
 
     private static AmazonS3 amazonS3;
 
