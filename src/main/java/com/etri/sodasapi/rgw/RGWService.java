@@ -12,6 +12,7 @@ import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.Bucket;
 import com.amazonaws.services.s3.model.ObjectListing;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.etri.sodasapi.common.BObject;
 import com.etri.sodasapi.common.Key;
@@ -20,7 +21,10 @@ import com.etri.sodasapi.config.Constants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -71,7 +75,19 @@ public class RGWService {
     public void deleteBucket(Key key, String bucketName) {
         AmazonS3 conn = getClient(key);
 
+        List<BObject> objectList = getObjects(key, bucketName);
+
+        for(BObject bObject : objectList) {
+            conn.deleteObject(bucketName, bObject.getObjectName());
+        }
+
         conn.deleteBucket(bucketName);
+    }
+
+    public void deleteObject(Key key, String bucketName, String object) {
+        AmazonS3 conn = getClient(key);
+
+        conn.deleteObject(bucketName, object);
     }
 
     private synchronized AmazonS3 getClient(Key key){
@@ -89,6 +105,13 @@ public class RGWService {
                 .withClientConfiguration(clientConfiguration)
                 .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
                 .build();
+    }
+
+    public void objectUpload(MultipartFile file, String bucketName, Key key) throws IOException {
+        AmazonS3 conn = getClient(key);
+
+        ByteArrayInputStream input = new ByteArrayInputStream(file.getBytes());
+        conn.putObject(bucketName, file.getOriginalFilename(), input, new ObjectMetadata());
     }
 
     // TODO: 2023.7.22 Keycloak과 연동해 관리자 확인하는 코드 추가해야 함.

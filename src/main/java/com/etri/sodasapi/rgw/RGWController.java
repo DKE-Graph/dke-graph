@@ -8,7 +8,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,5 +58,24 @@ public class RGWController {
         else{
             rgwService.deleteBucket(key, bucketName);
         }
+    }
+
+    @DeleteMapping("/bucket/{bucketName}/{object}")
+    public void deleteObject(@RequestBody Key key, @PathVariable String bucketName, @PathVariable String object){
+        if(rgwService.validAccess(key)){
+            rgwService.deleteObject(key, bucketName, object);
+        }
+        else{
+            rgwService.deleteObject(key, bucketName, object);
+        }
+    }
+
+    @PostMapping("/bucket/object")
+    public String objectUpload(@RequestParam("file") MultipartFile file, @RequestParam("bucketName") String bucketName, @RequestParam("accessKey") String accessKey, @RequestParam("secretKey") String secretKey) throws IOException {
+        Key key = new Key(accessKey, secretKey);
+
+        rgwService.objectUpload(file, bucketName, key);
+
+        return file.getOriginalFilename();
     }
 }
