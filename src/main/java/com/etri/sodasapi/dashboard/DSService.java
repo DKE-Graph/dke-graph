@@ -29,8 +29,8 @@ public class DSService {
         getToken();
 
         URI uri = UriComponentsBuilder
-                .fromUriString("http://"+MGR_ENDPOINT)
-                .path("api/rgw/user/" + userName+"/quota")
+                .fromUriString(MGR_ENDPOINT)
+                .path("/api/rgw/user/" + userName+"/quota")
                 .encode()
                 .build()
                 .toUri();
@@ -65,8 +65,8 @@ public class DSService {
         getToken();
 
         URI uri = UriComponentsBuilder
-                .fromUriString("http://"+MGR_ENDPOINT)
-                .path("api/rgw/user/" + userName + "/quota")
+                .fromUriString(MGR_ENDPOINT)
+                .path("/api/rgw/user/" + userName + "/quota")
                 .encode()
                 .build()
                 .toUri();
@@ -94,8 +94,8 @@ public class DSService {
         }
 
         URI uri = UriComponentsBuilder
-                .fromUriString("http://"+MGR_ENDPOINT)
-                .path("api/auth")
+                .fromUriString(MGR_ENDPOINT)
+                .path("/api/auth")
                 .encode()
                 .build()
                 .toUri();

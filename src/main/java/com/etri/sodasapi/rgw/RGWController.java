@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +21,9 @@ import java.util.List;
 public class RGWController {
     private final RGWService rgwService;
 
+    /*
+        Permission - Data - List
+     */
     @GetMapping("/bucket")
     public ResponseEntity<List<SBucket>> getBuckets(@RequestBody Key key){
         if(rgwService.validAccess(key)){
@@ -30,16 +34,9 @@ public class RGWController {
         }
     }
 
-    @GetMapping("/bucket/{bucketName}")
-    public ResponseEntity<List<BObject>> getObjects(@RequestBody Key key, @PathVariable String bucketName){
-        if(rgwService.validAccess(key)){
-            return ResponseEntity.status(HttpStatus.OK).body(rgwService.getObjects(key, bucketName));
-        }
-        else{
-            return ResponseEntity.status(HttpStatus.OK).body(rgwService.getObjects(key, bucketName));
-        }
-    }
-
+    /*
+        Permission - Data - Create
+     */
     @PostMapping("/bucket/{bucketName}")
     public ResponseEntity<Bucket> createBucket(@RequestBody Key key, @PathVariable String bucketName){
         if(rgwService.validAccess(key)){
@@ -50,6 +47,9 @@ public class RGWController {
         }
     }
 
+    /*
+        Permission - Data - Delete
+     */
     @DeleteMapping("/bucket/{bucketName}")
     public void deleteBucket(@RequestBody Key key, @PathVariable String bucketName){
         if(rgwService.validAccess(key)){
@@ -60,6 +60,22 @@ public class RGWController {
         }
     }
 
+    /*
+        Data - List
+     */
+    @GetMapping("/bucket/{bucketName}")
+    public ResponseEntity<List<BObject>> getObjects(@RequestBody Key key, @PathVariable String bucketName){
+        if(rgwService.validAccess(key)){
+            return ResponseEntity.status(HttpStatus.OK).body(rgwService.getObjects(key, bucketName));
+        }
+        else{
+            return ResponseEntity.status(HttpStatus.OK).body(rgwService.getObjects(key, bucketName));
+        }
+    }
+
+    /*
+        Data - Delete
+     */
     @DeleteMapping("/bucket/{bucketName}/{object}")
     public void deleteObject(@RequestBody Key key, @PathVariable String bucketName, @PathVariable String object){
         if(rgwService.validAccess(key)){
@@ -70,6 +86,9 @@ public class RGWController {
         }
     }
 
+    /*
+        Data - Create
+     */
     @PostMapping("/bucket/object")
     public String objectUpload(@RequestParam("file") MultipartFile file, @RequestParam("bucketName") String bucketName, @RequestParam("accessKey") String accessKey, @RequestParam("secretKey") String secretKey) throws IOException {
         Key key = new Key(accessKey, secretKey);
@@ -77,5 +96,13 @@ public class RGWController {
         rgwService.objectUpload(file, bucketName, key);
 
         return file.getOriginalFilename();
+    }
+
+    /*
+        Data - Get
+     */
+    @GetMapping("/bucket/{bucketName}/{object}")
+    public URL objectDownUrl(@RequestBody Key key, @PathVariable String bucketName, @PathVariable String object){
+        return rgwService.objectDownUrl(key, bucketName, object);
     }
 }

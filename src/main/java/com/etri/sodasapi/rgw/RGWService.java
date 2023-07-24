@@ -1,23 +1,17 @@
 package com.etri.sodasapi.rgw;
 
 import com.amazonaws.ClientConfiguration;
-import com.amazonaws.Protocol;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.amazonaws.services.s3.model.Bucket;
-import com.amazonaws.services.s3.model.ObjectListing;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.amazonaws.services.s3.model.*;
 import com.etri.sodasapi.common.BObject;
 import com.etri.sodasapi.common.Key;
 import com.etri.sodasapi.common.SBucket;
-import com.etri.sodasapi.config.Constants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -25,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,6 +38,7 @@ public class RGWService {
 
         for (Bucket mybucket : buckets) {
             bucketList.add(new SBucket(mybucket.getName(), mybucket.getCreationDate()));
+            System.out.println(mybucket.getName() + " " + conn.getBucketAcl(mybucket.getName()));
         }
 
         return bucketList;
@@ -100,7 +96,7 @@ public class RGWService {
         ClientConfiguration clientConfiguration = new ClientConfiguration();
         return amazonS3 = AmazonS3ClientBuilder
                 .standard()
-                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration("http://object-storage.rook.221.154.134.31.traefik.me:10017/", Regions.DEFAULT_REGION.getName()))
+                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(RGW_ENDPOINT, Regions.DEFAULT_REGION.getName()))
                 .withPathStyleAccessEnabled(true)
                 .withClientConfiguration(clientConfiguration)
                 .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
@@ -117,5 +113,14 @@ public class RGWService {
     // TODO: 2023.7.22 Keycloak과 연동해 관리자 확인하는 코드 추가해야 함.
     public boolean validAccess(Key key) {
         return true;
+    }
+
+    public URL objectDownUrl(Key key, String bucketName, String object) {
+        AmazonS3 conn = getClient(key);
+
+        GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(bucketName, object);
+
+        System.out.println(conn.generatePresignedUrl(request));
+        return conn.generatePresignedUrl(request);
     }
 }
