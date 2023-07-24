@@ -31,8 +31,6 @@ public class RGWService {
     @Value("${RGW_ENDPOINT}")
     private String RGW_ENDPOINT;
 
-    private static AmazonS3 amazonS3;
-
     public List<SBucket> getBuckets(Key key) {
         AmazonS3 conn = getClient(key);
 
@@ -76,10 +74,8 @@ public class RGWService {
         conn.deleteBucket(bucketName);
     }
 
-    private synchronized static AmazonS3 getClient(Key key){
-        if(amazonS3 != null){
-            return amazonS3;
-        }
+    private synchronized AmazonS3 getClient(Key key){
+        AmazonS3 amazonS3;
 
         String accessKey = key.getAccessKey();
         String secretKey = key.getSecretKey();
