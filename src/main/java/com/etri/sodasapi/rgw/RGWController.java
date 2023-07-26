@@ -12,6 +12,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.net.URL;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,8 +66,9 @@ public class RGWController {
         Data - List
      */
     @GetMapping("/bucket/{bucketName}")
-    public ResponseEntity<List<BObject>> getObjects(@RequestBody Key key, @PathVariable String bucketName){
+    public ResponseEntity<List<BObject>> getObjects(@RequestBody Key key, @PathVariable String bucketName) throws NoSuchAlgorithmException, InvalidKeyException {
         if(rgwService.validAccess(key)){
+            rgwService.getBucketQuota(key, bucketName);
             return ResponseEntity.status(HttpStatus.OK).body(rgwService.getObjects(key, bucketName));
         }
         else{

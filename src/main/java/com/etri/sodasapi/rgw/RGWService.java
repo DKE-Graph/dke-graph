@@ -17,10 +17,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 @Service
@@ -122,5 +129,35 @@ public class RGWService {
 
         System.out.println(conn.generatePresignedUrl(request));
         return conn.generatePresignedUrl(request);
+    }
+
+    public void getBucketQuota(Key key, String bucketName) throws NoSuchAlgorithmException, InvalidKeyException {
+        AmazonS3 conn = getClient(key);
+
+        String accessKey = "MB9VKP4AC9TZPV1UDEO4";
+        String secretKey = "UYScnoXxLtmAemx4gAPjByZmbDnaYuOPOdpG7vMw";
+        String bucket = "signature";
+        String endpoint = "http://object-storage.rook.221.154.134.31.traefik.me:10017";
+        String verb = "GET";
+        String path = "/admin/bucket";
+        String expiryMinutes = "10";
+
+        String url = getSignedUrl(verb, path, accessKey, secretKey, bucket, endpoint, expiryMinutes);
+        System.out.println(url);
+    }
+
+    public String getSignedUrl(String verb, String path, String accessKey, String secretKey, String bucket, String endpoint, String expiryMinutes) throws NoSuchAlgorithmException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeyException {
+
+        long expiryEpoch = (System.currentTimeMillis() / 1000) + (Integer.parseInt(expiryMinutes) * 60);
+
+        String canonicalizedResource = "/admin/user";
+        String stringToSign = verb + "\n\n\n" + expiryEpoch + "\n" + canonicalizedResource;
+
+        Mac mac = Mac.getInstance("HmacSHA1");
+        mac.init(new SecretKeySpec(secretKey.getBytes(StandardCharsets.UTF_8), "HmacSHA1"));
+        byte[] signatureBytes = mac.doFinal(stringToSign.getBytes(StandardCharsets.UTF_8));
+        String signature = URLEncoder.encode(Base64.getEncoder().encodeToString(signatureBytes), StandardCharsets.UTF_8);
+
+        return endpoint + canonicalizedResource + "?AWSAccessKeyId=" + accessKey + "&Expires=" + expiryEpoch + "&Signature=" + signature;
     }
 }
