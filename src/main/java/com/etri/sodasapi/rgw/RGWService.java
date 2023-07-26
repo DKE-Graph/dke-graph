@@ -32,13 +32,54 @@ public class RGWService {
 
     public List<SBucket> getBuckets(Key key) {
         AmazonS3 conn = getClient(key);
-
         List<Bucket> buckets = conn.listBuckets();
         List<SBucket> bucketList = new ArrayList<>();
 
         for (Bucket mybucket : buckets) {
             bucketList.add(new SBucket(mybucket.getName(), mybucket.getCreationDate()));
             System.out.println(mybucket.getName() + " " + conn.getBucketAcl(mybucket.getName()));
+
+            AccessControlList accessControlList = conn.getBucketAcl(mybucket.getName());
+            // 기존 Grant를 가져올 Canonical ID 또는 AWS 계정 ID
+            String existingCanonicalId = "foo_user";
+
+// 기존 Grant 찾기
+            Grantee existingGrant = null;
+            for (Grant grant : accessControlList.getGrants()) {
+                if (grant.getGrantee() instanceof CanonicalGrantee) {
+                    String canonicalId = ((CanonicalGrantee) grant.getGrantee()).getIdentifier();
+                    if (existingCanonicalId.equals(canonicalId)) {
+                        existingGrant = grant.getGrantee();
+                        break;
+                    }
+                }
+            }
+
+            if (existingGrant != null) {
+                // 기존 Grant 삭제
+                accessControlList.revokeAllPermissions(existingGrant);
+
+                // 변경할 새로운 Grant 생성
+                String newCanonicalId = "foo_user"; // 새로운 Canonical ID 또는 AWS 계정 ID를 지정합니다.
+                Grantee newGrant = new CanonicalGrantee("foo_user");
+
+                // 새로운 Grant 추가
+                accessControlList.grantPermission(newGrant, Permission.Read);
+                accessControlList.grantPermission(newGrant, Permission.Write);
+
+                // 수정된 ACL을 버킷에 설정
+                conn.setBucketAcl("foo-test-bucket", accessControlList);
+                System.out.println(mybucket.getName() + " " + conn.getBucketAcl(mybucket.getName()));
+            }
+//            List<Grant> grants = new ArrayList<>();
+//            grants.add(new Grant(new CanonicalGrantee("foo_user"), Permission.Read));
+//
+//            accessControlList = (AccessControlList) grants;
+//
+//            conn.setBucketAcl(mybucket.getName(), accessControlList);
+//
+//
+//            System.out.println(mybucket.getName() + " " + conn.getBucketAcl(mybucket.getName()));
         }
 
         return bucketList;
@@ -55,17 +96,17 @@ public class RGWService {
         do {
             for (S3ObjectSummary objectSummary : objects.getObjectSummaries()) {
                 objectList.add(new BObject(objectSummary.getKey(), objectSummary.getSize(), objectSummary.getLastModified()));
+                System.out.println(objectSummary.getKey() + " " + conn.getObjectAcl(bucketName, objectSummary.getKey()));
             }
             objects = conn.listNextBatchOfObjects(objects);
         } while (objects.isTruncated());
-
         return objectList;
     }
 
     public Bucket createBucket(Key key, String bucketName) {
         AmazonS3 conn = getClient(key);
-
-        return conn.createBucket(bucketName);
+        Bucket newBucket = conn.createBucket(bucketName);
+        return newBucket;
     }
 
     public void deleteBucket(Key key, String bucketName) {
