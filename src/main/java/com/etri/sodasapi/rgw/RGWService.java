@@ -81,7 +81,6 @@ public class RGWService {
 //
 //            System.out.println(mybucket.getName() + " " + conn.getBucketAcl(mybucket.getName()));
         }
-
         return bucketList;
     }
 
