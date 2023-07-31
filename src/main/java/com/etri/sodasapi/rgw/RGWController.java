@@ -108,4 +108,7 @@ public class RGWController {
     public URL objectDownUrl(@RequestBody Key key, @PathVariable String bucketName, @PathVariable String object){
         return rgwService.objectDownUrl(key, bucketName, object);
     }
+
+
+
 }
