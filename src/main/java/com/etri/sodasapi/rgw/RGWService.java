@@ -134,8 +134,8 @@ public class RGWService {
     public void getBucketQuota(Key key, String bucketName) throws NoSuchAlgorithmException, InvalidKeyException {
         AmazonS3 conn = getClient(key);
 
-        String accessKey = "MB9VKP4AC9TZPV1UDEO4";
-        String secretKey = "UYScnoXxLtmAemx4gAPjByZmbDnaYuOPOdpG7vMw";
+        String accessKey = "sodas_dev_access";
+        String secretKey = "sodas_dev_secret";
         String bucket = "signature";
         String endpoint = "http://object-storage.rook.221.154.134.31.traefik.me:10017";
         String verb = "GET";
@@ -144,6 +144,22 @@ public class RGWService {
 
         String url = getSignedUrl(verb, path, accessKey, secretKey, bucket, endpoint, expiryMinutes);
         System.out.println(url);
+
+        AmazonS3 s3Client = AmazonS3ClientBuilder.standard().build();
+
+        java.util.Date expiration = new java.util.Date();
+        long expTimeMillis = expiration.getTime();
+        expTimeMillis += 1000 * 60 * 60;
+        expiration.setTime(expTimeMillis);
+
+        GeneratePresignedUrlRequest generatePresignedUrlRequest =
+                new GeneratePresignedUrlRequest("hello");
+
+        GeneratePresignedUrlRequest generatePresignedUrlRequest =
+                new GeneratePresignedUrlRequest(bucketName, );
+
+        generatePresignedUrlRequest
+
     }
 
     public String getSignedUrl(String verb, String path, String accessKey, String secretKey, String bucket, String endpoint, String expiryMinutes) throws NoSuchAlgorithmException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeyException {
@@ -158,6 +174,6 @@ public class RGWService {
         byte[] signatureBytes = mac.doFinal(stringToSign.getBytes(StandardCharsets.UTF_8));
         String signature = URLEncoder.encode(Base64.getEncoder().encodeToString(signatureBytes), StandardCharsets.UTF_8);
 
-        return endpoint + canonicalizedResource + "?AWSAccessKeyId=" + accessKey + "&Expires=" + expiryEpoch + "&Signature=" + signature;
+        return endpoint + canonicalizedResource + "?AWSAccessKeyId=" + accessKey + "&uid=sodas_dev_user&quota&quota-type=bucket" + "&Expires=" + expiryEpoch + "&Signature=" + signature;
     }
 }
