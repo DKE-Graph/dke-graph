@@ -12,23 +12,43 @@ import com.amazonaws.services.s3.model.*;
 import com.etri.sodasapi.common.BObject;
 import com.etri.sodasapi.common.Key;
 import com.etri.sodasapi.common.SBucket;
+import com.etri.sodasapi.config.Constants;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.twonote.rgwadmin4j.RgwAdmin;
+import org.twonote.rgwadmin4j.RgwAdminBuilder;
+import org.twonote.rgwadmin4j.model.UsageInfo;
+import org.twonote.rgwadmin4j.model.usage.Summary;
+import org.yaml.snakeyaml.scanner.Constant;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 public class RGWService {
+    private final Constants constants;
+    private RgwAdmin rgwAdmin;
 
-    @Value("${RGW_ENDPOINT}")
-    private String RGW_ENDPOINT;
+    private RgwAdmin getRgwAdmin(){
+        if(this.rgwAdmin == null){
+            rgwAdmin = new RgwAdminBuilder().accessKey(constants.getRgwAdminAccess())
+                    .secretKey(constants.getRgwAdminSecret())
+                    .endpoint(constants.getRgwEndpoint() + "/admin")
+                    .build();
+        }
+        return rgwAdmin;
+    }
+
 
     public List<SBucket> getBuckets(Key key) {
         AmazonS3 conn = getClient(key);
@@ -136,7 +156,7 @@ public class RGWService {
         ClientConfiguration clientConfiguration = new ClientConfiguration();
         return amazonS3 = AmazonS3ClientBuilder
                 .standard()
-                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(RGW_ENDPOINT, Regions.DEFAULT_REGION.getName()))
+                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(constants.getRgwEndpoint(), Regions.DEFAULT_REGION.getName()))
                 .withPathStyleAccessEnabled(true)
                 .withClientConfiguration(clientConfiguration)
                 .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
@@ -163,4 +183,39 @@ public class RGWService {
         System.out.println(conn.generatePresignedUrl(request));
         return conn.generatePresignedUrl(request);
     }
+
+    public void getBucketQuota(Key key, String bucketName, String uid) throws NoSuchAlgorithmException, InvalidKeyException {
+        RgwAdmin rgwAdmin = getRgwAdmin();
+
+        System.out.println(rgwAdmin.getBucketQuota(uid).stream().peek(System.out::println));
+    }
+
+    public void setBucketQuota(String uid, long maxObject, long maxSizeKb, String enabled){
+        RgwAdmin rgwAdmin = getRgwAdmin();
+
+        rgwAdmin.setBucketQuota(uid, maxObject, maxSizeKb);
+    }
+
+    public String getSignedUrl(String verb, String path, String accessKey, String secretKey, String bucket, String endpoint, String expiryMinutes) throws NoSuchAlgorithmException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeyException {
+
+        long expiryEpoch = (System.currentTimeMillis() / 1000) + (Integer.parseInt(expiryMinutes) * 60);
+
+        String canonicalizedResource = "/admin/user";
+        String stringToSign = verb + "\n\n\n" + expiryEpoch + "\n" + canonicalizedResource;
+
+        Mac mac = Mac.getInstance("HmacSHA1");
+        mac.init(new SecretKeySpec(secretKey.getBytes(StandardCharsets.UTF_8), "HmacSHA1"));
+        byte[] signatureBytes = mac.doFinal(stringToSign.getBytes(StandardCharsets.UTF_8));
+        String signature = URLEncoder.encode(Base64.getEncoder().encodeToString(signatureBytes), StandardCharsets.UTF_8);
+
+        return endpoint + canonicalizedResource + "?AWSAccessKeyId=" + accessKey + "&uid=sodas_dev_user&quota&quota-type=bucket" + "&Expires=" + expiryEpoch + "&Signature=" + signature;
+    }
+
+    public void setIndividualBucketQuota(String uid, String bucket, long maxObjects, long maxSizeKB){
+        RgwAdmin rgwAdmin = getRgwAdmin();
+
+        rgwAdmin.setIndividualBucketQuota(uid, bucket, maxObjects, maxSizeKB);
+    }
+
+
 }

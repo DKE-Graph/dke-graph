@@ -41,4 +41,5 @@ public class DSController {
     public void userQuotaDisable(@PathVariable("uid") String userName, @RequestBody Map<String, String> body){
         dsService.userQoutaDisable(userName, body.get("quota_type"));
     }
+
 }
