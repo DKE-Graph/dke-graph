@@ -11,6 +11,12 @@ java {
     sourceCompatibility = '17'
 }
 
+jar {
+    manifest {
+        attributes 'Main-Class': 'com.etri.sodasapi.SodasApiApplication'
+    }
+}
+
 configurations {
     compileOnly {
         extendsFrom annotationProcessor
@@ -34,6 +40,8 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
     compileOnly group: 'software.amazon.awssdk', name: 'aws-sdk-java', version: '2.17.42'
+
+    implementation group: 'io.github.twonote', name: 'radosgw-admin4j', version: '2.0.8'
 
 }
 

@@ -2,4 +2,12 @@ MGR_ENDPOINT:
   http://dashboard.rook.221.154.134.31.traefik.me:10017
 RGW_ENDPOINT:
   http://object-storage.rook.221.154.134.31.traefik.me:10017
+RGW_ADMIN_ACCESS:
+  sodas_admin_access
+RGW_ADMIN_SECRET:
+  sodas_admin_secret
+RGW_ADMIN_UID:
+  sodas_admin_user
+
+
 
