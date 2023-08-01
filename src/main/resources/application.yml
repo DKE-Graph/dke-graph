@@ -2,4 +2,3 @@ MGR_ENDPOINT:
   http://dashboard.rook.221.154.134.31.traefik.me:10017
 RGW_ENDPOINT:
   http://object-storage.rook.221.154.134.31.traefik.me:10017
-
