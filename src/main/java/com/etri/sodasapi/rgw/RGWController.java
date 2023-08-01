@@ -68,7 +68,6 @@ public class RGWController {
     @GetMapping("/bucket/{bucketName}")
     public ResponseEntity<List<BObject>> getObjects(@RequestBody Key key, @PathVariable String bucketName) throws NoSuchAlgorithmException, InvalidKeyException {
         if(rgwService.validAccess(key)){
-            rgwService.getBucketQuota(key, bucketName);
             return ResponseEntity.status(HttpStatus.OK).body(rgwService.getObjects(key, bucketName));
         }
         else{
@@ -107,6 +106,11 @@ public class RGWController {
     @GetMapping("/bucket/{bucketName}/{object}")
     public URL objectDownUrl(@RequestBody Key key, @PathVariable String bucketName, @PathVariable String object){
         return rgwService.objectDownUrl(key, bucketName, object);
+    }
+
+    @GetMapping("/bucket/test")
+    public void test(){
+        rgwService.setIndividualBucketQuota("foo_user", "foo-test-bucket", 3, 100);
     }
 
 

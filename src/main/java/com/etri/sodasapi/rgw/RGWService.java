@@ -14,9 +14,6 @@ import com.etri.sodasapi.common.Key;
 import com.etri.sodasapi.common.SBucket;
 import com.etri.sodasapi.config.Constants;
 import lombok.RequiredArgsConstructor;
-import org.apache.tomcat.util.bcel.Const;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.twonote.rgwadmin4j.RgwAdmin;
@@ -40,6 +37,17 @@ import java.util.*;
 @RequiredArgsConstructor
 public class RGWService {
     private final Constants constants;
+    private RgwAdmin rgwAdmin;
+
+    private RgwAdmin getRgwAdmin(){
+        if(this.rgwAdmin == null){
+            rgwAdmin = new RgwAdminBuilder().accessKey(constants.getRgwAdminAccess())
+                    .secretKey(constants.getRgwAdminSecret())
+                    .endpoint(constants.getRgwEndpoint() + "/admin")
+                    .build();
+        }
+        return rgwAdmin;
+    }
 
 
     public List<SBucket> getBuckets(Key key) {
@@ -136,60 +144,16 @@ public class RGWService {
         return conn.generatePresignedUrl(request);
     }
 
-    public void getBucketQuota(Key key, String bucketName) throws NoSuchAlgorithmException, InvalidKeyException {
+    public void getBucketQuota(Key key, String bucketName, String uid) throws NoSuchAlgorithmException, InvalidKeyException {
+        RgwAdmin rgwAdmin = getRgwAdmin();
 
-
-
-        rgwAdmin();
-
-
-        System.out.println("hello");
-
-        String accessKey = constants.getRgwAdminAccess();
-        String secretKey = constants.getRgwAdminSecret();
-        String bucket = "signature";
-        String endpoint = constants.getRgwEndpoint();
-        String verb = "GET";
-        String path = "/admin/bucket";
-        String expiryMinutes = "10";
-
-        String url = getSignedUrl(verb, path, accessKey, secretKey, bucket, endpoint, expiryMinutes);
-        System.out.println(url);
-
-
-
-
-
+        System.out.println(rgwAdmin.getBucketQuota(uid).stream().peek(System.out::println));
     }
 
-    public void setBucketQuota(String bucket, String maxSizeKb, String enabled){
-        try{
-            final String uid = constants.getRgwAdminUID();
+    public void setBucketQuota(String uid, long maxObject, long maxSizeKb, String enabled){
+        RgwAdmin rgwAdmin = getRgwAdmin();
 
-            Map<String, String> queryParameters = new HashMap<>();
-            queryParameters.put("uid", uid);
-            queryParameters.put("bucket", bucket);
-            queryParameters.put("max-size-kb", maxSizeKb);
-            queryParameters.put("enabled", enabled);
-
-            StringBuilder sb = new StringBuilder();
-
-            for (Map.Entry<String, String> entry : queryParameters.entrySet()){
-                if(sb.length()>0){
-                    sb.append("&");
-                }
-                sb.append(URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8.toString()));
-                sb.append("=");
-                sb.append(URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8.toString()));
-            }
-
-
-            String query = "uid=sodas_dev_user&bucket&max-size-kb=5000&enabled=true";
-            String encodeQuery = URLEncoder.encode(query, StandardCharsets.UTF_8);
-            System.out.println(encodeQuery);
-        }catch (Exception ex){
-            ex.printStackTrace();
-        }
+        rgwAdmin.setBucketQuota(uid, maxObject, maxSizeKb);
     }
 
     public String getSignedUrl(String verb, String path, String accessKey, String secretKey, String bucket, String endpoint, String expiryMinutes) throws NoSuchAlgorithmException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeyException {
@@ -207,20 +171,11 @@ public class RGWService {
         return endpoint + canonicalizedResource + "?AWSAccessKeyId=" + accessKey + "&uid=sodas_dev_user&quota&quota-type=bucket" + "&Expires=" + expiryEpoch + "&Signature=" + signature;
     }
 
-    public void rgwAdmin(){
-        RgwAdmin rgwAdmin = new RgwAdminBuilder().accessKey("sodas_dev_access")
-                .secretKey("sodas_dev_secret")
-                .endpoint("http://object-storage.rook.221.154.134.31.traefik.me:10017/admin")
-                .build();
+    public void setIndividualBucketQuota(String uid, String bucket, long maxObjects, long maxSizeKB){
+        RgwAdmin rgwAdmin = getRgwAdmin();
 
-        rgwAdmin.setBucketQuota("sodas_dev_user", 1000, 4998);
-        //System.out.println(rgwAdmin.getBucketQuota("sodas_dev_user").toString());
-
-        rgwAdmin.setIndividualBucketQuota("sodas_dev_user", "foo-test-bucket", 10, 5999);
-        rgwAdmin.getBucketInfo("foo-test-bucket").stream().peek(System.out::println);
-
-        UsageInfo userUsage = rgwAdmin.getUserUsage("sodas_dev_user").get();
-        List<Summary> hoho = userUsage.getSummary();
-        System.out.println(hoho);
+        rgwAdmin.setIndividualBucketQuota(uid, bucket, maxObjects, maxSizeKB);
     }
+
+
 }
