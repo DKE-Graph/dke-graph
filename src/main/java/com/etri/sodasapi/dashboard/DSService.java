@@ -51,11 +51,11 @@ public class DSService {
         return quotaList;
     }
 
-    public void userQoutaConfig(String userName, Quota quota) {
+    public void qoutaConfig(String userName, Quota quota) {
         quotaConfigOperation(userName, quota);
     }
 
-    public void userQoutaDisable(String userName, String quotaType) {
+    public void qoutaDisable(String userName, String quotaType) {
         System.out.println(quotaType);
         Quota quota = new Quota("false", "0", "0", quotaType);
         quotaConfigOperation(userName, quota);

@@ -1,14 +1,12 @@
 package com.etri.sodasapi.rgw;
 
 import com.amazonaws.services.s3.model.Bucket;
-import com.etri.sodasapi.common.BObject;
-import com.etri.sodasapi.common.Key;
-import com.etri.sodasapi.common.Quota;
-import com.etri.sodasapi.common.SBucket;
+import com.etri.sodasapi.common.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.framework.qual.RequiresQualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +18,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -30,9 +29,8 @@ public class RGWController {
     /*
         Permission - Data - List
      */
-    @Operation(summary = "bucket 조회", description = "key 값을 확인하여 해당 bucket을 조회합니다")
     @GetMapping("/bucket")
-    public ResponseEntity<List<SBucket>> getBuckets(@Parameter(name = "key", description = "해당 key 값") @RequestBody Key key){
+    public ResponseEntity<List<SBucket>> getBuckets(Key key){
         if(rgwService.validAccess(key)){
             return ResponseEntity.status(HttpStatus.OK).body(rgwService.getBuckets(key));
         }
@@ -130,7 +128,7 @@ public class RGWController {
         Quota 반환 하기
      */
     @GetMapping("/bucket/quota/{bucketName}")
-    public long getIndividualBucketQuota(@PathVariable String bucketName){
+    public Map<String, Long> getIndividualBucketQuota(@PathVariable String bucketName){
         return rgwService.getIndividualBucketQuota(bucketName);
     }
 
@@ -142,5 +140,30 @@ public class RGWController {
     @GetMapping("/bucket/quota/{bucketName}/utilization")
     public Double quotaUtilizationInfo(@PathVariable String bucketName){
         return rgwService.quotaUtilizationInfo(bucketName);
+    }
+
+    @PostMapping("/bucket/subuser/{uid}")
+    public void createSubUser(@PathVariable("uid") String uid, @RequestBody SSubUser subUser){
+        rgwService.createSubUser(uid, subUser);
+    }
+
+    @GetMapping("/bucket/subuser/{uid}/{subUid}")
+    public String subUserInfo(@PathVariable("uid") String uid, @PathVariable("subUid") String subUid){
+        return rgwService.subUserInfo(uid, subUid);
+    }
+
+    @PostMapping("/bucket/subuser/{uid}/{subUid}")
+    public void setSubUserPermission(@PathVariable("uid") String uid, @PathVariable("subUid") String subUid, @RequestBody String permission){
+        rgwService.setSubUserPermission(uid, subUid, permission);
+    }
+
+    @DeleteMapping("/bucket/subuser/{uid}/{subUid}")
+    public void deleteSubUser(@PathVariable("uid") String uid, @PathVariable("subUid") String subUid, @RequestBody Key key){
+        rgwService.deleteSubUser(uid, subUid, key);
+    }
+
+    @PostMapping("/bucket/subuser/{uid}/{subUid}/key")
+    public void alterSubUserKey(@PathVariable("uid") String uid, @PathVariable("subUid") String subUid, @RequestBody Key key){
+        rgwService.alterSubUserKey(uid, subUid, key);
     }
 }

@@ -30,7 +30,7 @@ public class DSController {
      */
     @PostMapping("/quota/{uid}/config")
     public ResponseEntity userQuotaConfig(@PathVariable("uid") String userName, @RequestBody Quota quota){
-        dsService.userQoutaConfig(userName, quota);
+        dsService.qoutaConfig(userName, quota);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
@@ -39,7 +39,7 @@ public class DSController {
      */
     @DeleteMapping("/quota/{uid}/config")
     public void userQuotaDisable(@PathVariable("uid") String userName, @RequestBody Map<String, String> body){
-        dsService.userQoutaDisable(userName, body.get("quota_type"));
+        dsService.qoutaDisable(userName, body.get("quota_type"));
     }
 
 }
