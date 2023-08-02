@@ -155,4 +155,20 @@ public class RGWController {
     public Double quotaUtilizationInfo(@PathVariable String bucketName){
         return rgwService.quotaUtilizationInfo(bucketName);
     }
+
+    @GetMapping("/credential")
+    public List<S3Credential> getCredential(@PathVariable String uid) {
+        return rgwService.getS3Credential(uid);
+    }
+
+    @PostMapping("/credential")
+    public void createCredential(@PathVariable String uid){
+        rgwService.createS3Credential(uid);
+    }
+
+    // TODO: 자신의 subuser만 제어 가능하도록 valid access key 함수 넣어야 하는지?
+    @DeleteMapping("/credential")
+    public void deleteCredential(@PathVariable String uid, @PathVariable Key key){
+        rgwService.deleteS3Credential(uid, key.getAccessKey());
+    }
 }
