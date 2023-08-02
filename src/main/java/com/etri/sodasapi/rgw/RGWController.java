@@ -3,6 +3,7 @@ package com.etri.sodasapi.rgw;
 import com.amazonaws.services.s3.model.Bucket;
 import com.etri.sodasapi.common.BObject;
 import com.etri.sodasapi.common.Key;
+import com.etri.sodasapi.common.Quota;
 import com.etri.sodasapi.common.SBucket;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -124,10 +125,32 @@ public class RGWController {
     public URL objectDownUrl(@RequestBody Key key, @PathVariable String bucketName, @PathVariable String object){
         return rgwService.objectDownUrl(key, bucketName, object);
     }
+
     @Operation(summary = "테스트용 api")
     @GetMapping("/bucket/test")
-    public void test(){
+    public void test() {
         rgwService.getBucketInfo("foo-test-bucket");
-        rgwService.setIndividualBucketQuota("foo_user", "foo-test-bucket", 30, 100);
+        rgwService.setIndividualBucketQuota(
+                "foo_user",
+                "foo-test-bucket",
+                new Quota("true", "3", "1000", "bucket"));
+    }
+
+    /*
+        Quota 반환 하기
+     */
+    @GetMapping("/bucket/quota/{bucketName}")
+    public long getIndividualBucketQuota(@PathVariable String bucketName){
+        return rgwService.getIndividualBucketQuota(bucketName);
+    }
+
+    @PostMapping("/bucket/quota/{bucketName}/{uid}")
+    public Quota setIndividualBucketQuota(@PathVariable String bucketName, @PathVariable String uid, @RequestBody Quota quota){
+        return rgwService.setIndividualBucketQuota(uid, bucketName, quota);
+    }
+
+    @GetMapping("/bucket/quota/{bucketName}/utilization")
+    public Double quotaUtilizationInfo(@PathVariable String bucketName){
+        return rgwService.quotaUtilizationInfo(bucketName);
     }
 }

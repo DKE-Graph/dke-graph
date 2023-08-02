@@ -11,6 +11,7 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.*;
 import com.etri.sodasapi.common.BObject;
 import com.etri.sodasapi.common.Key;
+import com.etri.sodasapi.common.Quota;
 import com.etri.sodasapi.common.SBucket;
 import com.etri.sodasapi.config.Constants;
 import lombok.RequiredArgsConstructor;
@@ -19,18 +20,12 @@ import org.springframework.web.multipart.MultipartFile;
 import org.twonote.rgwadmin4j.RgwAdmin;
 import org.twonote.rgwadmin4j.RgwAdminBuilder;
 import org.twonote.rgwadmin4j.model.BucketInfo;
-import org.twonote.rgwadmin4j.model.UsageInfo;
-import org.twonote.rgwadmin4j.model.usage.BucketUsage;
-import org.twonote.rgwadmin4j.model.usage.Summary;
-import org.yaml.snakeyaml.scanner.Constant;
+import org.twonote.rgwadmin4j.model.CredentialType;
+import org.twonote.rgwadmin4j.model.SubUser;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URL;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
@@ -41,8 +36,8 @@ public class RGWService {
     private final Constants constants;
     private RgwAdmin rgwAdmin;
 
-    private RgwAdmin getRgwAdmin(){
-        if(this.rgwAdmin == null){
+    private synchronized RgwAdmin getRgwAdmin() {
+        if (this.rgwAdmin == null) {
             rgwAdmin = new RgwAdminBuilder().accessKey(constants.getRgwAdminAccess())
                     .secretKey(constants.getRgwAdminSecret())
                     .endpoint(constants.getRgwEndpoint() + "/admin")
@@ -135,7 +130,7 @@ public class RGWService {
 
         List<BObject> objectList = getObjects(key, bucketName);
 
-        for(BObject bObject : objectList) {
+        for (BObject bObject : objectList) {
             conn.deleteObject(bucketName, bObject.getObjectName());
         }
 
@@ -148,7 +143,7 @@ public class RGWService {
         conn.deleteObject(bucketName, object);
     }
 
-    private synchronized AmazonS3 getClient(Key key){
+    private synchronized AmazonS3 getClient(Key key) {
         AmazonS3 amazonS3;
 
         String accessKey = key.getAccessKey();
@@ -192,32 +187,21 @@ public class RGWService {
         System.out.println(rgwAdmin.getBucketQuota(uid).stream().peek(System.out::println));
     }
 
-    public void setBucketQuota(String uid, long maxObject, long maxSizeKb, String enabled){
+    public void setBucketQuota(String uid, long maxObject, long maxSizeKb, String enabled) {
         RgwAdmin rgwAdmin = getRgwAdmin();
 
         rgwAdmin.setBucketQuota(uid, maxObject, maxSizeKb);
     }
 
-    public String getSignedUrl(String verb, String path, String accessKey, String secretKey, String bucket, String endpoint, String expiryMinutes) throws NoSuchAlgorithmException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeyException {
-
-        long expiryEpoch = (System.currentTimeMillis() / 1000) + (Integer.parseInt(expiryMinutes) * 60);
-
-        String canonicalizedResource = "/admin/user";
-        String stringToSign = verb + "\n\n\n" + expiryEpoch + "\n" + canonicalizedResource;
-
-        Mac mac = Mac.getInstance("HmacSHA1");
-        mac.init(new SecretKeySpec(secretKey.getBytes(StandardCharsets.UTF_8), "HmacSHA1"));
-        byte[] signatureBytes = mac.doFinal(stringToSign.getBytes(StandardCharsets.UTF_8));
-        String signature = URLEncoder.encode(Base64.getEncoder().encodeToString(signatureBytes), StandardCharsets.UTF_8);
-
-        return endpoint + canonicalizedResource + "?AWSAccessKeyId=" + accessKey + "&uid=sodas_dev_user&quota&quota-type=bucket" + "&Expires=" + expiryEpoch + "&Signature=" + signature;
-    }
-
-    public void setIndividualBucketQuota(String uid, String bucket, long maxObjects, long maxSizeKB){
+    public long getIndividualBucketQuota(String bucketName) {
         RgwAdmin rgwAdmin = getRgwAdmin();
 
-        rgwAdmin.setIndividualBucketQuota(uid, bucket, maxObjects, maxSizeKB);
+        Optional<BucketInfo> bucketInfo = rgwAdmin.getBucketInfo(bucketName);
+        BucketInfo bucketInfo1 = bucketInfo.get();
+
+        return bucketInfo1.getBucketQuota().getMaxSizeKb();
     }
+
 
     public void getBucketInfo(String bucketName){
         RgwAdmin rgwAdmin = getRgwAdmin();
@@ -227,4 +211,40 @@ public class RGWService {
         System.out.println(usage);
     }
 
+    public long getIndividualBucketMaxObjects(String bucketName){
+        RgwAdmin rgwAdmin = getRgwAdmin();
+
+        Optional<BucketInfo> bucketInfo = rgwAdmin.getBucketInfo(bucketName);
+        BucketInfo bucketInfo1 = bucketInfo.get();
+
+        return bucketInfo1.getBucketQuota().getMaxObjects();
+    }
+
+    public Quota setIndividualBucketQuota(String uid, String bucketName, Quota quota) {
+        RgwAdmin rgwAdmin = getRgwAdmin();
+
+        rgwAdmin.setIndividualBucketQuota(uid, bucketName, Long.parseLong(quota.getMax_objects()), Long.parseLong(quota.getMax_size_kb()));
+
+        return quota;
+    }
+
+    public Double quotaUtilizationInfo(String bucketName) {
+        RgwAdmin rgwAdmin = getRgwAdmin();
+
+        Optional<BucketInfo> bucketInfo = rgwAdmin.getBucketInfo(bucketName);
+        BucketInfo bucketInfo1 = bucketInfo.get();
+        return (double) ((bucketInfo1.getUsage().getRgwMain().getSize_actual() / (bucketInfo1.getBucketQuota().getMaxSizeKb() * 1024)) * 100);
+    }
+
+    public SubUser createSubUser(String uid, String subUid){
+        RgwAdmin rgwAdmin = getRgwAdmin();
+        SubUser.Permission.valueOf("FULL");
+
+        return rgwAdmin.createSubUser("foo_user", subUid, SubUser.Permission.FULL, CredentialType.S3);
+    }
+
+    public void createS3Credential(){
+        RgwAdmin rgwAdmin = getRgwAdmin();
+
+    }
 }
