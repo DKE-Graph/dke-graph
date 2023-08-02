@@ -3,8 +3,8 @@ MGR_ENDPOINT:
 RGW_ENDPOINT:
   http://object-storage.rook.221.154.134.31.traefik.me:10017
 RGW_ADMIN_ACCESS:
-  sodas_admin_access
+  sodas_dev_access
 RGW_ADMIN_SECRET:
-  sodas_admin_secret
+  sodas_dev_secret
 RGW_ADMIN_UID:
-  sodas_admin_user
+  sodas_dev_user

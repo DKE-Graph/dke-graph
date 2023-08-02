@@ -124,9 +124,10 @@ public class RGWController {
     public URL objectDownUrl(@RequestBody Key key, @PathVariable String bucketName, @PathVariable String object){
         return rgwService.objectDownUrl(key, bucketName, object);
     }
-    @Operation(summary = "bucket 테스트")
+    @Operation(summary = "테스트용 api")
     @GetMapping("/bucket/test")
     public void test(){
-        rgwService.setIndividualBucketQuota("foo_user", "foo-test-bucket", 3, 100);
+        rgwService.getBucketInfo("foo-test-bucket");
+        rgwService.setIndividualBucketQuota("foo_user", "foo-test-bucket", 30, 100);
     }
 }

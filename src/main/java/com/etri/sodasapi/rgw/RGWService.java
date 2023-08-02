@@ -18,7 +18,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.twonote.rgwadmin4j.RgwAdmin;
 import org.twonote.rgwadmin4j.RgwAdminBuilder;
+import org.twonote.rgwadmin4j.model.BucketInfo;
 import org.twonote.rgwadmin4j.model.UsageInfo;
+import org.twonote.rgwadmin4j.model.usage.BucketUsage;
 import org.twonote.rgwadmin4j.model.usage.Summary;
 import org.yaml.snakeyaml.scanner.Constant;
 
@@ -217,5 +219,12 @@ public class RGWService {
         rgwAdmin.setIndividualBucketQuota(uid, bucket, maxObjects, maxSizeKB);
     }
 
+    public void getBucketInfo(String bucketName){
+        RgwAdmin rgwAdmin = getRgwAdmin();
+
+        long usage =  rgwAdmin.getBucketInfo(bucketName).get().getUsage().getRgwMain().getSize();
+
+        System.out.println(usage);
+    }
 
 }
