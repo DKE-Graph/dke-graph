@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.twonote.rgwadmin4j.model.S3Credential;
 
 import java.io.IOException;
 import java.net.URL;
@@ -124,6 +125,17 @@ public class RGWController {
         return rgwService.objectDownUrl(key, bucketName, object);
     }
 
+    @Operation(summary = "테스트용 api")
+    @GetMapping("/bucket/test")
+    public List<S3Credential> test() {
+        return rgwService.getS3Credential("foo_user");
+        //rgwService.getBucketInfo("foo-test-bucket");
+        //rgwService.setIndividualBucketQuota(
+        //        "foo_user",
+        //        "foo-test-bucket",
+        //        new Quota("true", "3", "1000", "bucket"));
+    }
+
     /*
         Quota 반환 하기
      */
@@ -163,7 +175,22 @@ public class RGWController {
     }
 
     @PostMapping("/bucket/subuser/{uid}/{subUid}/key")
-    public void alterSubUserKey(@PathVariable("uid") String uid, @PathVariable("subUid") String subUid, @RequestBody Key key){
+    public void alterSubUserKey(@PathVariable("uid") String uid, @PathVariable("subUid") String subUid, @RequestBody Key key) {
         rgwService.alterSubUserKey(uid, subUid, key);
+    }
+    @GetMapping("/credential")
+    public List<S3Credential> getCredential(@PathVariable String uid) {
+        return rgwService.getS3Credential(uid);
+    }
+
+    @PostMapping("/credential")
+    public void createCredential(@PathVariable String uid){
+        rgwService.createS3Credential(uid);
+    }
+
+    // TODO: 자신의 subuser만 제어 가능하도록 valid access key 함수 넣어야 하는지?
+    @DeleteMapping("/credential")
+    public void deleteCredential(@PathVariable String uid, @PathVariable Key key){
+        rgwService.deleteS3Credential(uid, key.getAccessKey());
     }
 }

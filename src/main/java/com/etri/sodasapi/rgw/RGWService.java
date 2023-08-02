@@ -10,15 +10,14 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.*;
 import com.etri.sodasapi.common.*;
+import com.etri.sodasapi.common.Quota;
 import com.etri.sodasapi.config.Constants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.twonote.rgwadmin4j.RgwAdmin;
 import org.twonote.rgwadmin4j.RgwAdminBuilder;
-import org.twonote.rgwadmin4j.model.BucketInfo;
-import org.twonote.rgwadmin4j.model.CredentialType;
-import org.twonote.rgwadmin4j.model.SubUser;
+import org.twonote.rgwadmin4j.model.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -171,18 +170,6 @@ public class RGWService {
         return conn.generatePresignedUrl(request);
     }
 
-    public void getBucketQuota(Key key, String bucketName, String uid) throws NoSuchAlgorithmException, InvalidKeyException {
-        RgwAdmin rgwAdmin = getRgwAdmin();
-
-        System.out.println(rgwAdmin.getBucketQuota(uid).stream().peek(System.out::println));
-    }
-
-    public void setBucketQuota(String uid, long maxObject, long maxSizeKb, String enabled) {
-        RgwAdmin rgwAdmin = getRgwAdmin();
-
-        rgwAdmin.setBucketQuota(uid, maxObject, maxSizeKb);
-    }
-
     public Map<String, Long> getIndividualBucketQuota(String bucketName) {
         RgwAdmin rgwAdmin = getRgwAdmin();
 
@@ -196,6 +183,15 @@ public class RGWService {
 
         return individualBucketQuota;
     }
+
+    public void getBucketInfo(String bucketName){
+        RgwAdmin rgwAdmin = getRgwAdmin();
+
+        long usage =  rgwAdmin.getBucketInfo(bucketName).get().getUsage().getRgwMain().getSize();
+
+        System.out.println(usage);
+    }
+
 
     public Quota setIndividualBucketQuota(String uid, String bucketName, Quota quota) {
         RgwAdmin rgwAdmin = getRgwAdmin();
@@ -247,5 +243,32 @@ public class RGWService {
     public void alterSubUserKey(String uid, String subUid, Key key) {
         RgwAdmin rgwAdmin = getRgwAdmin();
         rgwAdmin.createS3CredentialForSubUser(uid, subUid, key.getAccessKey(), key.getSecretKey());
+    }
+
+    // nodejs 코드에서 입력 파라미터로 uid만을 받게 설계돼 있어서 우리도 key 빼야할지 고민해봐야함.
+    public void createS3Credential(String uid, Key key){
+        RgwAdmin rgwAdmin = getRgwAdmin();
+
+        rgwAdmin.createS3Credential(uid, key.getAccessKey(), key.getSecretKey());
+    }
+
+    public void createS3Credential(String uid){
+        RgwAdmin rgwAdmin = getRgwAdmin();
+
+        rgwAdmin.createS3Credential(uid);
+    }
+
+    public void deleteS3Credential(String uid, String accessKey){
+        RgwAdmin rgwAdmin = getRgwAdmin();
+
+        rgwAdmin.removeS3Credential(uid, accessKey);
+    }
+
+    public List<S3Credential> getS3Credential(String uid){
+        RgwAdmin rgwAdmin = getRgwAdmin();
+        Optional<User> userInfo = rgwAdmin.getUserInfo(uid);
+
+        return userInfo.map(User::getS3Credentials).orElse(null);
+
     }
 }
