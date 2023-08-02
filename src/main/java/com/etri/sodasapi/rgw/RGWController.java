@@ -32,7 +32,7 @@ public class RGWController {
      */
     @Operation(summary = "bucket 조회", description = "key 값을 확인하여 해당 bucket을 조회합니다")
     @GetMapping("/bucket")
-    public ResponseEntity<List<SBucket>> getBuckets(@Parameter(name = "key", description = "해당 key 값")@RequestBody Key key){
+    public ResponseEntity<List<SBucket>> getBuckets(@Parameter(name = "key", description = "해당 key 값") @RequestBody Key key){
         if(rgwService.validAccess(key)){
             return ResponseEntity.status(HttpStatus.OK).body(rgwService.getBuckets(key));
         }
@@ -44,9 +44,10 @@ public class RGWController {
     /*
         Permission - Data - Create
      */
-    @Operation(summary = "bucket 생성", description = "key값과 bucket값을 주어 bucket을 생성합니다")
+    @Operation(summary = "bucket 생성", description = "key 값과 bucket 값을 주어 bucket을 생성합니다")
     @PostMapping("/bucket/{bucketName}")
-    public ResponseEntity<Bucket> createBucket(@Parameter(name = "key", description = "해당 key 값")@RequestBody Key key,@Parameter(name = "bucketName", description = "해당 bucketName") @PathVariable String bucketName){
+    public ResponseEntity<Bucket> createBucket(@Parameter(name = "key", description = "해당 key 값") @RequestBody Key key,
+                                               @Parameter(name = "bucketName", description = "해당 bucketName") @PathVariable String bucketName){
         if(rgwService.validAccess(key)){
             return ResponseEntity.status(HttpStatus.OK).body(rgwService.createBucket(key, bucketName));
         }
@@ -60,7 +61,8 @@ public class RGWController {
      */
     @Operation(summary = "bucket 삭제", description = "key값을 확인하여 해당 bucket을 삭제합니다")
     @DeleteMapping("/bucket/{bucketName}")
-    public void deleteBucket(@RequestBody Key key, @PathVariable String bucketName){
+    public void deleteBucket(@Parameter(name = "key", description = "해당 key 값") @RequestBody Key key,
+                             @Parameter(name = "bucketName", description = "해당 bucketName") @PathVariable String bucketName){
         if(rgwService.validAccess(key)){
             rgwService.deleteBucket(key, bucketName);
         }
@@ -74,7 +76,7 @@ public class RGWController {
      */
     @Operation(summary = "Object 조회", description = "key 값과 bucketName을 확인하여 해당 Objects를 조회합니다")
     @GetMapping("/bucket/{bucketName}")
-    public ResponseEntity<List<BObject>> getObjects(@Parameter(name = "key", description = "해당 key값") @RequestBody Key key,
+    public ResponseEntity<List<BObject>> getObjects(@Parameter(name = "key", description = "해당 key 값") @RequestBody Key key,
                                                     @Parameter(name = "bucketName", description = "해당 bucketName") @PathVariable String bucketName)
             throws NoSuchAlgorithmException, InvalidKeyException {
         if(rgwService.validAccess(key)){
@@ -88,8 +90,11 @@ public class RGWController {
     /*
         Data - Delete
      */
+    @Operation(summary = "Object 삭제", description = "key값과 bucketName을 확인하여 해당 Object를 삭제합니다")
     @DeleteMapping("/bucket/{bucketName}/{object}")
-    public void deleteObject(@RequestBody Key key, @PathVariable String bucketName, @PathVariable String object){
+    public void deleteObject(@Parameter(name = "key", description = "해당 key 값") @RequestBody Key key,
+                             @Parameter(name = "bucketName", description = "해당 bucketName") @PathVariable String bucketName,
+                             @Parameter(name = "object", description = "해당 object") @PathVariable String object){
         if(rgwService.validAccess(key)){
             rgwService.deleteObject(key, bucketName, object);
         }
@@ -101,8 +106,10 @@ public class RGWController {
     /*
         Data - Create
      */
+    @Operation(summary = "object 업로드")
     @PostMapping("/bucket/object")
-    public String objectUpload(@RequestParam("file") MultipartFile file, @RequestParam("bucketName") String bucketName, @RequestParam("accessKey") String accessKey, @RequestParam("secretKey") String secretKey) throws IOException {
+    public String objectUpload(@RequestParam("file") MultipartFile file, @RequestParam("bucketName") String bucketName,
+                               @RequestParam("accessKey") String accessKey, @RequestParam("secretKey") String secretKey) throws IOException {
         Key key = new Key(accessKey, secretKey);
 
         rgwService.objectUpload(file, bucketName, key);
@@ -113,6 +120,7 @@ public class RGWController {
     /*
         Data - Get
      */
+    @Operation(summary = "object 의 url 다운로드")
     @GetMapping("/bucket/{bucketName}/{object}")
     public URL objectDownUrl(@RequestBody Key key, @PathVariable String bucketName, @PathVariable String object){
         return rgwService.objectDownUrl(key, bucketName, object);
@@ -135,9 +143,4 @@ public class RGWController {
     public Double quotaUtilizationInfo(@PathVariable String bucketName){
         return rgwService.quotaUtilizationInfo(bucketName);
     }
-
-
-
-
-
 }
