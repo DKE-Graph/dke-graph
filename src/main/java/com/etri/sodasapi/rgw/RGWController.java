@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.twonote.rgwadmin4j.model.S3Credential;
 
 import java.io.IOException;
 import java.net.URL;
@@ -128,12 +129,13 @@ public class RGWController {
 
     @Operation(summary = "테스트용 api")
     @GetMapping("/bucket/test")
-    public void test() {
-        rgwService.getBucketInfo("foo-test-bucket");
-        rgwService.setIndividualBucketQuota(
-                "foo_user",
-                "foo-test-bucket",
-                new Quota("true", "3", "1000", "bucket"));
+    public List<S3Credential> test() {
+        return rgwService.getS3Credential("foo_user");
+        //rgwService.getBucketInfo("foo-test-bucket");
+        //rgwService.setIndividualBucketQuota(
+        //        "foo_user",
+        //        "foo-test-bucket",
+        //        new Quota("true", "3", "1000", "bucket"));
     }
 
     /*
