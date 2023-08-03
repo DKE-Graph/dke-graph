@@ -178,7 +178,7 @@ public class RGWController {
     public void alterSubUserKey(@PathVariable("uid") String uid, @PathVariable("subUid") String subUid, @RequestBody Key key) {
         rgwService.alterSubUserKey(uid, subUid, key);
     }
-    @GetMapping("/credential")
+    @GetMapping("/credential/{uid}")
     public List<S3Credential> getCredential(@PathVariable String uid) {
         return rgwService.getS3Credential(uid);
     }

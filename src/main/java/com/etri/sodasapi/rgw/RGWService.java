@@ -215,7 +215,7 @@ public class RGWService {
         subUserParam.put("access-key", subUser.getAccessKey());
         subUserParam.put("secret-key", subUser.getSecretKey());
         subUserParam.put("key-type", "s3");
-        subUserParam.put("access", subUser.getPermission());
+        subUserParam.put("access", SubUser.Permission.NONE.toString());
         return rgwAdmin.createSubUser(uid, subUser.getSubUid(), subUserParam);
     }
 
@@ -230,6 +230,7 @@ public class RGWService {
 
     public void setSubUserPermission(String uid, String subUid, String permission) {
         RgwAdmin rgwAdmin = getRgwAdmin();
+
         rgwAdmin.setSubUserPermission(uid, subUid, SubUser.Permission.valueOf(permission.toUpperCase()));
 
     }
