@@ -18,13 +18,13 @@ import org.springframework.web.multipart.MultipartFile;
 import org.twonote.rgwadmin4j.RgwAdmin;
 import org.twonote.rgwadmin4j.RgwAdminBuilder;
 import org.twonote.rgwadmin4j.model.*;
+import software.amazon.awssdk.core.exception.SdkClientException;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URL;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -270,6 +270,58 @@ public class RGWService {
         Optional<User> userInfo = rgwAdmin.getUserInfo(uid);
 
         return userInfo.map(User::getS3Credentials).orElse(null);
+    }
 
+    public Map<String, List<?>> getFileList(Key key, String bucketName, String prefix){
+        final AmazonS3 s3 = getClient(key);
+
+        try {
+            ListObjectsRequest folderRequest = new ListObjectsRequest()
+                    .withBucketName(bucketName)
+                    .withDelimiter("/")
+                    .withPrefix(prefix);
+            ObjectListing folderListing = s3.listObjects(folderRequest);
+            List<String> folderList = new ArrayList<>(folderListing.getCommonPrefixes());
+
+            // 파일 나열 (폴더는 제외)
+            ListObjectsRequest fileRequest = new ListObjectsRequest()
+                    .withBucketName(bucketName)
+                    .withPrefix(prefix);
+            ObjectListing fileListing = s3.listObjects(fileRequest);
+            List<S3ObjectSummary> fileList = fileListing.getObjectSummaries()
+                    .stream()
+                    .filter(objectSummary -> !folderList.contains(objectSummary.getKey()))
+                    .collect(Collectors.toList());
+
+            Map<String, List<?>> result = new HashMap<>();
+            result.put("folders", folderList);
+            result.put("files", fileList);
+
+            return result;
+
+        } catch (AmazonS3Exception | SdkClientException e) {
+            e.printStackTrace();
+        }
+//        String bucketName = "foo-test-bucket";
+//        String prefix = ""; // 버킷 내부 경로
+//
+//        AmazonS3 s3Client = getClient(key);
+//
+//        ListObjectsV2Request req = new ListObjectsV2Request()
+//                .withBucketName(bucketName)
+//                .withPrefix(prefix);
+//        ListObjectsV2Result result;
+//
+//        do {
+//            result = s3Client.listObjectsV2(req);
+//
+//            for (S3ObjectSummary objectSummary : result.getObjectSummaries()) {
+//                System.out.printf(" - %s (size: %d)\n", objectSummary.getKey(), objectSummary.getSize());
+//            }
+//            req.setContinuationToken(result.getNextContinuationToken());
+//        } while (result.isTruncated());
+//
+//        return result.getObjectSummaries();
+        return null;
     }
 }
