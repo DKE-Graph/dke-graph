@@ -1,42 +1,26 @@
 package com.etri.sodasapi.common;
 
 import com.etri.sodasapi.config.Constants;
-import lombok.RequiredArgsConstructor;
+import com.etri.sodasapi.utils.CustomAuthInterceptor;
 import okhttp3.*;
-import org.twonote.rgwadmin4j.RgwAdmin;
-import org.twonote.rgwadmin4j.RgwAdminBuilder;
 import org.twonote.rgwadmin4j.impl.RgwAdminException;
-import org.twonote.rgwadmin4j.impl.RgwAdminImpl;
-import org.twonote.rgwadmin4j.model.*;
-import org.twonote.rgwadmin4j.model.Quota;
-import software.amazon.awssdk.services.xray.model.Http;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
-@RequiredArgsConstructor
+
 public class SodasRgwAdmin {
-
-    private RgwAdmin rgwAdmin;
     private final Constants constants;
     private final OkHttpClient client;
 
-    public RgwAdmin getRgwAdmin() {
-        if (this.rgwAdmin == null) {
-            rgwAdmin = new RgwAdminBuilder().accessKey(constants.getRgwAdminAccess())
-                    .secretKey(constants.getRgwAdminSecret())
-                    .endpoint(constants.getRgwEndpoint() + "/admin")
-                    .build();
-        }
-        new (access)
-        return rgwAdmin;
+    public SodasRgwAdmin(Constants constants){
+        this.constants = constants;
+        this.client = new OkHttpClient.Builder()
+                .addInterceptor(new CustomAuthInterceptor(constants.getRgwAdminAccess(), constants.getRgwAdminSecret()))
+                .build();
     }
 
-    public void getUserRateLimit(String uid){
-        HttpUrl url = HttpUrl.parse(constants.getMgrEndpoint() + "/admin")
+    public String getUserRateLimit(String uid){
+        HttpUrl url = HttpUrl.parse(constants.getRgwEndpoint())
                 .newBuilder()
                 .addPathSegment("admin")
                 .addPathSegment("ratelimit")
@@ -50,7 +34,7 @@ public class SodasRgwAdmin {
                 .build();
 
         String result = safeCall(request);
-        System.out.println(result);
+        return result;
     }
 
     private String safeCall(Request request) {

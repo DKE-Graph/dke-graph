@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 public class RGWService {
     private final Constants constants;
     private RgwAdmin rgwAdmin;
+    private SodasRgwAdmin sodasRgwAdmin;
 
     private synchronized RgwAdmin getRgwAdmin() {
         if (this.rgwAdmin == null) {
@@ -40,6 +41,13 @@ public class RGWService {
                     .build();
         }
         return rgwAdmin;
+    }
+
+    private SodasRgwAdmin getSodasRgwAdmin(){
+        if(this.sodasRgwAdmin == null){
+            sodasRgwAdmin = new SodasRgwAdmin(constants);
+        }
+        return sodasRgwAdmin;
     }
 
 
@@ -270,6 +278,12 @@ public class RGWService {
         Optional<User> userInfo = rgwAdmin.getUserInfo(uid);
 
         return userInfo.map(User::getS3Credentials).orElse(null);
+    }
+
+    public String getUserRatelimit(String uid){
+        SodasRgwAdmin sodasRgwAdmin = getSodasRgwAdmin();
+
+        return sodasRgwAdmin.getUserRateLimit(uid);
     }
 
 
