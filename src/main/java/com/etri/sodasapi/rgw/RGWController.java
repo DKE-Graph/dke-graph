@@ -29,6 +29,7 @@ public class RGWController {
 
     /*
         Permission - Data - List
+        버킷 정보를 읽어옴
      */
     @GetMapping("/bucket")
     public ResponseEntity<List<SBucket>> getBuckets(Key key){
@@ -138,46 +139,72 @@ public class RGWController {
 
     /*
         Quota 반환 하기
+        벼킷 각각의 크기 받아오기
      */
     @GetMapping("/bucket/quota/{bucketName}")
     public Map<String, Long> getIndividualBucketQuota(@PathVariable String bucketName){
         return rgwService.getIndividualBucketQuota(bucketName);
     }
 
+    /*
+        버킷 각각의 크기 설정하기
+     */
     @PostMapping("/bucket/quota/{bucketName}/{uid}")
     public Quota setIndividualBucketQuota(@PathVariable String bucketName, @PathVariable String uid, @RequestBody Quota quota){
         return rgwService.setIndividualBucketQuota(uid, bucketName, quota);
     }
 
+    /*
+        버킷 사용도 %로 계산하여 출력
+     */
     @GetMapping("/bucket/quota/{bucketName}/utilization")
     public Double quotaUtilizationInfo(@PathVariable String bucketName){
         return rgwService.quotaUtilizationInfo(bucketName);
     }
 
+    /*
+        서브 유저 생성
+     */
     @PostMapping("/bucket/subuser/{uid}")
     public void createSubUser(@PathVariable("uid") String uid, @RequestBody SSubUser subUser){
         rgwService.createSubUser(uid, subUser);
     }
 
+    /*
+        서브 유저의 권한 정보 출력
+     */
     @GetMapping("/bucket/subuser/{uid}/{subUid}")
     public String subUserInfo(@PathVariable("uid") String uid, @PathVariable("subUid") String subUid){
         return rgwService.subUserInfo(uid, subUid);
     }
 
+    /*
+        서브 유저의 권한 수정
+     */
     @PostMapping("/bucket/subuser/{uid}/{subUid}")
     public void setSubUserPermission(@PathVariable("uid") String uid, @PathVariable("subUid") String subUid, @RequestBody String permission){
         rgwService.setSubUserPermission(uid, subUid, permission);
     }
 
+    /*
+        서브 유저 삭제
+     */
     @DeleteMapping("/bucket/subuser/{uid}/{subUid}")
     public void deleteSubUser(@PathVariable("uid") String uid, @PathVariable("subUid") String subUid, @RequestBody Key key){
         rgwService.deleteSubUser(uid, subUid, key);
     }
 
+    /*
+        서브 유저의 엑세스키와 시크릿 키 변경
+     */
     @PostMapping("/bucket/subuser/{uid}/{subUid}/key")
     public void alterSubUserKey(@PathVariable("uid") String uid, @PathVariable("subUid") String subUid, @RequestBody Key key) {
         rgwService.alterSubUserKey(uid, subUid, key);
     }
+
+    /*
+
+     */
     @GetMapping("/credential/{uid}")
     public List<S3Credential> getCredential(@PathVariable String uid) {
         return rgwService.getS3Credential(uid);
