@@ -273,24 +273,28 @@ public class RGWService {
     }
 
     public Map<String, List<?>> getFileList(Key key, String bucketName, String prefix){
+
+        String actualPrefix = (prefix != null) ? prefix : "";
         final AmazonS3 s3 = getClient(key);
 
         try {
-            ListObjectsRequest folderRequest = new ListObjectsRequest()
+            ListObjectsRequest listObjectsRequest = new ListObjectsRequest()
                     .withBucketName(bucketName)
                     .withDelimiter("/")
-                    .withPrefix(prefix);
-            ObjectListing folderListing = s3.listObjects(folderRequest);
-            List<String> folderList = new ArrayList<>(folderListing.getCommonPrefixes());
+                    .withPrefix(actualPrefix);
 
-            // 파일 나열 (폴더는 제외)
-            ListObjectsRequest fileRequest = new ListObjectsRequest()
-                    .withBucketName(bucketName)
-                    .withPrefix(prefix);
-            ObjectListing fileListing = s3.listObjects(fileRequest);
-            List<S3ObjectSummary> fileList = fileListing.getObjectSummaries()
+            ObjectListing objectListing = s3.listObjects(listObjectsRequest);
+
+            // 현재 디렉토리의 폴더만 가져옴
+            List<String> folderList = objectListing.getCommonPrefixes()
                     .stream()
-                    .filter(objectSummary -> !folderList.contains(objectSummary.getKey()))
+                    .filter(commonPrefix -> commonPrefix.startsWith(actualPrefix))
+                    .collect(Collectors.toList());
+
+            // 현재 디렉토리의 파일만 가져옴
+            List<S3ObjectSummary> fileList = objectListing.getObjectSummaries()
+                    .stream()
+                    .filter(objectSummary -> objectSummary.getKey().startsWith(actualPrefix) && !folderList.contains(objectSummary.getKey() + "/"))
                     .collect(Collectors.toList());
 
             Map<String, List<?>> result = new HashMap<>();
@@ -302,26 +306,7 @@ public class RGWService {
         } catch (AmazonS3Exception | SdkClientException e) {
             e.printStackTrace();
         }
-//        String bucketName = "foo-test-bucket";
-//        String prefix = ""; // 버킷 내부 경로
-//
-//        AmazonS3 s3Client = getClient(key);
-//
-//        ListObjectsV2Request req = new ListObjectsV2Request()
-//                .withBucketName(bucketName)
-//                .withPrefix(prefix);
-//        ListObjectsV2Result result;
-//
-//        do {
-//            result = s3Client.listObjectsV2(req);
-//
-//            for (S3ObjectSummary objectSummary : result.getObjectSummaries()) {
-//                System.out.printf(" - %s (size: %d)\n", objectSummary.getKey(), objectSummary.getSize());
-//            }
-//            req.setContinuationToken(result.getNextContinuationToken());
-//        } while (result.isTruncated());
-//
-//        return result.getObjectSummaries();
+
         return null;
     }
 }
