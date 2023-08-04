@@ -104,6 +104,7 @@ public class RGWController {
 
     /*
         Data - Create
+
      */
     @Operation(summary = "object 업로드")
     @PostMapping("/bucket/object")
@@ -178,17 +179,30 @@ public class RGWController {
     public void alterSubUserKey(@PathVariable("uid") String uid, @PathVariable("subUid") String subUid, @RequestBody Key key) {
         rgwService.alterSubUserKey(uid, subUid, key);
     }
+
+    /*
+       Credential - List
+       uid를 파라미터로 받아 S3Credential list를 반환하는 api
+     */
     @GetMapping("/credential/{uid}")
     public List<S3Credential> getCredential(@PathVariable String uid) {
         return rgwService.getS3Credential(uid);
     }
 
-    @PostMapping("/credential")
+    /*
+        Credential - Create
+        uid를 파라미터로 받아 S3Credential을 생성하는 api
+     */
+    @PostMapping("/credential/{uid}")
     public void createCredential(@PathVariable String uid){
         rgwService.createS3Credential(uid);
     }
 
     // TODO: 자신의 subuser만 제어 가능하도록 valid access key 함수 넣어야 하는지?
+    /*
+        Credential - Delete
+        uid와 key를 받아 S3Credential을 삭제하는 api
+     */
     @DeleteMapping("/credential")
     public void deleteCredential(@PathVariable String uid, @PathVariable Key key){
         rgwService.deleteS3Credential(uid, key.getAccessKey());
