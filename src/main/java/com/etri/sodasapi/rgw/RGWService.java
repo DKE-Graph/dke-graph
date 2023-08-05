@@ -51,7 +51,7 @@ public class RGWService {
         for (Bucket mybucket : buckets) {
             bucketList.add(new SBucket(mybucket.getName(), mybucket.getCreationDate()));
         }
-
+        System.out.println(conn.getUrl("foo-test-bucket", "2023_여름_세미나_일정_전체 (2)"));
         return bucketList;
     }
 
@@ -151,7 +151,6 @@ public class RGWService {
 
     public void objectUpload(MultipartFile file, String bucketName, Key key) throws IOException {
         AmazonS3 conn = getClient(key);
-
         ByteArrayInputStream input = new ByteArrayInputStream(file.getBytes());
         System.out.println(conn.putObject(bucketName, file.getOriginalFilename(), input, new ObjectMetadata()));
     }
@@ -180,6 +179,7 @@ public class RGWService {
 
         individualBucketQuota.put("max-size-kb", bucketInfo1.getBucketQuota().getMaxSizeKb());
         individualBucketQuota.put("max-objects", bucketInfo1.getBucketQuota().getMaxObjects());
+        individualBucketQuota.put("actual-size", bucketInfo1.getUsage().getRgwMain().getSize_actual());
 
         return individualBucketQuota;
     }
@@ -261,7 +261,6 @@ public class RGWService {
 
     public void deleteS3Credential(String uid, String accessKey){
         RgwAdmin rgwAdmin = getRgwAdmin();
-
         rgwAdmin.removeS3Credential(uid, accessKey);
     }
 
@@ -270,6 +269,48 @@ public class RGWService {
         Optional<User> userInfo = rgwAdmin.getUserInfo(uid);
 
         return userInfo.map(User::getS3Credentials).orElse(null);
+    }
 
+    public User createUser(SUser user) {
+        RgwAdmin rgwAdmin = getRgwAdmin();
+        Map<String, String> userParameters = new HashMap<>();
+        userParameters.put("display-name", user.getDisplayName());
+        userParameters.put("email", user.getEmail());
+        return rgwAdmin.createUser(user.getUid(), userParameters);
+    }
+
+    public void bucketAclTest() {
+        AmazonS3 conn = getClient(new Key("MB9VKP4AC9TZPV1UDEO4" , "UYScnoXxLtmAemx4gAPjByZmbDnaYuOPOdpG7vMw"));
+        AccessControlList accessControlList = conn.getBucketAcl("foo-test-bucket");
+        // 기존 Grant를 가져올 Canonical ID 또는 AWS 계정 ID
+        String existingCanonicalId = "foo_user2";
+
+// 기존 Grant 찾기
+        Grantee existingGrant = null;
+        for (Grant grant : accessControlList.getGrants()) {
+            if (grant.getGrantee() instanceof CanonicalGrantee) {
+                String canonicalId = ((CanonicalGrantee) grant.getGrantee()).getIdentifier();
+                if (existingCanonicalId.equals(canonicalId)) {
+                    existingGrant = grant.getGrantee();
+                    break;
+                }
+            }
+        }
+
+        if (existingGrant != null) {
+            // 변경할 새로운 Grant 생성
+            accessControlList.revokeAllPermissions(existingGrant);
+
+            String newCanonicalId = "foo_user"; // 새로운 Canonical ID 또는 AWS 계정 ID를 지정합니다.
+            Grantee newGrant = new CanonicalGrantee("foo_user");
+
+            // 새로운 Grant 추가
+            accessControlList.grantPermission(new CanonicalGrantee("foo_user"), Permission.FullControl);
+            accessControlList.grantPermission(new CanonicalGrantee("id=foo_user2"), Permission.Read);
+            conn.setBucketAcl("foo-test-bucket", accessControlList);
+
+            // 수정된 ACL을 버킷에 설정
+            System.out.println(conn.getBucketAcl("foo-test-bucket"));
+        }
     }
 }

@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.twonote.rgwadmin4j.model.S3Credential;
+import org.twonote.rgwadmin4j.model.User;
 
 import java.io.IOException;
 import java.net.URL;
@@ -20,6 +21,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 
 @RestController
 @RequiredArgsConstructor
@@ -75,9 +77,10 @@ public class RGWController {
         Data - List
      */
     @Operation(summary = "Object 조회", description = "key 값과 bucketName을 확인하여 해당 Objects를 조회합니다")
-    @GetMapping("/bucket/{bucketName}")
-    public ResponseEntity<List<BObject>> getObjects(@Parameter(name = "key", description = "해당 key 값") @RequestBody Key key,
-                                                    @Parameter(name = "bucketName", description = "해당 bucketName") @PathVariable String bucketName)
+    @PostMapping("/bucket/{bucketName}/object")
+    public ResponseEntity<List<BObject>> getObjects(@PathVariable String bucketName,
+                                                     @RequestBody Key key
+                                                    )
             throws NoSuchAlgorithmException, InvalidKeyException {
         if(rgwService.validAccess(key)){
             return ResponseEntity.status(HttpStatus.OK).body(rgwService.getObjects(key, bucketName));
@@ -219,5 +222,15 @@ public class RGWController {
     @DeleteMapping("/credential")
     public void deleteCredential(@PathVariable String uid, @PathVariable Key key){
         rgwService.deleteS3Credential(uid, key.getAccessKey());
+    }
+
+    @PostMapping("/user")
+    public User createUser(@RequestBody SUser user){
+        return rgwService.createUser(user);
+    }
+
+    @GetMapping("/bucketTest")
+    public void bucketAclTest(){
+        rgwService.bucketAclTest();
     }
 }
