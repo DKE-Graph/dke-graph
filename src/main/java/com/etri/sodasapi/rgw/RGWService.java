@@ -57,7 +57,7 @@ public class RGWService {
 
     public List<BObject> getObjects(Key key, String bucketName) {
         AmazonS3 conn = getClient(key);
-
+        ;
         ObjectListing objects = conn.listObjects(bucketName);
 
 //        System.out.println(objects);
