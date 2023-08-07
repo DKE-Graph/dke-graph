@@ -21,5 +21,4 @@ public class RateLimit {
         this.maxReadOpts = maxReadOpts;
         this.maxWriteOpts = maxWriteOpts;
     }
-
 }

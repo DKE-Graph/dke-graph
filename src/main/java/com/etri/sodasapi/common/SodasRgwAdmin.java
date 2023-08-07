@@ -2,6 +2,7 @@ package com.etri.sodasapi.common;
 
 import com.etri.sodasapi.config.Constants;
 import com.etri.sodasapi.utils.CustomAuthInterceptor;
+import com.google.gson.Gson;
 import okhttp3.*;
 import org.twonote.rgwadmin4j.impl.RgwAdminException;
 
@@ -38,18 +39,23 @@ public class SodasRgwAdmin {
         return result;
     }
 
-    public void setUserRateLimit(String uid, RateLimit rateLimit){
-        HttpUrl.Builder urlBuilder = Objects.requireNonNull(HttpUrl.parse(constants.getRgwEndpoint()))
+    public String setUserRateLimit(String uid, RateLimit rateLimit){
+        HttpUrl url = Objects.requireNonNull(HttpUrl.parse(constants.getRgwEndpoint()))
                 .newBuilder()
                 .addPathSegment("admin")
                 .addPathSegment("ratelimit")
                 .addQueryParameter("ratelimit-scope", "user")
-                .addQueryParameter("uid", uid);
+                .addQueryParameter("uid", uid)
+                .build();
+
+        String jsonRateLimit = new Gson().toJson(rateLimit);
 
         Request request = new Request.Builder()
-                .get()
+                .post(RequestBody.create(MediaType.parse("application/json; charset=utf-8"), jsonRateLimit))
                 .url(url)
                 .build();
+
+        return safeCall(request);
     }
 
     private String safeCall(Request request) {

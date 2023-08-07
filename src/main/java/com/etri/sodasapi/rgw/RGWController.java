@@ -145,6 +145,11 @@ public class RGWController {
         return rgwService.getUserRatelimit(uid);
     }
 
+    @PostMapping("/bucket/quota/rate-limit/{uid}")
+    public String setUserRateLimit(@PathVariable String uid, @RequestBody RateLimit rateLimit){
+        return rgwService.setUserRatelilmit(uid, rateLimit);
+    }
+
     @Operation(summary = "prefix 경로의 폴더 및 파일 리스트 반환")
     @PostMapping("/bucket/{bucketName}/files")
     public Map<String, List<?>> getFileList(@RequestBody Key key, @PathVariable String bucketName, @RequestParam(required = false) String prefix){
