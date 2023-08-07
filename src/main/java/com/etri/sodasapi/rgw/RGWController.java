@@ -77,9 +77,9 @@ public class RGWController {
         Data - List
      */
     @Operation(summary = "Object 조회", description = "key 값과 bucketName을 확인하여 해당 Objects를 조회합니다")
-    @PostMapping("/bucket/{bucketName}/object")
+    @GetMapping("/bucket/{bucketName}")
     public ResponseEntity<List<BObject>> getObjects(@PathVariable String bucketName,
-                                                     @RequestBody Key key
+                                                     Key key
                                                     )
             throws NoSuchAlgorithmException, InvalidKeyException {
         if(rgwService.validAccess(key)){

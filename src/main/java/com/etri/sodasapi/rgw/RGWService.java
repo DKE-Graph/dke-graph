@@ -51,7 +51,6 @@ public class RGWService {
         for (Bucket mybucket : buckets) {
             bucketList.add(new SBucket(mybucket.getName(), mybucket.getCreationDate()));
         }
-        System.out.println(conn.getUrl("foo-test-bucket", "2023_여름_세미나_일정_전체 (2)"));
         return bucketList;
     }
 
@@ -281,36 +280,51 @@ public class RGWService {
 
     public void bucketAclTest() {
         AmazonS3 conn = getClient(new Key("MB9VKP4AC9TZPV1UDEO4" , "UYScnoXxLtmAemx4gAPjByZmbDnaYuOPOdpG7vMw"));
-        AccessControlList accessControlList = conn.getBucketAcl("foo-test-bucket");
+//        AccessControlList accessControlList = conn.getBucketAcl("foo-test-bucket2");
         // 기존 Grant를 가져올 Canonical ID 또는 AWS 계정 ID
         String existingCanonicalId = "foo_user2";
 
+        AccessControlList accessControlList = conn.getBucketAcl("foo-test-bucket2");
+
+        Grant grant2 = new Grant(new CanonicalGrantee("foo_user"), Permission.Read);
+        Grant grant3 = new Grant(new CanonicalGrantee("foo_user"), Permission.Write);
+        Grant grant4 = new Grant(new CanonicalGrantee("foo_user2"), Permission.FullControl);
+
+        accessControlList.grantAllPermissions(grant4);
+        accessControlList.grantAllPermissions(grant2);
+        accessControlList.grantAllPermissions(grant3);
+        conn.setBucketAcl("foo-test-bucket2", accessControlList);
+        conn.setBucketAcl("foo-test-bucket2", CannedAccessControlList.AuthenticatedRead);
+        System.out.println(conn.getBucketAcl("foo-test-bucket2"));
+
+//        conn.setBucketAcl("foo-test-bucket2", CannedAccessControlList.PublicRead);
 // 기존 Grant 찾기
-        Grantee existingGrant = null;
-        for (Grant grant : accessControlList.getGrants()) {
-            if (grant.getGrantee() instanceof CanonicalGrantee) {
-                String canonicalId = ((CanonicalGrantee) grant.getGrantee()).getIdentifier();
-                if (existingCanonicalId.equals(canonicalId)) {
-                    existingGrant = grant.getGrantee();
-                    break;
-                }
-            }
-        }
+//        Grantee existingGrant = null;
+//        for (Grant grant : accessControlList.getGrants()) {
+//            if (grant.getGrantee() instanceof CanonicalGrantee) {
+//                String canonicalId = ((CanonicalGrantee) grant.getGrantee()).getIdentifier();
+//                if (existingCanonicalId.equals(canonicalId)) {
+//                    existingGrant = grant.getGrantee();
+//                    break;
+//                }
+//            }
+//        }
 
-        if (existingGrant != null) {
-            // 변경할 새로운 Grant 생성
-            accessControlList.revokeAllPermissions(existingGrant);
-
-            String newCanonicalId = "foo_user"; // 새로운 Canonical ID 또는 AWS 계정 ID를 지정합니다.
-            Grantee newGrant = new CanonicalGrantee("foo_user");
-
-            // 새로운 Grant 추가
-            accessControlList.grantPermission(new CanonicalGrantee("foo_user"), Permission.FullControl);
-            accessControlList.grantPermission(new CanonicalGrantee("id=foo_user2"), Permission.Read);
-            conn.setBucketAcl("foo-test-bucket", accessControlList);
-
-            // 수정된 ACL을 버킷에 설정
-            System.out.println(conn.getBucketAcl("foo-test-bucket"));
-        }
+//        if (existingGrant != null) {
+//            // 변경할 새로운 Grant 생성
+////            accessControlList.revokeAllPermissions(existingGrant);
+//
+//            String newCanonicalId = "foo_user"; // 새로운 Canonical ID 또는 AWS 계정 ID를 지정합니다.
+//            Grantee newGrant = new CanonicalGrantee("foo_user");
+//
+//            // 새로운 Grant 추가
+//            accessControlList.grantPermission(GroupGrantee.AllUsers, Permission.Read);
+//            accessControlList.grantPermission(new CanonicalGrantee("foo_user2"), Permission.Read);
+//            conn.setBucketAcl("foo-test-bucket2", accessControlList);
+//
+//            // 수정된 ACL을 버킷에 설정
+//            System.out.println(conn.getBucketAcl("foo-test-bucket2"));
+////            System.out.println(conn.getBucketAcl("foo-test-bucket"));
+//        }
     }
 }
