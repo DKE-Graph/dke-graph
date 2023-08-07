@@ -77,40 +77,6 @@ public class RGWService {
         Bucket newBucket = conn.createBucket(bucketName);
         return newBucket;
 
-//        System.out.println(mybucket.getName() + " " + conn.getBucketAcl(mybucket.getName()));
-//
-//        AccessControlList accessControlList = conn.getBucketAcl(mybucket.getName());
-//        // 기존 Grant를 가져올 Canonical ID 또는 AWS 계정 ID
-//        String existingCanonicalId = "foo_user";
-//
-//// 기존 Grant 찾기
-//        Grantee existingGrant = null;
-//        for (Grant grant : accessControlList.getGrants()) {
-//            if (grant.getGrantee() instanceof CanonicalGrantee) {
-//                String canonicalId = ((CanonicalGrantee) grant.getGrantee()).getIdentifier();
-//                if (existingCanonicalId.equals(canonicalId)) {
-//                    existingGrant = grant.getGrantee();
-//                    break;
-//                }
-//            }
-//        }
-//
-//        if (existingGrant != null) {
-//            // 기존 Grant 삭제
-//            accessControlList.revokeAllPermissions(existingGrant);
-//
-//            // 변경할 새로운 Grant 생성
-//            String newCanonicalId = "foo_user"; // 새로운 Canonical ID 또는 AWS 계정 ID를 지정합니다.
-//            Grantee newGrant = new CanonicalGrantee("foo_user");
-//
-//            // 새로운 Grant 추가
-//            accessControlList.grantPermission(newGrant, Permission.Read);
-//            accessControlList.grantPermission(newGrant, Permission.Write);
-//
-//            // 수정된 ACL을 버킷에 설정
-//            conn.setBucketAcl("foo-test-bucket", accessControlList);
-//            System.out.println(mybucket.getName() + " " + conn.getBucketAcl(mybucket.getName()));
-
     }
 
     public void deleteBucket(Key key, String bucketName) {
@@ -285,18 +251,24 @@ public class RGWService {
         String existingCanonicalId = "foo_user2";
 
         AccessControlList accessControlList = conn.getBucketAcl("foo-test-bucket2");
-
-        Grant grant2 = new Grant(new CanonicalGrantee("foo_user"), Permission.Read);
-        Grant grant3 = new Grant(new CanonicalGrantee("foo_user"), Permission.Write);
         Grant grant4 = new Grant(new CanonicalGrantee("foo_user2"), Permission.FullControl);
 
         accessControlList.grantAllPermissions(grant4);
-        accessControlList.grantAllPermissions(grant2);
-        accessControlList.grantAllPermissions(grant3);
         conn.setBucketAcl("foo-test-bucket2", accessControlList);
-        conn.setBucketAcl("foo-test-bucket2", CannedAccessControlList.AuthenticatedRead);
+
+        List<BObject> objectList = getObjects(new Key("MB9VKP4AC9TZPV1UDEO4" , "UYScnoXxLtmAemx4gAPjByZmbDnaYuOPOdpG7vMw"), "foo-test-bucket2");
+
         System.out.println(conn.getBucketAcl("foo-test-bucket2"));
 
+
+        for(BObject bObject : objectList){
+            AccessControlList accessControlList12 = conn.getObjectAcl("foo-test-bucket2", bObject.getObjectName());
+            Grant grant5 = new Grant(new CanonicalGrantee("foo_user2"), Permission.FullControl);
+
+            accessControlList12.grantAllPermissions(grant5);
+
+            conn.setObjectAcl("foo-test-bucket2",bObject.getObjectName(), accessControlList12);
+        }
 //        conn.setBucketAcl("foo-test-bucket2", CannedAccessControlList.PublicRead);
 // 기존 Grant 찾기
 //        Grantee existingGrant = null;
