@@ -6,6 +6,7 @@ import okhttp3.*;
 import org.twonote.rgwadmin4j.impl.RgwAdminException;
 
 import java.io.IOException;
+import java.util.Objects;
 
 
 public class SodasRgwAdmin {
@@ -35,6 +36,20 @@ public class SodasRgwAdmin {
 
         String result = safeCall(request);
         return result;
+    }
+
+    public void setUserRateLimit(String uid, RateLimit rateLimit){
+        HttpUrl.Builder urlBuilder = Objects.requireNonNull(HttpUrl.parse(constants.getRgwEndpoint()))
+                .newBuilder()
+                .addPathSegment("admin")
+                .addPathSegment("ratelimit")
+                .addQueryParameter("ratelimit-scope", "user")
+                .addQueryParameter("uid", uid);
+
+        Request request = new Request.Builder()
+                .get()
+                .url(url)
+                .build();
     }
 
     private String safeCall(Request request) {
