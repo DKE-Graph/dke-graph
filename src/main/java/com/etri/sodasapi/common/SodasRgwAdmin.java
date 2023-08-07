@@ -38,19 +38,19 @@ public class SodasRgwAdmin {
         return result;
     }
 
-    public void setUserRateLimit(String uid, RateLimit rateLimit){
-        HttpUrl.Builder urlBuilder = Objects.requireNonNull(HttpUrl.parse(constants.getRgwEndpoint()))
-                .newBuilder()
-                .addPathSegment("admin")
-                .addPathSegment("ratelimit")
-                .addQueryParameter("ratelimit-scope", "user")
-                .addQueryParameter("uid", uid);
-
-        Request request = new Request.Builder()
-                .get()
-                .url(url)
-                .build();
-    }
+//    public void setUserRateLimit(String uid, RateLimit rateLimit){
+//        HttpUrl.Builder urlBuilder = Objects.requireNonNull(HttpUrl.parse(constants.getRgwEndpoint()))
+//                .newBuilder()
+//                .addPathSegment("admin")
+//                .addPathSegment("ratelimit")
+//                .addQueryParameter("ratelimit-scope", "user")
+//                .addQueryParameter("uid", uid);
+//
+//        Request request = new Request.Builder()
+//                .get()
+//                .url(urlBuilder)
+//                .build();
+//    }
 
     private String safeCall(Request request) {
         try (Response response = client.newCall(request).execute()) {
