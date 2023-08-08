@@ -7,6 +7,8 @@ import okhttp3.*;
 import org.twonote.rgwadmin4j.impl.RgwAdminException;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 
@@ -47,16 +49,33 @@ public class SodasRgwAdmin {
                 .addQueryParameter("ratelimit-scope", "user")
                 .addQueryParameter("uid", uid)
                 .addQueryParameter("AWSAccessKeyId", constants.getRgwAdminAccess())
+                .addQueryParameter("format", "json")
                 .build();
 
-        String jsonRateLimit = new Gson().toJson(rateLimit);
+
+        Gson gson = new Gson();
+        String jsonData = gson.toJson(toMap(rateLimit));
+        RequestBody requestBody = RequestBody.create(jsonData, MediaType.parse("application/json; charset=utf-8"));
+
 
         Request request = new Request.Builder()
-                .post(RequestBody.create(MediaType.parse("application/json; charset=utf-8"), jsonRateLimit))
+                .post(requestBody)
                 .url(url)
                 .build();
 
         return safeCall(request);
+    }
+
+    private static Map<String, Object> toMap(RateLimit rateLimit) {
+        Map<String, Object> result = new HashMap<>();
+
+        result.put("enabled", rateLimit.getEnabled());
+        result.put("max-read-bytes", rateLimit.getMaxReadBytes());
+        result.put("max-write-bytes", rateLimit.getMaxWriteBytes());
+        result.put("max-read-opts", rateLimit.getMaxReadOpts());
+        result.put("max-write-opts", rateLimit.getMaxWriteOpts());
+
+        return result;
     }
 
     private String safeCall(Request request) {

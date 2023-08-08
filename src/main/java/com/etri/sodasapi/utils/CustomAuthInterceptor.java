@@ -42,6 +42,10 @@ public class CustomAuthInterceptor implements Interceptor {
         long epo = epochSeconds + expiry;
         String resource = originalRequest.url().encodedPath();
 
+/*        if (resource.startsWith("/admin")) {
+            resource = resource.substring(6);
+        }*/
+
         String signature = sign(originalRequest.method(), String.valueOf(epo), resource);
 
         HttpUrl modifiedURL = originalRequest.url().newBuilder()
