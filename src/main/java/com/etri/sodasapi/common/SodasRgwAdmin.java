@@ -33,6 +33,7 @@ public class SodasRgwAdmin {
         Request request = new Request.Builder()
                 .get()
                 .url(url)
+                .header("Accept", "application/vnd.ceph.api.v1.0+json")
                 .build();
 
         String result = safeCall(request);

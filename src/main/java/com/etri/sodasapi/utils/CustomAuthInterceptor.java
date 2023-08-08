@@ -40,19 +40,19 @@ public class CustomAuthInterceptor implements Interceptor {
         long epochSeconds = System.currentTimeMillis() / 1000;
         long expiry = 15 * 60; // For example, if you want 15 minutes like JavaScript.
         long epo = epochSeconds + expiry;
-        String resource = originalRequest.url()
-                .encodedPath();
+        String resource = originalRequest.url().encodedPath();
 
         String signature = sign(originalRequest.method(), String.valueOf(epo), resource);
 
         HttpUrl modifiedURL = originalRequest.url().newBuilder()
-                .addQueryParameter("Authorization", signature)
                 .addQueryParameter("Expires", String.valueOf(epo))
+                .addQueryParameter("AWSAccessKeyId", accessKey) // Assuming you have 'accessKey' as a member variable or you can get it from some method.
+                .addQueryParameter("Signature", signature)
                 .build();
 
         Request signedRequest = originalRequest.newBuilder()
                 .url(modifiedURL)
-                        .build();
+                .build();
 
         System.out.println(signedRequest.toString());
 
