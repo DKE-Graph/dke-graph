@@ -22,12 +22,12 @@ public class SodasRgwAdmin {
     }
 
     public String getUserRateLimit(String uid){
-        HttpUrl url = HttpUrl.parse(constants.getRgwEndpoint())
+        HttpUrl url = HttpUrl.parse(constants.getRgwEndpoint()+ "/admin")
                 .newBuilder()
-                .addPathSegment("admin")
                 .addPathSegment("ratelimit")
                 .addQueryParameter("ratelimit-scope", "user")
                 .addQueryParameter("uid", uid)
+                .addQueryParameter("AWSAccessKeyId", constants.getRgwAdminAccess())
                 .build();
 
         Request request = new Request.Builder()
@@ -40,12 +40,12 @@ public class SodasRgwAdmin {
     }
 
     public String setUserRateLimit(String uid, RateLimit rateLimit){
-        HttpUrl url = Objects.requireNonNull(HttpUrl.parse(constants.getRgwEndpoint()))
+        HttpUrl url = HttpUrl.parse(constants.getRgwEndpoint()+ "/admin")
                 .newBuilder()
-                .addPathSegment("admin")
                 .addPathSegment("ratelimit")
                 .addQueryParameter("ratelimit-scope", "user")
                 .addQueryParameter("uid", uid)
+                .addQueryParameter("AWSAccessKeyId", constants.getRgwAdminAccess())
                 .build();
 
         String jsonRateLimit = new Gson().toJson(rateLimit);
@@ -59,6 +59,8 @@ public class SodasRgwAdmin {
     }
 
     private String safeCall(Request request) {
+
+        System.out.println(request.toString());
         try (Response response = client.newCall(request).execute()) {
             if (response.code() == 404) {
                 return null;

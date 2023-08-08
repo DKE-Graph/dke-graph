@@ -1,5 +1,6 @@
 package com.etri.sodasapi.utils;
 
+import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -36,21 +37,30 @@ public class CustomAuthInterceptor implements Interceptor {
     public Response intercept(Chain chain) throws IOException {
         Request originalRequest = chain.request();
 
-        String date = DateTimeFormatter.RFC_1123_DATE_TIME.format(ZonedDateTime.now(ZoneId.of("GMT")));
-        String resource = originalRequest.url().encodedPath();
+        long epochSeconds = System.currentTimeMillis() / 1000;
+        long expiry = 15 * 60; // For example, if you want 15 minutes like JavaScript.
+        long epo = epochSeconds + expiry;
+        String resource = originalRequest.url()
+                .encodedPath();
 
-        String signature = sign(originalRequest.method(), date, resource);
+        String signature = sign(originalRequest.method(), String.valueOf(epo), resource);
+
+        HttpUrl modifiedURL = originalRequest.url().newBuilder()
+                .addQueryParameter("Authorization", signature)
+                .addQueryParameter("Expires", String.valueOf(epo))
+                .build();
 
         Request signedRequest = originalRequest.newBuilder()
-                .header("Authorization", signature)
-                .header("Date", date)
-                .build();
+                .url(modifiedURL)
+                        .build();
+
+        System.out.println(signedRequest.toString());
 
         return chain.proceed(signedRequest);
     }
 
-    private String sign(String httpVerb, String date, String resource) {
-        StringBuilder stringToSign = new StringBuilder(httpVerb + "\n\n\n" + date + "\n" + resource);
+    private String sign(String httpVerb, String epo, String resource) {
+        StringBuilder stringToSign = new StringBuilder(httpVerb + "\n\n\n" + epo + "\n" + resource);
 
         try {
             Mac mac = Mac.getInstance("HmacSHA1");
@@ -59,7 +69,8 @@ public class CustomAuthInterceptor implements Interceptor {
             mac.init(signingKey);
             byte[] signBytes = mac.doFinal(stringToSign.toString().getBytes(StandardCharsets.UTF_8));
             String signature = encodeBase64(signBytes);
-            return "AWS " + accessKey + ":" + signature;
+            //return "AWS " + accessKey + ":" + signature;
+            return signature;
         } catch (Exception e) {
             throw new RuntimeException("MAC CALC FAILED.", e);
         }
