@@ -60,11 +60,11 @@ public class SodasRgwAdmin {
 
         Gson gson = new Gson();
         String jsonData = gson.toJson(toMap(rateLimit));
-        RequestBody requestBody = RequestBody.create(jsonData, MediaType.parse("application/json; charset=utf-8"));
+        RequestBody emptyBody = RequestBody.create(new byte[0]);
 
 
         Request request = new Request.Builder()
-                .post(requestBody)
+                .post(emptyBody)
                 .url(url)
                 .build();
 
