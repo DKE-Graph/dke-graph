@@ -14,7 +14,7 @@ public class Quota {
     @Schema(description = "가능여부")
     private String enabled;
 
-
+    @Schema(description = "최대로 넣을수 있는 오브젝트 수")
     private String max_objects;
 
     @Schema(description = "최대 KB 용량")

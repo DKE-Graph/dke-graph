@@ -3,10 +3,14 @@ package com.etri.sodasapi.dashboard;
 import com.etri.sodasapi.common.Quota;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.twonote.rgwadmin4j.model.S3Credential;
 
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +27,9 @@ public class DSController {
         Permission-Quota-Get
         유저의 쿼타 정보 출력
      */
-    @Operation(summary = "유저 쿼타 정보 출력", description = "유저 id를 입력하여 유저의 쿼타 정보를 출력합니다")
+    @Operation(summary = "유저 쿼타 정보 출력", description = "유저 id를 입력하여 유저의 쿼타 정보를 출력합니다", responses = {
+            @ApiResponse(responseCode = "200", description = "유저 쿼타 정보 출력 성공", content = @Content(mediaType = "application/json",schema = @Schema(implementation = Quota.class))),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @GetMapping("/quota/{uid}")
     public ResponseEntity<List<HashMap>> userQuotaInfo(@Parameter(name = "uid", description = "유저 id") @PathVariable("uid") String userName){
         return ResponseEntity.status(HttpStatus.OK).body(dsService.userQoutaInfo(userName));
@@ -33,7 +39,9 @@ public class DSController {
         Permission-Quota-Create, Update
         유저 쿼타 설정
      */
-    @Operation(summary = "유저 쿼타 설정", description = "유저 id와 쿼타를 입력하여 유저의 쿼타를 설정합니다")
+    @Operation(summary = "유저 쿼타 설정", description = "유저 id와 쿼타를 입력하여 유저의 쿼타를 설정합니다", responses = {
+            @ApiResponse(responseCode = "200", description = "유저 쿼타 설정 성공", content = @Content(mediaType = "application/json",schema = @Schema(implementation = Quota.class))),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @PostMapping("/quota/{uid}/config")
     public ResponseEntity userQuotaConfig(@Parameter(name = "uid", description = "유저 id")@PathVariable("uid") String userName,
                                           @RequestBody Quota quota){
@@ -45,9 +53,11 @@ public class DSController {
         Permission-Quota-Delete
         쿼타 사용 금지
      */
-    @Operation(summary = "유저 쿼타 사용 금지", description = "유저 id를 입력하여 유저의 쿼타의 사용을 금지합니다")
+    @Operation(summary = "유저 쿼타 사용 금지 설정", description = "유저 id를 입력하여 유저의 쿼타의 사용을 금지합니다", responses = {
+            @ApiResponse(responseCode = "200", description = "유저 쿼타 사용 금지 설정 성공"),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @DeleteMapping("/quota/{uid}/config")
-    public void userQuotaDisable(@Parameter(name = "uid", description = "유저  id")@PathVariable("uid") String userName,
+    public void userQuotaDisable(@Parameter(name = "uid", description = "유저 id")@PathVariable("uid") String userName,
                                  @RequestBody Map<String, String> body){
         dsService.qoutaDisable(userName, body.get("quota_type"));
     }

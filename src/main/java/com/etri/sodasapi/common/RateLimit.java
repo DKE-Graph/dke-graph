@@ -11,13 +11,16 @@ public class RateLimit {
     @Schema(description = "가능여부")
     private String enabled;
 
-    @Schema(description = "최대로 읽을 수 있는 바이트 용량")
+    @Schema(description = "초당 읽을수 있는 바이트")
     private long maxReadBytes;
 
-    @Schema(description = "최대로 쓸 수 있는 바이트 용량")
+    @Schema(description = "초당 쓸수 있는 바이트")
     private long maxWriteBytes;
 
+    @Schema(description = "초당 읽을 수 있는 호출수")
     private long maxReadOpts;
+
+    @Schema(description = "초당 쓸수 있는 호출수")
     private long maxWriteOpts;
 
     public RateLimit(String enabled, long maxReadBytes, long maxWriteBytes, long maxReadOpts, long maxWriteOpts){
