@@ -1,11 +1,11 @@
 package com.etri.sodasapi.utils;
 
+import com.google.common.base.CharMatcher;
 import com.google.gson.Gson;
-import okhttp3.HttpUrl;
-import okhttp3.Interceptor;
-import okhttp3.Request;
-import okhttp3.Response;
+import okhttp3.*;
+import okio.Buffer;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.boot.configurationprocessor.json.JSONObject;
 
 import java.io.IOException;
 import javax.crypto.Mac;
@@ -14,6 +14,9 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 public class CustomAuthInterceptor implements Interceptor {
 
@@ -23,6 +26,34 @@ public class CustomAuthInterceptor implements Interceptor {
     public CustomAuthInterceptor(String accessKey, String secretKey) {
         this.accessKey = accessKey;
         this.secretKey = secretKey;
+    }
+
+    public static <Buffer> Map<String, String> requestToMap(final RequestBody requestBody) {
+
+        if(requestBody == null){
+            return null;
+        }
+
+        String str = "";
+        Map<String, String> map = new HashMap<>();
+        try(okio.Buffer buffer = new okio.Buffer()){
+            requestBody.writeTo(buffer);
+            str = buffer.readUtf8();
+        } catch (final IOException e) {
+            str = "Failed to convert body to string";
+        }
+        try {
+
+            JSONObject jsonObject = new JSONObject(str);
+            Iterator keys = jsonObject.keys();
+            while (keys.hasNext()) {
+                String key = (String) keys.next();
+                map.put(key, jsonObject.getString(key));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return map;
     }
 
     @NotNull
@@ -39,15 +70,11 @@ public class CustomAuthInterceptor implements Interceptor {
             resource = resource.substring(6);
         }*/
 
-        String signature =
-                (originalRequest.body() != null) ?
-                sign(originalRequest.method(), String.valueOf(epo), resource, true) :
-                        sign(originalRequest.method(), String.valueOf(epo), resource, false);
+        String signature = sign(originalRequest.method(), String.valueOf(epo), resource, originalRequest.body());
 
 
         HttpUrl modifiedURL = originalRequest.url().newBuilder()
                 .addQueryParameter("Expires", String.valueOf(epo))
-                .addQueryParameter("AWSAccessKeyId", accessKey) // Assuming you have 'accessKey' as a member variable or you can get it from some method.
                 .addQueryParameter("Signature", signature)
                 .build();
 
@@ -64,12 +91,17 @@ public class CustomAuthInterceptor implements Interceptor {
         return chain.proceed(signedRequest);
     }
 
-    private String sign(String httpVerb, String epo, String resource, Boolean isBody) {
-        StringBuilder stringToSign = new StringBuilder(httpVerb + "\n\n\n" + epo + "\n" + resource);
+    private String sign(String httpVerb, String epo, String resource, RequestBody requestBody) {
+        StringBuilder stringToSign = new StringBuilder(httpVerb + "\n\n\n" + epo + "\n");
 
-        if(isBody){
-            stringToSign.append("\n").append(hexDigest(jsonStringify(new TestObject(true))));
-        }
+/*        if(requestBody != null){
+            stringToSign.append(hexDigest("{\"test\":true}"));
+            stringToSign.append("\n");
+        }*/
+
+        //resource = resource.replaceFirst("/admin", "");
+
+        stringToSign.append(resource);
 
         try {
             Mac mac = Mac.getInstance("HmacSHA1");

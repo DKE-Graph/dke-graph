@@ -50,6 +50,11 @@ public class SodasRgwAdmin {
                 .addQueryParameter("uid", uid)
                 .addQueryParameter("AWSAccessKeyId", constants.getRgwAdminAccess())
                 .addQueryParameter("format", "json")
+                .addQueryParameter("enabled", rateLimit.getEnabled())
+                .addQueryParameter("max-read-bytes", String.valueOf(rateLimit.getMaxReadBytes()))
+                .addQueryParameter("max-write-bytes", String.valueOf(rateLimit.getMaxWriteBytes()))
+                .addQueryParameter("max-read-ops", String.valueOf(rateLimit.getMaxReadOps()))
+                .addQueryParameter("max-write-ops", String.valueOf(rateLimit.getMaxWriteOps()))
                 .build();
 
 
@@ -72,8 +77,8 @@ public class SodasRgwAdmin {
         result.put("enabled", rateLimit.getEnabled());
         result.put("max-read-bytes", rateLimit.getMaxReadBytes());
         result.put("max-write-bytes", rateLimit.getMaxWriteBytes());
-        result.put("max-read-opts", rateLimit.getMaxReadOpts());
-        result.put("max-write-opts", rateLimit.getMaxWriteOpts());
+        result.put("max-read-opts", rateLimit.getMaxReadOps());
+        result.put("max-write-opts", rateLimit.getMaxWriteOps());
 
         return result;
     }
