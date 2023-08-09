@@ -1,5 +1,6 @@
 package com.etri.sodasapi.utils;
 
+import com.google.gson.Gson;
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
 import okhttp3.Request;
@@ -10,17 +11,9 @@ import java.io.IOException;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.text.SimpleDateFormat;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Base64;
-import java.util.Date;
-import java.util.Locale;
-import java.util.TimeZone;
 
 public class CustomAuthInterceptor implements Interceptor {
 
@@ -46,7 +39,11 @@ public class CustomAuthInterceptor implements Interceptor {
             resource = resource.substring(6);
         }*/
 
-        String signature = sign(originalRequest.method(), String.valueOf(epo), resource);
+        String signature =
+                (originalRequest.body() != null) ?
+                sign(originalRequest.method(), String.valueOf(epo), resource, true) :
+                        sign(originalRequest.method(), String.valueOf(epo), resource, false);
+
 
         HttpUrl modifiedURL = originalRequest.url().newBuilder()
                 .addQueryParameter("Expires", String.valueOf(epo))
@@ -58,13 +55,21 @@ public class CustomAuthInterceptor implements Interceptor {
                 .url(modifiedURL)
                 .build();
 
+
+
+        System.out.println(toCurlCommand(signedRequest));
+
         System.out.println(signedRequest.toString());
 
         return chain.proceed(signedRequest);
     }
 
-    private String sign(String httpVerb, String epo, String resource) {
+    private String sign(String httpVerb, String epo, String resource, Boolean isBody) {
         StringBuilder stringToSign = new StringBuilder(httpVerb + "\n\n\n" + epo + "\n" + resource);
+
+        if(isBody){
+            stringToSign.append("\n").append(hexDigest(jsonStringify(new TestObject(true))));
+        }
 
         try {
             Mac mac = Mac.getInstance("HmacSHA1");
@@ -78,6 +83,62 @@ public class CustomAuthInterceptor implements Interceptor {
         } catch (Exception e) {
             throw new RuntimeException("MAC CALC FAILED.", e);
         }
+    }
+
+    private static String bytesToHex(byte[] bytes) {
+        StringBuilder sb = new StringBuilder();
+        for (byte b : bytes) {
+            sb.append(String.format("%02x", b));
+        }
+        return sb.toString();
+    }
+
+    public String hexDigest(String message) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(message.getBytes(StandardCharsets.UTF_8));
+            return bytesToHex(hash);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("SHA-256 algorithm not found", e);
+        }
+    }
+
+    private String jsonStringify(TestObject obj) {
+        Gson gson = new Gson();
+        return gson.toJson(obj);
+    }
+
+    // Corresponding class for the test object you are trying to stringify
+    public class TestObject {
+        private boolean test;
+
+        public TestObject(boolean test) {
+            this.test = test;
+        }
+
+        // Getter and Setter methods for 'test' (optional, but can be useful)
+    }
+
+    public static String toCurlCommand(Request request) {
+        StringBuilder curlCmd = new StringBuilder("curl -X ")
+                .append(request.method())
+                .append(" ");
+
+        for (String headerName : request.headers().names()) {
+            for (String headerValue : request.headers(headerName)) {
+                curlCmd.append("-H \"").append(headerName).append(": ").append(headerValue).append("\" ");
+            }
+        }
+
+        if (request.body() != null) {
+            // for the sake of simplicity, assuming the request body to be plain text
+            // for binary or other types of request bodies, further processing might be required
+            curlCmd.append("-d '").append(request.body().toString()).append("' ");
+        }
+
+        curlCmd.append(request.url());
+
+        return curlCmd.toString();
     }
 
     private static String encodeBase64(byte[] data) {
