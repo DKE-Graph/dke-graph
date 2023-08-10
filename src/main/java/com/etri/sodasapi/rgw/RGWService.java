@@ -286,13 +286,6 @@ public class RGWService {
         return sodasRgwAdmin.getUserRateLimit(uid);
     }
 
-    public String setUserRatelilmit(String uid, RateLimit rateLimit){
-        SodasRgwAdmin sodasRgwAdmin = getSodasRgwAdmin();
-
-
-        return sodasRgwAdmin.setUserRateLimit(uid, rateLimit);
-    }
-
 
     public Map<String, List<?>> getFileList(Key key, String bucketName, String prefix){
 
