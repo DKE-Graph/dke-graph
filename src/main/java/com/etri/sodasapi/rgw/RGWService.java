@@ -12,6 +12,7 @@ import com.amazonaws.services.s3.model.*;
 import com.etri.sodasapi.common.*;
 import com.etri.sodasapi.common.Quota;
 import com.etri.sodasapi.config.Constants;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -270,5 +271,25 @@ public class RGWService {
 //            conn.setObjectAcl("foo-test-bucket2",bObject.getObjectName(), accessControlList12);
 //        }
         conn.setBucketAcl("foo-test-bucket2", CannedAccessControlList.PublicRead);
+    }
+
+    public void addBucketUser(Key key, String rgwuser, String permission, String bucketName) {
+        AmazonS3 conn = getClient(key);
+
+        AccessControlList accessControlList = conn.getBucketAcl(bucketName);
+        Grant grant = new Grant(new CanonicalGrantee(rgwuser), Permission.valueOf(permission));
+
+        accessControlList.grantAllPermissions(grant);
+        conn.setBucketAcl(bucketName, accessControlList);
+
+        AccessControlList acl2 = conn.getBucketAcl(bucketName);
+
+        List<Grant> grantList = acl2.getGrantsAsList();
+
+        for(Grant g : grantList){
+            System.out.println(g.getGrantee().getIdentifier());
+            g.getPermission();
+            //
+        }
     }
 }

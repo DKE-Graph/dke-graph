@@ -129,6 +129,11 @@ public class RGWController {
         return rgwService.objectDownUrl(key, bucketName, object);
     }
 
+    @PostMapping("/bucket/{bucketName}/{rgwuser}/{permission}")
+    public void addBucketUser(@RequestBody Key key, @PathVariable String rgwuser, @PathVariable String permission, @PathVariable String bucketName){
+        rgwService.addBucketUser(key, rgwuser, permission, bucketName);
+    }
+
     @Operation(summary = "테스트용 api")
     @GetMapping("/bucket/test")
     public List<S3Credential> test() {
