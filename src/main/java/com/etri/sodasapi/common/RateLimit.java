@@ -18,17 +18,17 @@ public class RateLimit {
     private long maxWriteBytes;
 
     @Schema(description = "초당 읽을 수 있는 호출수")
-    private long maxReadOpts;
+    private long maxReadOps;
 
     @Schema(description = "초당 쓸수 있는 호출수")
-    private long maxWriteOpts;
+    private long maxWriteOps;
 
-    public RateLimit(String enabled, long maxReadBytes, long maxWriteBytes, long maxReadOpts, long maxWriteOpts){
+    public RateLimit(String enabled, long maxReadBytes, long maxWriteBytes, long maxReadOps, long maxWriteOps){
         this.enabled = enabled;
         this.maxReadBytes = maxReadBytes;
         this.maxWriteBytes = maxWriteBytes;
-        this.maxReadOpts = maxReadOpts;
-        this.maxWriteOpts = maxWriteOpts;
+        this.maxReadOps = maxReadOps;
+        this.maxWriteOps = maxWriteOps;
     }
 
 }

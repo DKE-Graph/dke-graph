@@ -8,3 +8,15 @@ RGW_ADMIN_SECRET:
   sodas_dev_secret
 RGW_ADMIN_UID:
   sodas_dev_user
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui/index.html
+    groups-order: DESC
+    doc-expansion: list
+    tags-sorter: alpha
+    operationsSorter: method
+    disable-swagger-default-url: true
+    display-request-duration: true

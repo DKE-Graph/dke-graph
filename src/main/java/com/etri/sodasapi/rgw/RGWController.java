@@ -53,7 +53,7 @@ public class RGWController {
         Permission - Data - Create
      */
     @Operation(summary = "bucket 생성", description = "key 값과 버킷 이름을 입력하여 bucket을 생성합니다", responses = {
-            @ApiResponse(responseCode = "200", description = "bucket 생성 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Bucket.class))),
+            @ApiResponse(responseCode = "200", description = "bucket 생성 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = SBucket.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @PostMapping("/bucket/{bucketName}")
     public ResponseEntity<Bucket> createBucket(@Parameter(name = "key", description = "해당 key 값") @RequestBody Key key,
@@ -223,7 +223,7 @@ public class RGWController {
         서브 유저 생성
      */
     @Operation(summary = "서브 유저 생성", description = "유저 id를 입력하여 해당 유저의 서브 유저를 생성합니다", responses = {
-            @ApiResponse(responseCode = "200", description = "서브 유저 생성 성공", content = @Content(mediaType = "application/json",schema = @Schema(implementation = SubUser.class))),
+            @ApiResponse(responseCode = "200", description = "서브 유저 생성 성공", content = @Content(mediaType = "application/json",schema = @Schema(implementation = SSubUser.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @PostMapping("/bucket/subuser/{uid}")
     public void createSubUser(@Parameter(name = "uid", description = "유저 id")@PathVariable("uid") String uid,
@@ -234,7 +234,7 @@ public class RGWController {
         서브 유저의 권한 정보 출력
      */
     @Operation(summary = "서브유저 권한정보 출력", description = "유저 id와 서브유저 id를 입력하여 해당 서브 유저의 권한정보를 출력합니다", responses = {
-            @ApiResponse(responseCode = "200", description = "서브유저 권한정보 출력 성공", content = @Content(mediaType = "application/json",schema = @Schema(implementation = SubUser.class))),
+            @ApiResponse(responseCode = "200", description = "서브유저 권한정보 출력 성공", content = @Content(mediaType = "application/json",schema = @Schema(implementation = SSubUser.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @GetMapping("/bucket/subuser/{uid}/{subUid}")
     public String subUserInfo(@Parameter(name = "uid", description = "유저 id")@PathVariable("uid") String uid,
@@ -246,7 +246,7 @@ public class RGWController {
         서브 유저의 권한 수정
      */
     @Operation(summary = "서브유저 권한 수정", description = "유저 id와 서브유저 id를 입력하여 해당 서브 유저의 권한을 수정합니다", responses = {
-            @ApiResponse(responseCode = "200", description = "서브유저 권한 수정 성공", content = @Content(mediaType = "application/json",schema = @Schema(implementation = SubUser.class))),
+            @ApiResponse(responseCode = "200", description = "서브유저 권한 수정 성공", content = @Content(mediaType = "application/json",schema = @Schema(implementation = SSubUser.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @PostMapping("/bucket/subuser/{uid}/{subUid}")
     public void setSubUserPermission(@Parameter(name = "uid", description = "유저 id")@PathVariable("uid") String uid,
@@ -272,7 +272,7 @@ public class RGWController {
         서브 유저의 엑세스키와 시크릿 키 변경
      */
     @Operation(summary = "서브유저 키 변경", description = "유저 id, 서브유저 id, key 값을 입력하여 서브 유저의 접근키와 비밀키를 변경합니다", responses = {
-            @ApiResponse(responseCode = "200", description = "서브유저 키 변경 성공", content = @Content(mediaType = "application/json",schema = @Schema(implementation = SubUser.class))),
+            @ApiResponse(responseCode = "200", description = "서브유저 키 변경 성공", content = @Content(mediaType = "application/json",schema = @Schema(implementation = SSubUser.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @PostMapping("/bucket/subuser/{uid}/{subUid}/key")
     public void alterSubUserKey(@Parameter(name = "uid", description = "유저 id")@PathVariable("uid") String uid,
