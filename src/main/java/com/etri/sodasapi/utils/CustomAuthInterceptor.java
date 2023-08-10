@@ -28,34 +28,6 @@ public class CustomAuthInterceptor implements Interceptor {
         this.secretKey = secretKey;
     }
 
-    public static <Buffer> Map<String, String> requestToMap(final RequestBody requestBody) {
-
-        if(requestBody == null){
-            return null;
-        }
-
-        String str = "";
-        Map<String, String> map = new HashMap<>();
-        try(okio.Buffer buffer = new okio.Buffer()){
-            requestBody.writeTo(buffer);
-            str = buffer.readUtf8();
-        } catch (final IOException e) {
-            str = "Failed to convert body to string";
-        }
-        try {
-
-            JSONObject jsonObject = new JSONObject(str);
-            Iterator keys = jsonObject.keys();
-            while (keys.hasNext()) {
-                String key = (String) keys.next();
-                map.put(key, jsonObject.getString(key));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return map;
-    }
-
     @NotNull
     @Override
     public Response intercept(Chain chain) throws IOException {
@@ -66,41 +38,21 @@ public class CustomAuthInterceptor implements Interceptor {
         long epo = epochSeconds + expiry;
         String resource = originalRequest.url().encodedPath();
 
-/*        if (resource.startsWith("/admin")) {
-            resource = resource.substring(6);
-        }*/
 
         String signature = sign(originalRequest.method(), String.valueOf(epo), resource, originalRequest.body());
-
-
         HttpUrl modifiedURL = originalRequest.url().newBuilder()
                 .addQueryParameter("Expires", String.valueOf(epo))
                 .addQueryParameter("Signature", signature)
                 .build();
-
         Request signedRequest = originalRequest.newBuilder()
                 .url(modifiedURL)
                 .build();
-
-
-
-        System.out.println(toCurlCommand(signedRequest));
-
-        System.out.println(signedRequest.toString());
 
         return chain.proceed(signedRequest);
     }
 
     private String sign(String httpVerb, String epo, String resource, RequestBody requestBody) {
         StringBuilder stringToSign = new StringBuilder(httpVerb + "\n\n\n" + epo + "\n");
-
-/*        if(requestBody != null){
-            stringToSign.append(hexDigest("{\"test\":true}"));
-            stringToSign.append("\n");
-        }*/
-
-        //resource = resource.replaceFirst("/admin", "");
-
         stringToSign.append(resource);
 
         try {
@@ -133,44 +85,6 @@ public class CustomAuthInterceptor implements Interceptor {
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException("SHA-256 algorithm not found", e);
         }
-    }
-
-    private String jsonStringify(TestObject obj) {
-        Gson gson = new Gson();
-        return gson.toJson(obj);
-    }
-
-    // Corresponding class for the test object you are trying to stringify
-    public class TestObject {
-        private boolean test;
-
-        public TestObject(boolean test) {
-            this.test = test;
-        }
-
-        // Getter and Setter methods for 'test' (optional, but can be useful)
-    }
-
-    public static String toCurlCommand(Request request) {
-        StringBuilder curlCmd = new StringBuilder("curl -X ")
-                .append(request.method())
-                .append(" ");
-
-        for (String headerName : request.headers().names()) {
-            for (String headerValue : request.headers(headerName)) {
-                curlCmd.append("-H \"").append(headerName).append(": ").append(headerValue).append("\" ");
-            }
-        }
-
-        if (request.body() != null) {
-            // for the sake of simplicity, assuming the request body to be plain text
-            // for binary or other types of request bodies, further processing might be required
-            curlCmd.append("-d '").append(request.body().toString()).append("' ");
-        }
-
-        curlCmd.append(request.url());
-
-        return curlCmd.toString();
     }
 
     private static String encodeBase64(byte[] data) {

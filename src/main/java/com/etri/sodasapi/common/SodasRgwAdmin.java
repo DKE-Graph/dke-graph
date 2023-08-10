@@ -58,11 +58,7 @@ public class SodasRgwAdmin {
                 .build();
 
 
-        Gson gson = new Gson();
-        String jsonData = gson.toJson(toMap(rateLimit));
         RequestBody emptyBody = RequestBody.create(new byte[0]);
-
-
         Request request = new Request.Builder()
                 .post(emptyBody)
                 .url(url)
@@ -85,7 +81,6 @@ public class SodasRgwAdmin {
 
     private String safeCall(Request request) {
 
-        System.out.println(request.toString());
         try (Response response = client.newCall(request).execute()) {
             if (response.code() == 404) {
                 return null;
