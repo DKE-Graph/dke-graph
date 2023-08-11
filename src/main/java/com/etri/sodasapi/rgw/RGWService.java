@@ -12,7 +12,6 @@ import com.amazonaws.services.s3.model.*;
 import com.etri.sodasapi.common.*;
 import com.etri.sodasapi.common.Quota;
 import com.etri.sodasapi.config.Constants;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -55,16 +54,14 @@ public class RGWService {
 
     public List<BObject> getObjects(Key key, String bucketName) {
         AmazonS3 conn = getClient(key);
-        ;
         ObjectListing objects = conn.listObjects(bucketName);
 
-//        System.out.println(objects);
         List<BObject> objectList = new ArrayList<>();
 
         do {
             for (S3ObjectSummary objectSummary : objects.getObjectSummaries()) {
                 objectList.add(new BObject(objectSummary.getKey(), objectSummary.getSize(), objectSummary.getLastModified()));
-                System.out.println(objectSummary.getKey() + " " + conn.getObjectAcl(bucketName, objectSummary.getKey()));
+//                System.out.println(objectSummary.getKey() + " " + conn.getObjectAcl(bucketName, objectSummary.getKey()));
             }
             objects = conn.listNextBatchOfObjects(objects);
         } while (objects.isTruncated());
@@ -73,9 +70,7 @@ public class RGWService {
 
     public Bucket createBucket(Key key, String bucketName) {
         AmazonS3 conn = getClient(key);
-        Bucket newBucket = conn.createBucket(bucketName);
-        return newBucket;
-
+        return conn.createBucket(bucketName);
     }
 
     public void deleteBucket(Key key, String bucketName) {
@@ -129,7 +124,6 @@ public class RGWService {
 
         GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(bucketName, object);
 
-        System.out.println(conn.generatePresignedUrl(request));
         return conn.generatePresignedUrl(request);
     }
 
