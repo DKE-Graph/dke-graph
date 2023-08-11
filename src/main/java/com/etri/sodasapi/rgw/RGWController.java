@@ -4,9 +4,7 @@ import com.amazonaws.services.s3.model.Bucket;
 import com.etri.sodasapi.common.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.checkerframework.framework.qual.RequiresQualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -234,8 +232,8 @@ public class RGWController {
         return rgwService.createUser(user);
     }
 
-    @GetMapping("/bucketTest")
-    public void bucketAclTest(){
-        rgwService.bucketAclTest();
-    }
+//    @GetMapping("/bucketTest")
+//    public void bucketAclTest(){
+//        rgwService.bucketAclTest();
+//    }
 }

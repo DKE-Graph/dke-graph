@@ -23,8 +23,6 @@ import org.twonote.rgwadmin4j.model.*;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URL;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 @Service
@@ -159,10 +157,13 @@ public class RGWService {
     }
 
 
-    public Quota setIndividualBucketQuota(String uid, String bucketName, Quota quota) {
+    public Quota setIndividualBucketQuota(String uid, String bucketName, Quota quota){
         RgwAdmin rgwAdmin = getRgwAdmin();
 
-        rgwAdmin.setIndividualBucketQuota(uid, bucketName, Long.parseLong(quota.getMax_objects()), Long.parseLong(quota.getMax_size_kb()));
+        if(rgwAdmin.getUserQuota(uid).get().getMaxSizeKb() >= Long.parseLong(quota.getMax_size_kb())
+            && rgwAdmin.getUserQuota(uid).get().getMaxObjects() >= Long.parseLong(quota.getMax_objects())){
+            rgwAdmin.setIndividualBucketQuota(uid, bucketName, Long.parseLong(quota.getMax_objects()), Long.parseLong(quota.getMax_size_kb()));
+        }
 
         return quota;
     }
@@ -245,6 +246,33 @@ public class RGWService {
         return rgwAdmin.createUser(user.getUid(), userParameters);
     }
 
+    public void addBucketUser(Key key, String rgwuser, String permission, String bucketName) {
+        AmazonS3 conn = getClient(key);
+
+        AccessControlList accessControlList = conn.getBucketAcl(bucketName);
+        Grant grant = new Grant(new CanonicalGrantee(rgwuser), Permission.valueOf(permission));
+
+        accessControlList.grantAllPermissions(grant);
+        conn.setBucketAcl(bucketName, accessControlList);
+
+        List<BObject> objectList = getObjects(key, bucketName);
+
+        addObjectPermission(conn, objectList, grant.getPermission(), bucketName);
+    }
+
+    public void addObjectPermission(AmazonS3 conn, List<BObject> objectList, Permission permission, String bucketName){
+        for(BObject bObject : objectList){
+            Grant grant = new Grant(new CanonicalGrantee(conn.getS3AccountOwner().getId()), permission);
+            AccessControlList accessControlList = conn.getObjectAcl(bucketName, bObject.getObjectName());
+            accessControlList.grantAllPermissions(grant);
+            conn.setObjectAcl(bucketName, bObject.getObjectName(), accessControlList);
+        }
+    }
+
+
+
+
+
     public void bucketAclTest() {
         AmazonS3 conn = getClient(new Key("MB9VKP4AC9TZPV1UDEO4" , "UYScnoXxLtmAemx4gAPjByZmbDnaYuOPOdpG7vMw"));
 //        AccessControlList accessControlList = conn.getBucketAcl("foo-test-bucket2");
@@ -271,25 +299,5 @@ public class RGWService {
 //            conn.setObjectAcl("foo-test-bucket2",bObject.getObjectName(), accessControlList12);
 //        }
         conn.setBucketAcl("foo-test-bucket2", CannedAccessControlList.PublicRead);
-    }
-
-    public void addBucketUser(Key key, String rgwuser, String permission, String bucketName) {
-        AmazonS3 conn = getClient(key);
-
-        AccessControlList accessControlList = conn.getBucketAcl(bucketName);
-        Grant grant = new Grant(new CanonicalGrantee(rgwuser), Permission.valueOf(permission));
-
-        accessControlList.grantAllPermissions(grant);
-        conn.setBucketAcl(bucketName, accessControlList);
-
-        AccessControlList acl2 = conn.getBucketAcl(bucketName);
-
-        List<Grant> grantList = acl2.getGrantsAsList();
-
-        for(Grant g : grantList){
-            System.out.println(g.getGrantee().getIdentifier());
-            g.getPermission();
-            //
-        }
     }
 }
