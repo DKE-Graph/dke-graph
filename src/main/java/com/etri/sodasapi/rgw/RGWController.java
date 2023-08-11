@@ -16,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.twonote.rgwadmin4j.model.S3Credential;
-import org.twonote.rgwadmin4j.model.SubUser;
 
 import java.io.IOException;
 import java.net.URL;
@@ -56,7 +55,7 @@ public class RGWController {
             @ApiResponse(responseCode = "200", description = "bucket 생성 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = SBucket.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @PostMapping("/bucket/{bucketName}")
-    public ResponseEntity<Bucket> createBucket(@Parameter(name = "key", description = "해당 key 값") @RequestBody Key key,
+    public ResponseEntity<Bucket> createBucket(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "해당 key 값") @RequestBody Key key,
                                                @Parameter(name = "bucketName", description = "버킷 이름") @PathVariable String bucketName){
         if(rgwService.validAccess(key)){
             return ResponseEntity.status(HttpStatus.OK).body(rgwService.createBucket(key, bucketName));
@@ -73,7 +72,7 @@ public class RGWController {
             @ApiResponse(responseCode = "200", description = "bucket 삭제 성공"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @DeleteMapping("/bucket/{bucketName}")
-    public void deleteBucket(@Parameter(name = "key", description = "해당 key 값") @RequestBody Key key,
+    public void deleteBucket(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "해당 key 값") @RequestBody Key key,
                              @Parameter(name = "bucketName", description = "버킷 이름") @PathVariable String bucketName){
         if(rgwService.validAccess(key)){
             rgwService.deleteBucket(key, bucketName);
@@ -90,7 +89,7 @@ public class RGWController {
             @ApiResponse(responseCode = "200", description = "Object 조회 성공", content = @Content(mediaType = "application/json",schema = @Schema(implementation = BObject.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @GetMapping("/bucket/{bucketName}")
-    public ResponseEntity<List<BObject>> getObjects(@Parameter(name = "key", description = "해당 key 값") @RequestBody Key key,
+    public ResponseEntity<List<BObject>> getObjects(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "해당 key 값") @RequestBody Key key,
                                                     @Parameter(name = "bucketName", description = "버킷 이름") @PathVariable String bucketName)
             throws NoSuchAlgorithmException, InvalidKeyException {
         if(rgwService.validAccess(key)){
@@ -108,7 +107,7 @@ public class RGWController {
             @ApiResponse(responseCode = "200", description = "Object 삭제 성공"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @DeleteMapping("/bucket/{bucketName}/{object}")
-    public void deleteObject(@Parameter(name = "key", description = "해당 key 값") @RequestBody Key key,
+    public void deleteObject(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "해당 key 값") @RequestBody Key key,
                              @Parameter(name = "bucketName", description = "버킷 이름") @PathVariable String bucketName,
                              @Parameter(name = "object", description = "해당 object") @PathVariable String object){
         if(rgwService.validAccess(key)){
@@ -148,7 +147,7 @@ public class RGWController {
             @ApiResponse(responseCode = "200", description = "Object의 url 다운로드 성공"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @GetMapping("/bucket/{bucketName}/{object}")
-    public URL objectDownUrl(@Parameter(name = "key", description = "해당 key 값")@RequestBody Key key,
+    public URL objectDownUrl(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "해당 key 값")@RequestBody Key key,
                              @Parameter(name = "bucketName", description = "버킷 이름")@PathVariable String bucketName,
                              @Parameter(name = "object", description = "오브젝트")@PathVariable String object){
         return rgwService.objectDownUrl(key, bucketName, object);
@@ -177,7 +176,7 @@ public class RGWController {
             @ApiResponse(responseCode = "200", description = "prefix 경로의 폴더 및 파일 리스트 반환 성공"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @PostMapping("/bucket/{bucketName}/files")
-    public Map<String, List<?>> getFileList(@Parameter(name = "key", description = "해당 key 값")@RequestBody Key key,
+    public Map<String, List<?>> getFileList(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "해당 key 값")@RequestBody Key key,
                                             @Parameter(name = "bucketName", description = "버킷 이름")@PathVariable String bucketName,
                                             @Parameter(name = "prefix", description = "prefix")@RequestParam(required = false) String prefix){
         return rgwService.getFileList(key, bucketName, prefix);
@@ -204,7 +203,7 @@ public class RGWController {
     @PostMapping("/bucket/quota/{bucketName}/{uid}")
     public Quota setIndividualBucketQuota(@Parameter(name = "bucketName", description = "버킷 이름") @PathVariable String bucketName,
                                           @Parameter(name = "uid", description = "유저 id") @PathVariable String uid,
-                                          @Parameter(name = "quota", description = "할당량")@RequestBody Quota quota){
+                                          @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "할당량")@RequestBody Quota quota){
         return rgwService.setIndividualBucketQuota(uid, bucketName, quota);
     }
 
@@ -227,7 +226,7 @@ public class RGWController {
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @PostMapping("/bucket/subuser/{uid}")
     public void createSubUser(@Parameter(name = "uid", description = "유저 id")@PathVariable("uid") String uid,
-                              @Parameter(name = "subUser", description = "서브 유저")@RequestBody SSubUser subUser){
+                              @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "서브 유저")@RequestBody SSubUser subUser){
         rgwService.createSubUser(uid, subUser);
     }
     /*
@@ -251,7 +250,7 @@ public class RGWController {
     @PostMapping("/bucket/subuser/{uid}/{subUid}")
     public void setSubUserPermission(@Parameter(name = "uid", description = "유저 id")@PathVariable("uid") String uid,
                                      @Parameter(name = "subUid", description = "서브유저 id")@PathVariable("subUid") String subUid,
-                                     @Parameter(name = "permission", description = "권한")@RequestBody String permission){
+                                     @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "권한")@RequestBody String permission){
         rgwService.setSubUserPermission(uid, subUid, permission);
     }
 
@@ -264,7 +263,7 @@ public class RGWController {
     @DeleteMapping("/bucket/subuser/{uid}/{subUid}")
     public void deleteSubUser(@Parameter(name = "uid", description = "유저 id") @PathVariable("uid") String uid,
                               @Parameter(name = "subUid", description = "서브유저 id")@PathVariable("subUid") String subUid,
-                              @Parameter(name = "key", description = "해당 key 값")@RequestBody Key key){
+                              @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "해당 key 값")@RequestBody Key key){
         rgwService.deleteSubUser(uid, subUid, key);
     }
 
@@ -277,7 +276,7 @@ public class RGWController {
     @PostMapping("/bucket/subuser/{uid}/{subUid}/key")
     public void alterSubUserKey(@Parameter(name = "uid", description = "유저 id")@PathVariable("uid") String uid,
                                 @Parameter(name = "subUid", description = "서브유저 id")@PathVariable("subUid") String subUid,
-                                @Parameter(name = "key", description = "해당 key 값")@RequestBody Key key) {
+                                @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "해당 key 값")@RequestBody Key key) {
         rgwService.alterSubUserKey(uid, subUid, key);
     }
 

@@ -17,7 +17,7 @@ public class RateLimit {
     @Schema(description = "초당 쓸수 있는 바이트")
     private long maxWriteBytes;
 
-    @Schema(description = "초당 읽을 수 있는 호출수")
+    @Schema(description = "초당 읽을수 있는 호출수")
     private long maxReadOps;
 
     @Schema(description = "초당 쓸수 있는 호출수")
