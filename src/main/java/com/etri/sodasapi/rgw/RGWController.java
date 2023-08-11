@@ -1,8 +1,6 @@
 package com.etri.sodasapi.rgw;
 
 import com.amazonaws.services.s3.model.Bucket;
-import com.amazonaws.services.s3.model.ListObjectsV2Result;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.etri.sodasapi.common.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -11,11 +9,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.twonote.rgwadmin4j.model.S3Credential;
+import org.twonote.rgwadmin4j.model.User;
 
 import java.io.IOException;
 import java.net.URL;
@@ -24,6 +22,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 
 @RestController
 @RequiredArgsConstructor
@@ -153,6 +152,10 @@ public class RGWController {
         return rgwService.objectDownUrl(key, bucketName, object);
     }
 
+    @PostMapping("/bucket/{bucketName}/{rgwuser}/{permission}")
+    public void addBucketUser(@RequestBody Key key, @PathVariable String rgwuser, @PathVariable String permission, @PathVariable String bucketName){
+        rgwService.addBucketUser(key, rgwuser, permission, bucketName);
+    }
 
     @Operation(summary = "테스트용 api")
     @GetMapping("/bucket/test")
@@ -315,4 +318,14 @@ public class RGWController {
                                  @Parameter(name = "key", description = "해당 key 값")@PathVariable Key key){
         rgwService.deleteS3Credential(uid, key.getAccessKey());
     }
+
+    @PostMapping("/user")
+    public User createUser(@RequestBody SUser user){
+        return rgwService.createUser(user);
+    }
+
+//    @GetMapping("/bucketTest")
+//    public void bucketAclTest(){
+//        rgwService.bucketAclTest();
+//    }
 }
