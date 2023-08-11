@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-
+@Tag(name = "RGW Controller", description = "RGW 컨트롤러 API 문서입니다")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/object-storage")
@@ -88,8 +89,8 @@ public class RGWController {
             @ApiResponse(responseCode = "200", description = "Object 조회 성공", content = @Content(mediaType = "application/json",schema = @Schema(implementation = BObject.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @GetMapping("/bucket/{bucketName}")
-    public ResponseEntity<List<BObject>> getObjects(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "해당 key 값") @RequestBody Key key,
-                                                    @Parameter(name = "bucketName", description = "버킷 이름") @PathVariable String bucketName)
+    public ResponseEntity<List<BObject>> getObjects(@Parameter(name = "bucketName", description = "버킷 이름") @PathVariable String bucketName,
+                                                    @Parameter(name = "key", description = "해당 key 값") @PathVariable Key key)
             throws NoSuchAlgorithmException, InvalidKeyException {
         if(rgwService.validAccess(key)){
             return ResponseEntity.status(HttpStatus.OK).body(rgwService.getObjects(key, bucketName));

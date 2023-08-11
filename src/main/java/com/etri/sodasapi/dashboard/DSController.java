@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +16,7 @@ import org.twonote.rgwadmin4j.model.S3Credential;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+@Tag(name = "DS Controller", description = "DS 컨트롤러 API 문서입니다")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/dashboard")
