@@ -1,9 +1,7 @@
-package com.etri.sodasapi.rgw;
+package com.etri.sodasapi.objectstorage.rgw;
 
 import com.amazonaws.services.s3.model.Bucket;
-import com.amazonaws.services.s3.model.ListObjectsV2Result;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
-import com.etri.sodasapi.common.*;
+import com.etri.sodasapi.objectstorage.common.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;

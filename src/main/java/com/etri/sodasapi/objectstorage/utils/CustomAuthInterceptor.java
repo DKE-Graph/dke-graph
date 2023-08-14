@@ -1,4 +1,4 @@
-package com.etri.sodasapi.utils;
+package com.etri.sodasapi.objectstorage.utils;
 
 import com.google.common.base.CharMatcher;
 import com.google.gson.Gson;

@@ -1,4 +1,4 @@
-package com.etri.sodasapi.rgw;
+package com.etri.sodasapi.objectstorage.rgw;
 
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSCredentials;
@@ -9,8 +9,8 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.*;
-import com.etri.sodasapi.common.*;
-import com.etri.sodasapi.common.Quota;
+import com.etri.sodasapi.objectstorage.common.*;
+import com.etri.sodasapi.objectstorage.common.Quota;
 import com.etri.sodasapi.config.Constants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

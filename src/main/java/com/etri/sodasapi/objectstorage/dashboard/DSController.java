@@ -1,6 +1,6 @@
-package com.etri.sodasapi.dashboard;
+package com.etri.sodasapi.objectstorage.dashboard;
 
-import com.etri.sodasapi.common.Quota;
+import com.etri.sodasapi.objectstorage.common.Quota;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

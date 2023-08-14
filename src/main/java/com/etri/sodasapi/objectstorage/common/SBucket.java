@@ -1,4 +1,4 @@
-package com.etri.sodasapi.common;
+package com.etri.sodasapi.objectstorage.common;
 
 import lombok.Data;
 import lombok.Getter;

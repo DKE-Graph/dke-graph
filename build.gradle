@@ -41,6 +41,10 @@ dependencies {
     implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
     compileOnly group: 'software.amazon.awssdk', name: 'aws-sdk-java', version: '2.17.42'
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    implementation 'org.keycloak:keycloak-spring-security-adapter'
+
 
 
     implementation group: 'io.github.twonote', name: 'radosgw-admin4j', version: '2.0.8'
