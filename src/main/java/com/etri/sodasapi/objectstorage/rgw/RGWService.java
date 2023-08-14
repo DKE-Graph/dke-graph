@@ -59,20 +59,19 @@ public class RGWService {
         for (Bucket mybucket : buckets) {
             bucketList.add(new SBucket(mybucket.getName(), mybucket.getCreationDate()));
         }
-
         return bucketList;
     }
 
     public List<BObject> getObjects(Key key, String bucketName) {
         AmazonS3 conn = getClient(key);
-
         ObjectListing objects = conn.listObjects(bucketName);
+
         List<BObject> objectList = new ArrayList<>();
 
         do {
             for (S3ObjectSummary objectSummary : objects.getObjectSummaries()) {
                 objectList.add(new BObject(objectSummary.getKey(), objectSummary.getSize(), objectSummary.getLastModified()));
-                System.out.println(objectSummary.getKey() + " " + conn.getObjectAcl(bucketName, objectSummary.getKey()));
+//                System.out.println(objectSummary.getKey() + " " + conn.getObjectAcl(bucketName, objectSummary.getKey()));
             }
             objects = conn.listNextBatchOfObjects(objects);
         } while (objects.isTruncated());
@@ -81,8 +80,7 @@ public class RGWService {
 
     public Bucket createBucket(Key key, String bucketName) {
         AmazonS3 conn = getClient(key);
-        Bucket newBucket = conn.createBucket(bucketName);
-        return newBucket;
+        return conn.createBucket(bucketName);
     }
 
     public void deleteBucket(Key key, String bucketName) {
@@ -122,7 +120,6 @@ public class RGWService {
 
     public void objectUpload(MultipartFile file, String bucketName, Key key) throws IOException {
         AmazonS3 conn = getClient(key);
-
         ByteArrayInputStream input = new ByteArrayInputStream(file.getBytes());
         System.out.println(conn.putObject(bucketName, file.getOriginalFilename(), input, new ObjectMetadata()));
     }
@@ -136,8 +133,7 @@ public class RGWService {
         AmazonS3 conn = getClient(key);
 
         GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(bucketName, object);
-
-        System.out.println(conn.generatePresignedUrl(request));
+        ;
         return conn.generatePresignedUrl(request);
     }
 
@@ -151,6 +147,7 @@ public class RGWService {
 
         individualBucketQuota.put("max-size-kb", bucketInfo1.getBucketQuota().getMaxSizeKb());
         individualBucketQuota.put("max-objects", bucketInfo1.getBucketQuota().getMaxObjects());
+        individualBucketQuota.put("actual-size", bucketInfo1.getUsage().getRgwMain().getSize_actual());
 
         return individualBucketQuota;
     }
@@ -159,13 +156,18 @@ public class RGWService {
         RgwAdmin rgwAdmin = getRgwAdmin();
 
         long usage =  rgwAdmin.getBucketInfo(bucketName).get().getUsage().getRgwMain().getSize();
+
+        System.out.println(usage);
     }
 
 
-    public Quota setIndividualBucketQuota(String uid, String bucketName, Quota quota) {
+    public Quota setIndividualBucketQuota(String uid, String bucketName, Quota quota){
         RgwAdmin rgwAdmin = getRgwAdmin();
 
-        rgwAdmin.setIndividualBucketQuota(uid, bucketName, Long.parseLong(quota.getMax_objects()), Long.parseLong(quota.getMax_size_kb()));
+        if(rgwAdmin.getUserQuota(uid).get().getMaxSizeKb() >= Long.parseLong(quota.getMax_size_kb())
+            && rgwAdmin.getUserQuota(uid).get().getMaxObjects() >= Long.parseLong(quota.getMax_objects())){
+            rgwAdmin.setIndividualBucketQuota(uid, bucketName, Long.parseLong(quota.getMax_objects()), Long.parseLong(quota.getMax_size_kb()));
+        }
 
         return quota;
     }
@@ -204,6 +206,20 @@ public class RGWService {
 
     }
 
+    public Map<String, String> subUserList(String uid){
+        RgwAdmin rgwAdmin = getRgwAdmin();
+
+        List<String> subUserList = rgwAdmin.listSubUser(uid);
+
+        Map<String, String> userInfoMap = new HashMap<>();
+
+        for(String subUser : subUserList){
+            userInfoMap.put(subUser, subUserInfo(uid, subUser).toUpperCase());
+        }
+
+        return userInfoMap;
+    }
+
     public void deleteSubUser(String uid, String subUid, Key key) {
         RgwAdmin rgwAdmin = getRgwAdmin();
         rgwAdmin.removeS3CredentialFromSubUser(uid, subUid, key.getAccessKey());
@@ -230,7 +246,6 @@ public class RGWService {
 
     public void deleteS3Credential(String uid, String accessKey){
         RgwAdmin rgwAdmin = getRgwAdmin();
-
         rgwAdmin.removeS3Credential(uid, accessKey);
     }
 
@@ -247,15 +262,8 @@ public class RGWService {
         return sodasRgwAdmin.getUserRateLimit(uid);
     }
 
-    public String setUserRateLimit(String uid, RateLimit rateLimit){
-        SodasRgwAdmin sodasRgwAdmin = getSodasRgwAdmin();
 
-        return sodasRgwAdmin.setUserRateLimit(uid, rateLimit);
-    }
-
-
-
-    public Map<String, List<?>> getFileList(Key key, String bucketName, String prefix){
+    public Map<String, List<?>> getFileList(Key key, String bucketName, String prefix) {
 
         String actualPrefix = (prefix != null) ? prefix : "";
         final AmazonS3 s3 = getClient(key);
@@ -268,10 +276,13 @@ public class RGWService {
 
             ObjectListing objectListing = s3.listObjects(listObjectsRequest);
 
+            // 현재 디렉토리의 폴더만 가져옴
             List<String> folderList = objectListing.getCommonPrefixes()
                     .stream()
                     .filter(commonPrefix -> commonPrefix.startsWith(actualPrefix))
                     .collect(Collectors.toList());
+
+            // 현재 디렉토리의 파일만 가져옴
             List<S3ObjectSummary> fileList = objectListing.getObjectSummaries()
                     .stream()
                     .filter(objectSummary -> objectSummary.getKey().startsWith(actualPrefix) && !folderList.contains(objectSummary.getKey() + "/"))
@@ -288,5 +299,68 @@ public class RGWService {
         }
 
         return null;
+    }
+
+    public User createUser(SUser user) {
+        RgwAdmin rgwAdmin = getRgwAdmin();
+        Map<String, String> userParameters = new HashMap<>();
+        userParameters.put("display-name", user.getDisplayName());
+        userParameters.put("email", user.getEmail());
+        return rgwAdmin.createUser(user.getUid(), userParameters);
+    }
+
+    public void addBucketUser(Key key, String rgwuser, String permission, String bucketName) {
+        AmazonS3 conn = getClient(key);
+
+        AccessControlList accessControlList = conn.getBucketAcl(bucketName);
+        Grant grant = new Grant(new CanonicalGrantee(rgwuser), Permission.valueOf(permission));
+
+        accessControlList.grantAllPermissions(grant);
+        conn.setBucketAcl(bucketName, accessControlList);
+
+        List<BObject> objectList = getObjects(key, bucketName);
+
+        addObjectPermission(conn, objectList, grant.getPermission(), bucketName);
+    }
+
+    public void addObjectPermission(AmazonS3 conn, List<BObject> objectList, Permission permission, String bucketName){
+        for(BObject bObject : objectList){
+            Grant grant = new Grant(new CanonicalGrantee(conn.getS3AccountOwner().getId()), permission);
+            AccessControlList accessControlList = conn.getObjectAcl(bucketName, bObject.getObjectName());
+            accessControlList.grantAllPermissions(grant);
+            conn.setObjectAcl(bucketName, bObject.getObjectName(), accessControlList);
+        }
+    }
+
+
+
+
+
+    public void bucketAclTest() {
+        AmazonS3 conn = getClient(new Key("MB9VKP4AC9TZPV1UDEO4" , "UYScnoXxLtmAemx4gAPjByZmbDnaYuOPOdpG7vMw"));
+//        AccessControlList accessControlList = conn.getBucketAcl("foo-test-bucket2");
+        // 기존 Grant를 가져올 Canonical ID 또는 AWS 계정 ID
+//        String existingCanonicalId = "foo_user2";
+//
+//        AccessControlList accessControlList = conn.getBucketAcl("foo-test-bucket2");
+//        Grant grant4 = new Grant(new CanonicalGrantee("foo_user2"), Permission.FullControl);
+//
+//        accessControlList.grantAllPermissions(grant4);
+//        conn.setBucketAcl("foo-test-bucket2", accessControlList);
+//
+//        List<BObject> objectList = getObjects(new Key("MB9VKP4AC9TZPV1UDEO4" , "UYScnoXxLtmAemx4gAPjByZmbDnaYuOPOdpG7vMw"), "foo-test-bucket2");
+//
+//        System.out.println(conn.getBucketAcl("foo-test-bucket2"));
+//
+//
+//        for(BObject bObject : objectList){
+//            AccessControlList accessControlList12 = conn.getObjectAcl("foo-test-bucket2", bObject.getObjectName());
+//            Grant grant5 = new Grant(new CanonicalGrantee("foo_user2"), Permission.FullControl);
+//
+//            accessControlList12.grantAllPermissions(grant5);
+//
+//            conn.setObjectAcl("foo-test-bucket2",bObject.getObjectName(), accessControlList12);
+//        }
+        conn.setBucketAcl("foo-test-bucket2", CannedAccessControlList.PublicRead);
     }
 }

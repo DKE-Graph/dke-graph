@@ -7,9 +7,6 @@ import org.springframework.context.annotation.Bean;
 @SpringBootApplication
 public class SodasApiApplication {
 
-    @Bean
-    public KeycloakConfig
-
     public static void main(String[] args) {
         SpringApplication.run(SodasApiApplication.class, args);
     }
