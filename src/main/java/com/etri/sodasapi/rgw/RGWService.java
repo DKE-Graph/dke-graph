@@ -133,7 +133,7 @@ public class RGWService {
         AmazonS3 conn = getClient(key);
 
         GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(bucketName, object);
-
+        ;
         return conn.generatePresignedUrl(request);
     }
 
