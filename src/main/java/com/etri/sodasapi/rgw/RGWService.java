@@ -206,6 +206,20 @@ public class RGWService {
 
     }
 
+    public Map<String, String> subUserList(String uid){
+        RgwAdmin rgwAdmin = getRgwAdmin();
+
+        List<String> subUserList = rgwAdmin.listSubUser(uid);
+
+        Map<String, String> userInfoMap = new HashMap<>();
+
+        for(String subUser : subUserList){
+            userInfoMap.put(subUser, subUserInfo(uid, subUser).toUpperCase());
+        }
+
+        return userInfoMap;
+    }
+
     public void deleteSubUser(String uid, String subUid, Key key) {
         RgwAdmin rgwAdmin = getRgwAdmin();
         rgwAdmin.removeS3CredentialFromSubUser(uid, subUid, key.getAccessKey());

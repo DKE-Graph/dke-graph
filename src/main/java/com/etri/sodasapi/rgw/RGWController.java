@@ -320,6 +320,11 @@ public class RGWController {
         rgwService.deleteS3Credential(uid, key.getAccessKey());
     }
 
+    @GetMapping("/subUser/{uid}")
+    public Map<String, String> subUserList(@PathVariable String uid){
+        return rgwService.subUserList(uid);
+    }
+
     @PostMapping("/user")
     public User createUser(@RequestBody SUser user){
         return rgwService.createUser(user);

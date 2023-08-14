@@ -21,23 +21,23 @@ springdoc:
     disable-swagger-default-url: true
     display-request-duration: true
 
-spring:
-  security:
-    oauth2:
-      client:
-        provider:
-          keycloak:
-            issuer-uri: http://keycloak.221.154.134.31.traefik.me:10017/auth/realms/MSA
-        registration:
-          keycloak:
-            #            provider: keycloak
-            client-id: platform
-            client-secret: ae46ef1b-f7bc-47db-8096-d821ffb999e1
-            authorization-grant-type: authorization_code
-            redirect-uri: 'http://localhost:8080/login/oauth2/code/keycloak'
-
-  keycloak:
-    realm: MSA
-    #  public-client: false
-    resource: spring-gateway-client
-    auth-server-url: http://keycloak.221.154.134.31.traefik.me:10017/auth
+#spring:
+#  security:
+#    oauth2:
+#      client:
+#        provider:
+#          keycloak:
+#            issuer-uri: http://keycloak.221.154.134.31.traefik.me:10017/auth/realms/MSA
+#        registration:
+#          keycloak:
+#            #            provider: keycloak
+#            client-id: platform
+#            client-secret: ae46ef1b-f7bc-47db-8096-d821ffb999e1
+#            authorization-grant-type: authorization_code
+#            redirect-uri: 'http://localhost:8080/login/oauth2/code/keycloak'
+#
+#  keycloak:
+#    realm: MSA
+#    #  public-client: false
+#    resource: spring-gateway-client
+#    auth-server-url: http://keycloak.221.154.134.31.traefik.me:10017/auth
