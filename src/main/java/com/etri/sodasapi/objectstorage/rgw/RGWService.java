@@ -238,10 +238,10 @@ public class RGWService {
         rgwAdmin.createS3Credential(uid, key.getAccessKey(), key.getSecretKey());
     }
 
-    public void createS3Credential(String uid){
+    public List<S3Credential> createS3Credential(String uid){
         RgwAdmin rgwAdmin = getRgwAdmin();
 
-        rgwAdmin.createS3Credential(uid);
+        return rgwAdmin.createS3Credential(uid);
     }
 
     public void deleteS3Credential(String uid, String accessKey){

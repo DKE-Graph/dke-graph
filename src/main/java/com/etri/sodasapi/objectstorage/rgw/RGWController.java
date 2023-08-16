@@ -116,6 +116,7 @@ public class RGWController {
     // TODO: 2023-08-03T18:25:19.870+09:00  WARN 50273 --- [nio-8080-exec-7] c.amazonaws.services.s3.AmazonS3Client   : No content length specified for stream data.  Stream contents will be buffered in memory and could result in out of memory errors.
     // TODO: 2023-08-03T18:25:20.944+09:00  WARN 50273 --- [nio-8080-exec-7] com.amazonaws.util.Base64                : JAXB is unavailable. Will fallback to SDK implementation which may be less performant.If you are using Java 9+, you will need to include javax.xml.bind:jaxb-api as a dependency.
     // TODO: 파일 업로드할 때 이런 오류 발생
+    // TODO: 대용량 파일 업로드 수정해야 함
     /*
         Data - Create
 
@@ -149,8 +150,8 @@ public class RGWController {
     }
 
     // TODO: excel 정리된 것 처럼 매핑해야함
-    @PostMapping("/bucket/{bucketName}/{rgwUser}/{permission}")
-    public void addBucketUser(@RequestBody Key key, @PathVariable String rgwUser, @PathVariable String permission, @PathVariable String bucketName) {
+    @PostMapping("/permission/acl/bucket/{bucketName}")
+    public void addBucketUser(@RequestBody Key key, @RequestBody String rgwUser, @RequestBody String permission, @PathVariable String bucketName) {
         rgwService.addBucketUser(key, rgwUser, permission, bucketName);
     }
 
