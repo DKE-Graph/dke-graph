@@ -1,4 +1,4 @@
-package com.etri.sodasapi.utils;
+package com.etri.sodasapi.objectstorage.utils;
 
 import okhttp3.Interceptor;
 import okhttp3.Request;

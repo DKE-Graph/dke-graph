@@ -1,4 +1,4 @@
-package com.etri.sodasapi.common;
+package com.etri.sodasapi.objectstorage.common;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;

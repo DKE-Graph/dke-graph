@@ -1,4 +1,4 @@
-package com.etri.sodasapi.rgw;
+package com.etri.sodasapi.objectstorage.rgw;
 
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSCredentials;
@@ -9,8 +9,8 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.*;
-import com.etri.sodasapi.common.*;
-import com.etri.sodasapi.common.Quota;
+import com.etri.sodasapi.objectstorage.common.*;
+import com.etri.sodasapi.objectstorage.common.Quota;
 import com.etri.sodasapi.config.Constants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -239,10 +239,10 @@ public class RGWService {
         rgwAdmin.createS3Credential(uid, key.getAccessKey(), key.getSecretKey());
     }
 
-    public void createS3Credential(String uid){
+    public List<S3Credential> createS3Credential(String uid){
         RgwAdmin rgwAdmin = getRgwAdmin();
 
-        rgwAdmin.createS3Credential(uid);
+        return rgwAdmin.createS3Credential(uid);
     }
 
     public void deleteS3Credential(String uid, String accessKey){
