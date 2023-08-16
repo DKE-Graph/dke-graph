@@ -127,7 +127,7 @@ public class RGWController {
             @ApiResponse(responseCode = "200", description = "Object 생성 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = BObject.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @PostMapping("/data")
-    public String objectUpload(@Parameter(name = "file", description = "파일") @RequestParam("file") MultipartFile file,
+    public String objectUpload(@Parameter(name = "file", description = "파일") @RequestPart(value = "file", required = false) MultipartFile file,
                                @Parameter(name = "bucketName", description = "버킷 이름") @RequestParam("bucketName") String bucketName,
                                @Parameter(name = "accessKey", description = "접근키") @RequestParam("accessKey") String accessKey,
                                @Parameter(name = "secretKey", description = "비밀키") @RequestParam("secretKey") String secretKey) throws IOException {
