@@ -228,6 +228,7 @@ public class RGWService {
 
     public void alterSubUserKey(String uid, String subUid, Key key) {
         RgwAdmin rgwAdmin = getRgwAdmin();
+        rgwAdmin.removeS3CredentialFromSubUser(uid, subUid, key.getAccessKey());
         rgwAdmin.createS3CredentialForSubUser(uid, subUid, key.getAccessKey(), key.getSecretKey());
     }
 
