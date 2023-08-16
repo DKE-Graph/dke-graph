@@ -10,7 +10,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.*;
 import com.etri.sodasapi.objectstorage.common.*;
-import com.etri.sodasapi.objectstorage.common.Quota;
+import com.etri.sodasapi.objectstorage.common.SQuota;
 import com.etri.sodasapi.config.Constants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -161,7 +161,7 @@ public class RGWService {
     }
 
 
-    public Quota setIndividualBucketQuota(String uid, String bucketName, Quota quota){
+    public SQuota setIndividualBucketQuota(String uid, String bucketName, SQuota quota){
         RgwAdmin rgwAdmin = getRgwAdmin();
 
         if(rgwAdmin.getUserQuota(uid).get().getMaxSizeKb() >= Long.parseLong(quota.getMax_size_kb())
@@ -261,6 +261,66 @@ public class RGWService {
         SodasRgwAdmin sodasRgwAdmin = getSodasRgwAdmin();
 
         return sodasRgwAdmin.getUserRateLimit(uid);
+    }
+
+    public Map<String, Map<String, Quota>> usersQuota(){
+        RgwAdmin rgwAdmin = getRgwAdmin();
+
+        List<User> userList = rgwAdmin.listUserInfo();
+
+        Map<String, Map<String, Quota>> userInfo = new HashMap<>();
+        Map<String, Quota> quota;
+
+        for(User user : userList){
+            quota = new HashMap<>();
+            Quota userQuota = rgwAdmin.getUserQuota(user.getUserId()).get();
+            Quota bucketQuota = rgwAdmin.getBucketQuota(user.getUserId()).get();
+            quota.put("userQuota", userQuota);
+            quota.put("bucketQuota", bucketQuota);
+
+//            String userRateLimit = getUserRatelimit(user.getUserId());
+//            quotaAndRateLimit.put("RateLimit", userRateLimit);
+
+            userInfo.put(user.getUserId(), quota);
+        }
+
+        return userInfo;
+    }
+
+    public Map<String, Map<String, String>> usersRateLimit(){
+        RgwAdmin rgwAdmin = getRgwAdmin();
+
+        List<User> userList = rgwAdmin.listUserInfo();
+
+        Map<String, Map<String, String>> userRateInfo = new HashMap<>();
+        Map<String, String> rateLimit;
+
+        for(User user : userList){
+            rateLimit = new HashMap<>();
+
+            String userRateLimit = getUserRatelimit(user.getUserId());
+            rateLimit.put("RateLimit", userRateLimit);
+
+            userRateInfo.put(user.getUserId(), rateLimit);
+        }
+
+        return userRateInfo;
+    }
+
+    public Map<String, BucketInfo> bucketsInfo(){
+        RgwAdmin rgwAdmin = getRgwAdmin();
+
+        List<String> bucketList = rgwAdmin.listBucket();
+
+        Map<String, BucketInfo> bucketInfoMap = new HashMap<>();
+
+        for(String bucket : bucketList){
+            BucketInfo bucketInfo = rgwAdmin.getBucketInfo(bucket).get();
+            bucketInfoMap.put(bucket, bucketInfo);
+        }
+
+
+        return bucketInfoMap;
     }
 
 

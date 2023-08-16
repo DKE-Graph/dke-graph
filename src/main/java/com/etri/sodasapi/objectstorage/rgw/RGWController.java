@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.twonote.rgwadmin4j.model.BucketInfo;
+import org.twonote.rgwadmin4j.model.Quota;
 import org.twonote.rgwadmin4j.model.S3Credential;
 import org.twonote.rgwadmin4j.model.User;
 
@@ -188,7 +190,7 @@ public class RGWController {
         벼킷 각각의 크기 받아오기
      */
     @Operation(summary = "버킷 크기 조회", description = "버킷 이름을 입력하여 해당 버킷의 크기를 조회합니다", responses = {
-            @ApiResponse(responseCode = "200", description = "버킷 크기 조회 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Quota.class))),
+            @ApiResponse(responseCode = "200", description = "버킷 크기 조회 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = SQuota.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @GetMapping("/permission/quota/bucket/size/{bucketName}")
     public Map<String, Long> getIndividualBucketQuota(@Parameter(name = "bucketName", description = "버킷 이름") @PathVariable String bucketName) {
@@ -199,12 +201,12 @@ public class RGWController {
         버킷 각각의 크기 설정하기
      */
     @Operation(summary = "버킷 크기 설정", description = "유저 id와 버킷 이름, 할당량을 입력하여 버킷의 크기를 설정합니다", responses = {
-            @ApiResponse(responseCode = "200", description = "버킷 크기 설정 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Quota.class))),
+            @ApiResponse(responseCode = "200", description = "버킷 크기 설정 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = SQuota.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @PostMapping("/permission/quota/bucket/size/{bucketName}")
-    public Quota setIndividualBucketQuota(@Parameter(name = "bucketName", description = "버킷 이름") @PathVariable String bucketName,
+    public SQuota setIndividualBucketQuota(@Parameter(name = "bucketName", description = "버킷 이름") @PathVariable String bucketName,
                                           @Parameter(name = "uid", description = "유저 id") @RequestBody String uid,
-                                          @Parameter(name = "quota", description = "할당량") @RequestBody Quota quota) {
+                                          @Parameter(name = "quota", description = "할당량") @RequestBody SQuota quota) {
         return rgwService.setIndividualBucketQuota(uid, bucketName, quota);
     }
 
@@ -329,5 +331,20 @@ public class RGWController {
     @GetMapping("/monitoring/{bucketName}")
     public Double quotaUtilizationInfo(@Parameter(name = "bucketName", description = "버킷 이름") @PathVariable String bucketName) {
         return rgwService.quotaUtilizationInfo(bucketName);
+    }
+
+    @GetMapping("/quota/user/size")
+    public Map<String, Map<String, Quota>> usersQuotaList(){
+        return rgwService.usersQuota();
+    }
+
+    @GetMapping("/quota/user/rate-limit")
+    public Map<String, Map<String, String>> usersRateLimit(){
+        return rgwService.usersRateLimit();
+    }
+
+    @GetMapping("/quota/bucket/size")
+    public Map<String, BucketInfo> bucketsInfo(){
+        return rgwService.bucketsInfo();
     }
 }

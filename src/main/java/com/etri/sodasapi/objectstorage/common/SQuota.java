@@ -10,7 +10,7 @@ import lombok.Getter;
 @Schema(description = "할당량")
 @Data
 @Getter
-public class Quota {
+public class SQuota {
     @Schema(description = "가능여부")
     private String enabled;
 
@@ -23,7 +23,7 @@ public class Quota {
     @Schema(description = "할당 타입")
     private String quota_type;
 
-    public Quota(String enabled, String max_objects, String max_size_kb, String quota_type) {
+    public SQuota(String enabled, String max_objects, String max_size_kb, String quota_type) {
         this.enabled = enabled;
         this.max_objects = max_objects;
         this.max_size_kb = max_size_kb;
