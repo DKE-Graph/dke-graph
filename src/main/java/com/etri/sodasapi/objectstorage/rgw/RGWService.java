@@ -1,5 +1,6 @@
 package com.etri.sodasapi.objectstorage.rgw;
 
+import com.amazonaws.AmazonServiceException;
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
@@ -9,6 +10,9 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.*;
+import com.amazonaws.services.s3.transfer.TransferManager;
+import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
+import com.amazonaws.services.s3.transfer.Upload;
 import com.etri.sodasapi.objectstorage.common.*;
 import com.etri.sodasapi.objectstorage.common.SQuota;
 import com.etri.sodasapi.config.Constants;
@@ -120,8 +124,24 @@ public class RGWService {
 
     public void objectUpload(MultipartFile file, String bucketName, Key key) throws IOException {
         AmazonS3 conn = getClient(key);
-        ByteArrayInputStream input = new ByteArrayInputStream(file.getBytes());
-        System.out.println(conn.putObject(bucketName, file.getOriginalFilename(), input, new ObjectMetadata()));
+//        ByteArrayInputStream input = new ByteArrayInputStream(file.getBytes());
+//        byte[] bytes = input.readAllBytes();
+        TransferManager transferManager = TransferManagerBuilder.standard()
+                .withS3Client(conn)
+                .build();
+        try {
+            Upload upload = transferManager.upload(bucketName, file.getOriginalFilename(), file.getInputStream(), null);
+            upload.waitForCompletion();
+            System.out.println("File uploaded successfully.");
+        } catch (AmazonServiceException | InterruptedException | IOException e){
+            e.printStackTrace();
+        } finally {
+            transferManager.shutdownNow();
+        }
+
+//        PutObjectRequest request = new PutObjectRequest(bucketName, file.getOriginalFilename(), file.getInputStream(), null);
+//        System.out.println(conn.putObject(bucketName, file.getOriginalFilename(), bytes, new ObjectMetadata()));
+//        System.out.println(conn.putObject(request));
     }
 
     // TODO: 2023.7.22 Keycloak과 연동해 관리자 확인하는 코드 추가해야 함.
