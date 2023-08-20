@@ -107,7 +107,7 @@ public class RGWService {
 
     private synchronized AmazonS3 getClient(Key key) {
         AmazonS3 amazonS3;
-        ;
+
         String accessKey = key.getAccessKey();
         String secretKey = key.getSecretKey();
 
