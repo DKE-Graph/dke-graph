@@ -1,6 +1,6 @@
-package com.etri.sodasapi.dashboard;
+package com.etri.sodasapi.objectstorage.dashboard;
 
-import com.etri.sodasapi.common.Quota;
+import com.etri.sodasapi.objectstorage.common.Quota;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;

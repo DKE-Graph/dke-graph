@@ -1,15 +1,13 @@
-package com.etri.sodasapi.common;
+package com.etri.sodasapi.objectstorage.common;
 
 import com.etri.sodasapi.config.Constants;
-import com.etri.sodasapi.utils.CustomAuthInterceptor;
-import com.google.gson.Gson;
+import com.etri.sodasapi.objectstorage.utils.CustomAuthInterceptor;
 import okhttp3.*;
 import org.twonote.rgwadmin4j.impl.RgwAdminException;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 
 public class SodasRgwAdmin {

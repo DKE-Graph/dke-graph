@@ -1,13 +1,11 @@
-package com.etri.sodasapi.dashboard;
+package com.etri.sodasapi.objectstorage.dashboard;
 
-import com.etri.sodasapi.common.Quota;
+import com.etri.sodasapi.objectstorage.common.Quota;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -15,7 +13,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Queue;
 
 @Service
 public class DSService {
