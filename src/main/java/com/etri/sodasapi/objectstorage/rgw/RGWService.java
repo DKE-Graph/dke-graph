@@ -24,8 +24,10 @@ import org.twonote.rgwadmin4j.RgwAdminBuilder;
 import org.twonote.rgwadmin4j.model.*;
 import software.amazon.awssdk.core.exception.SdkClientException;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -126,22 +128,57 @@ public class RGWService {
         AmazonS3 conn = getClient(key);
 //        ByteArrayInputStream input = new ByteArrayInputStream(file.getBytes());
 //        byte[] bytes = input.readAllBytes();
-        TransferManager transferManager = TransferManagerBuilder.standard()
-                .withS3Client(conn)
-                .build();
-        try {
-            Upload upload = transferManager.upload(bucketName, file.getOriginalFilename(), file.getInputStream(), null);
-            upload.waitForCompletion();
-            System.out.println("File uploaded successfully.");
-        } catch (AmazonServiceException | InterruptedException | IOException e){
-            e.printStackTrace();
-        } finally {
-            transferManager.shutdownNow();
+        long partSize = 5 * 1024 * 1024;
+        long contentLength = file.getSize();
+        int partCount = (int) Math.ceil((double) contentLength / partSize);
+
+        List<PartETag> partETags = new ArrayList<>();
+
+        String uploadId = initiateMultipartUpload(bucketName,file.getOriginalFilename(), conn);
+
+        for (int i = 0; i < partCount; i++) {
+            long start = i * partSize;
+            long end = Math.min(start + partSize, contentLength);
+
+            try (InputStream inputStream = file.getInputStream()) {
+                long skipBytes = inputStream.skip(start);
+                if (skipBytes != start) {
+                    throw new IOException("Could not skip to the desired position.");
+                }
+
+                byte[] buffer = new byte[(int) (end - start)];
+                int bytesRead = inputStream.read(buffer);
+
+                UploadPartRequest uploadPartRequest = new UploadPartRequest()
+                        .withBucketName(bucketName)
+                        .withKey(file.getOriginalFilename())
+                        .withUploadId(uploadId)
+                        .withPartNumber(i + 1)
+                        .withInputStream(new ByteArrayInputStream(buffer))
+                        .withPartSize(bytesRead);
+
+                UploadPartResult uploadPartResult = conn.uploadPart(uploadPartRequest);
+                partETags.add(uploadPartResult.getPartETag());
+            }
         }
 
-//        PutObjectRequest request = new PutObjectRequest(bucketName, file.getOriginalFilename(), file.getInputStream(), null);
+        CompleteMultipartUploadRequest completeRequest = new CompleteMultipartUploadRequest()
+                .withBucketName(bucketName)
+                .withKey(file.getOriginalFilename())
+                .withUploadId(uploadId)
+                .withPartETags(partETags);
+
+        conn.completeMultipartUpload(completeRequest);
+
+        //        PutObjectRequest request = new PutObjectRequest(bucketName, file.getOriginalFilename(), file.getInputStream(), null)
 //        System.out.println(conn.putObject(bucketName, file.getOriginalFilename(), bytes, new ObjectMetadata()));
 //        System.out.println(conn.putObject(request));
+    }
+
+    public String initiateMultipartUpload(String bucketName, String key, AmazonS3 conn){
+        InitiateMultipartUploadRequest initiateRequest = new InitiateMultipartUploadRequest(bucketName, key);
+        InitiateMultipartUploadResult initiateResult = conn.initiateMultipartUpload(initiateRequest);
+        return initiateResult.getUploadId();
     }
 
     // TODO: 2023.7.22 Keycloak과 연동해 관리자 확인하는 코드 추가해야 함.

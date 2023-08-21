@@ -203,9 +203,9 @@ public class RGWController {
     @Operation(summary = "버킷 크기 설정", description = "유저 id와 버킷 이름, 할당량을 입력하여 버킷의 크기를 설정합니다", responses = {
             @ApiResponse(responseCode = "200", description = "버킷 크기 설정 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = SQuota.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
-    @PostMapping("/permission/quota/bucket/size/{bucketName}")
+    @PostMapping("/permission/quota/bucket/size/{bucketName}/{uid}")
     public SQuota setIndividualBucketQuota(@Parameter(name = "bucketName", description = "버킷 이름") @PathVariable String bucketName,
-                                          @Parameter(name = "uid", description = "유저 id") @RequestBody String uid,
+                                          @Parameter(name = "uid", description = "유저 id") @PathVariable String uid,
                                           @Parameter(name = "quota", description = "할당량") @RequestBody SQuota quota) {
         return rgwService.setIndividualBucketQuota(uid, bucketName, quota);
     }
