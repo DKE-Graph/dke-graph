@@ -36,7 +36,8 @@ public class RGWController {
         버킷 정보를 읽어옴
      */
     @Operation(summary = "bucket 조회", description = "key 값을 읽어 해당 key값의 bucket을 조회합니다", responses = {
-            @ApiResponse(responseCode = "200", description = "bucket 조회 성공", content = @Content(mediaType = "application/json",schema = @Schema(implementation = SBucket.class))),
+            @ApiResponse(responseCode = "200", description = "bucket 조회 성공", content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = SBucket.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @GetMapping("/bucket")
     public ResponseEntity<List<SBucket>> getBuckets(@Parameter(name = "key", description = "해당 key 값") Key key){
@@ -152,9 +153,12 @@ public class RGWController {
                              @Parameter(name = "object", description = "오브젝트")@PathVariable String object){
         return rgwService.objectDownUrl(key, bucketName, object);
     }
-
+    @Operation(summary = "버킷 사용자 추가", description = "key 값과 user, bucketName, permission을 입력하여 사용자에게 해당 버킷의 권한을 부여합니다")
     @PostMapping("/bucket/{bucketName}/{rgwuser}/{permission}")
-    public void addBucketUser(@RequestBody Key key, @PathVariable String rgwuser, @PathVariable String permission, @PathVariable String bucketName){
+    public void addBucketUser(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "해당 key 값") @RequestBody Key key,
+                              @Parameter(name = "rgwuser", description = "유저")@PathVariable String rgwuser,
+                              @Parameter(name = "permission", description = "권한")@PathVariable String permission,
+                              @Parameter(name = "bucketName", description = "버킷 이름")@PathVariable String bucketName){
         rgwService.addBucketUser(key, rgwuser, permission, bucketName);
     }
 
@@ -320,8 +324,9 @@ public class RGWController {
         rgwService.deleteS3Credential(uid, key.getAccessKey());
     }
 
+    @Operation(summary = "서브유저 리스트 출력", description = "uid를 입력하여 해당 유저의 서브유저 리스트를 출력합니다")
     @GetMapping("/subUser/{uid}")
-    public Map<String, String> subUserList(@PathVariable String uid){
+    public Map<String, String> subUserList(@Parameter(name = "uid", description = "유저 id")@PathVariable String uid){
         return rgwService.subUserList(uid);
     }
 
