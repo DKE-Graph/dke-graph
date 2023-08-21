@@ -104,7 +104,7 @@ public class RGWController {
             @ApiResponse(responseCode = "200", description = "Object 삭제 성공"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @DeleteMapping("/data/{bucketName}/{object}")
-    public void deleteObject(@Parameter(name = "key", description = "해당 key 값") @RequestBody Key key,
+    public void deleteObject(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "해당 key 값") @RequestBody Key key,
                              @Parameter(name = "bucketName", description = "버킷 이름") @PathVariable String bucketName,
                              @Parameter(name = "object", description = "해당 object") @PathVariable String object) {
         if (rgwService.validAccess(key)) {
@@ -153,7 +153,10 @@ public class RGWController {
     // TODO: excel 정리된 것 처럼 매핑해야함
     @Operation(summary = "버킷 사용자 추가", description = "key 값과 user, bucketName, permission을 입력하여 사용자에게 해당 버킷의 권한을 부여합니다")
     @PostMapping("/permission/acl/bucket/{bucketName}")
-    public void addBucketUser(@RequestBody Key key, @RequestBody String rgwUser, @RequestBody String permission, @PathVariable String bucketName) {
+    public void addBucketUser(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "해당 key 값") @RequestBody Key key,
+                              @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "유저") @RequestBody String rgwUser,
+                              @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "권한")@RequestBody String permission,
+                              @Parameter(name = "bucketName", description = "버킷 이름") @PathVariable String bucketName) {
         rgwService.addBucketUser(key, rgwUser, permission, bucketName);
     }
     @Operation(summary = "테스트용 api")
@@ -166,17 +169,20 @@ public class RGWController {
         rgwService.getFileList(key, bucketName, prefix);
     }
 
-    @Operation(summary = "전송속도 제한", description = "API의 과도한 호출을 제한하기 위해 유저의 API 전송속도와 호출수를 제한합니다", responses = {
-            @ApiResponse(responseCode = "200", description = "전송속도 제한 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = RateLimit.class))),
+    @Operation(summary = "전송 속도 출력", description = "유저의 API 전송 속도와 호출 수를 출력합니다", responses = {
+            @ApiResponse(responseCode = "200", description = "전송 속도 출력 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = RateLimit.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @GetMapping("/permission/quota/user/rate-limit/{uid}")
     public String getUserRateLimit(@Parameter(name = "uid", description = "유저 id") @PathVariable String uid) {
         return rgwService.getUserRatelimit(uid);
     }
 
-
+    @Operation(summary = "전송속도 제한", description = "API의 과도한 호출을 제한하기 위해 유저의 API 전송속도와 호출수를 제한합니다", responses = {
+            @ApiResponse(responseCode = "200", description = "전송속도 제한 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = RateLimit.class))),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @PostMapping("/permission/quota/user/rate-limit/{uid}")
-    public String setUserRateLimit(@PathVariable String uid, @RequestBody RateLimit rateLimit){
+    public String setUserRateLimit(@Parameter(name = "uid", description = "유저 id")@PathVariable String uid,
+                                   @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "제한 속도") @RequestBody RateLimit rateLimit){
         return rgwService.setUserRateLimit(uid, rateLimit);
     }
 
@@ -210,8 +216,8 @@ public class RGWController {
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @PostMapping("/permission/quota/bucket/size/{bucketName}")
     public Quota setIndividualBucketQuota(@Parameter(name = "bucketName", description = "버킷 이름") @PathVariable String bucketName,
-                                          @Parameter(name = "uid", description = "유저 id") @RequestBody String uid,
-                                          @Parameter(name = "quota", description = "할당량") @RequestBody Quota quota) {
+                                          @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "유저 id") @RequestBody String uid,
+                                          @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "할당량") @RequestBody Quota quota) {
         return rgwService.setIndividualBucketQuota(uid, bucketName, quota);
     }
 
@@ -224,7 +230,7 @@ public class RGWController {
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @PostMapping("/credential/user/{uid}/sub-user")
     public void createSubUser(@Parameter(name = "uid", description = "유저 id") @PathVariable("uid") String uid,
-                              @Parameter(name = "subUser", description = "서브 유저") @RequestBody SSubUser subUser) {
+                              @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "서브 유저") @RequestBody SSubUser subUser) {
         rgwService.createSubUser(uid, subUser);
     }
 
@@ -249,7 +255,7 @@ public class RGWController {
     @PostMapping("/credential/user/{uid}/sub-user/{subUid}")
     public void setSubUserPermission(@Parameter(name = "uid", description = "유저 id") @PathVariable("uid") String uid,
                                      @Parameter(name = "subUid", description = "서브유저 id") @PathVariable("subUid") String subUid,
-                                     @Parameter(name = "permission", description = "권한") @RequestBody String permission) {
+                                     @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "권한") @RequestBody String permission) {
         rgwService.setSubUserPermission(uid, subUid, permission);
     }
 
@@ -262,7 +268,7 @@ public class RGWController {
     @DeleteMapping("/credential/user/{uid}/sub-user/{subUid}")
     public void deleteSubUser(@Parameter(name = "uid", description = "유저 id") @PathVariable("uid") String uid,
                               @Parameter(name = "subUid", description = "서브유저 id") @PathVariable("subUid") String subUid,
-                              @Parameter(name = "key", description = "해당 key 값") @RequestBody Key key) {
+                              @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "해당 key 값") @RequestBody Key key) {
         rgwService.deleteSubUser(uid, subUid, key);
     }
 
@@ -275,7 +281,7 @@ public class RGWController {
     @PostMapping("/credential/user/{uid}/sub-user/{subUid}/key")
     public void alterSubUserKey(@Parameter(name = "uid", description = "유저 id") @PathVariable("uid") String uid,
                                 @Parameter(name = "subUid", description = "서브유저 id") @PathVariable("subUid") String subUid,
-                                @Parameter(name = "key", description = "해당 key 값") @RequestBody Key key) {
+                                @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "해당 key 값") @RequestBody Key key) {
         rgwService.alterSubUserKey(uid, subUid, key);
     }
 
@@ -323,8 +329,9 @@ public class RGWController {
         return rgwService.subUserList(uid);
     }
 
+    @Operation(summary = "유저 생성", description = "유저를 생성합니다")
     @PostMapping("/user")
-    public User createUser(@RequestBody SUser user) {
+    public User createUser(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "유저") @RequestBody SUser user) {
         return rgwService.createUser(user);
     }
 
