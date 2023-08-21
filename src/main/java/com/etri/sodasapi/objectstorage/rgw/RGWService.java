@@ -11,7 +11,7 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.*;
 import com.etri.sodasapi.objectstorage.common.*;
 import com.etri.sodasapi.objectstorage.common.Quota;
-import com.etri.sodasapi.config.Constants;
+import com.etri.sodasapi.config.ObjectStorageConfig;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,15 +29,15 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class RGWService {
-    private final Constants constants;
+    private final ObjectStorageConfig objectStorageConfig;
     private RgwAdmin rgwAdmin;
     private SodasRgwAdmin sodasRgwAdmin;
 
     private synchronized RgwAdmin getRgwAdmin() {
         if (this.rgwAdmin == null) {
-            rgwAdmin = new RgwAdminBuilder().accessKey(constants.getRgwAdminAccess())
-                    .secretKey(constants.getRgwAdminSecret())
-                    .endpoint(constants.getRgwEndpoint() + "/admin")
+            rgwAdmin = new RgwAdminBuilder().accessKey(objectStorageConfig.getRgwAdminAccess())
+                    .secretKey(objectStorageConfig.getRgwAdminSecret())
+                    .endpoint(objectStorageConfig.getRgwEndpoint() + "/admin")
                     .build();
         }
         return rgwAdmin;
@@ -45,7 +45,7 @@ public class RGWService {
 
     private SodasRgwAdmin getSodasRgwAdmin(){
         if(this.sodasRgwAdmin == null){
-            sodasRgwAdmin = new SodasRgwAdmin(constants);
+            sodasRgwAdmin = new SodasRgwAdmin(objectStorageConfig);
         }
         return sodasRgwAdmin;
     }
@@ -111,7 +111,7 @@ public class RGWService {
         ClientConfiguration clientConfiguration = new ClientConfiguration();
         return amazonS3 = AmazonS3ClientBuilder
                 .standard()
-                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(constants.getRgwEndpoint(), Regions.DEFAULT_REGION.getName()))
+                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(objectStorageConfig.getRgwEndpoint(), Regions.DEFAULT_REGION.getName()))
                 .withPathStyleAccessEnabled(true)
                 .withClientConfiguration(clientConfiguration)
                 .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
@@ -256,13 +256,17 @@ public class RGWService {
         return userInfo.map(User::getS3Credentials).orElse(null);
     }
 
-    public String getUserRatelimit(String uid){
+    public String getUserRateLimit(String uid){
         SodasRgwAdmin sodasRgwAdmin = getSodasRgwAdmin();
 
         return sodasRgwAdmin.getUserRateLimit(uid);
     }
 
+    public String setUserRateLimit(String uid, RateLimit rateLimit){
+        SodasRgwAdmin sodasRgwAdmin = getSodasRgwAdmin();
 
+        return sodasRgwAdmin.setUserRateLimit(uid, rateLimit);
+    }
     public Map<String, List<?>> getFileList(Key key, String bucketName, String prefix) {
 
         String actualPrefix = (prefix != null) ? prefix : "";
@@ -276,13 +280,11 @@ public class RGWService {
 
             ObjectListing objectListing = s3.listObjects(listObjectsRequest);
 
-            // 현재 디렉토리의 폴더만 가져옴
             List<String> folderList = objectListing.getCommonPrefixes()
                     .stream()
                     .filter(commonPrefix -> commonPrefix.startsWith(actualPrefix))
                     .collect(Collectors.toList());
 
-            // 현재 디렉토리의 파일만 가져옴
             List<S3ObjectSummary> fileList = objectListing.getObjectSummaries()
                     .stream()
                     .filter(objectSummary -> objectSummary.getKey().startsWith(actualPrefix) && !folderList.contains(objectSummary.getKey() + "/"))

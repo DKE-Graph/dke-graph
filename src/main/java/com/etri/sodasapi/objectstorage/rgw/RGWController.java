@@ -1,6 +1,8 @@
 package com.etri.sodasapi.objectstorage.rgw;
 
 import com.amazonaws.services.s3.model.Bucket;
+import com.etri.sodasapi.auth.KeycloakAdapter;
+import com.etri.sodasapi.auth.KeycloakConfig;
 import com.etri.sodasapi.objectstorage.common.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -161,6 +163,11 @@ public class RGWController {
         Key key = new Key("MB9VKP4AC9TZPV1UDEO4", "UYScnoXxLtmAemx4gAPjByZmbDnaYuOPOdpG7vMw");
         String bucketName = "foo-test-bucket";
         String prefix = "test";
+        String token = "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJoV0NadE12M2s0eUJ2T012Ml85Y21SbTBHN0Zuc094czNGVkpuZGc3NmI4In0.eyJleHAiOjE2OTI1OTgzOTQsImlhdCI6MTY5MjU5NzQ5NCwianRpIjoiNjk3ZTMxZTUtOTU2YS00Y2ZlLWE0NjQtMGU0NTI0NDcxY2VhIiwiaXNzIjoiaHR0cDovL2tleWNsb2FrLjIyMS4xNTQuMTM0LjMxLnRyYWVmaWsubWU6MTAwMTcvcmVhbG1zL21hc3Rlci1pIiwiYXVkIjoiYWNjb3VudCIsInN1YiI6IjI2MzMxOTEzLTJkOGEtNDFkNS05NzFhLWE0NzAwMzAyOTIxYyIsInR5cCI6IkJlYXJlciIsImF6cCI6InBsYXRmb3JtIiwic2Vzc2lvbl9zdGF0ZSI6IjRlYzhjNzU4LThhZmYtNDM4OS1iNGQwLWZkMzEyMDhjYzVlNCIsImFsbG93ZWQtb3JpZ2lucyI6WyIvKiJdLCJyZWFsbV9hY2Nlc3MiOnsicm9sZXMiOlsib2ZmbGluZV9hY2Nlc3MiLCJ1bWFfYXV0aG9yaXphdGlvbiIsInBsYXRmb3JtX2FkbWluIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJwcm9maWxlIGVtYWlsIiwic2lkIjoiNGVjOGM3NTgtOGFmZi00Mzg5LWI0ZDAtZmQzMTIwOGNjNWU0IiwiZ3JvdXBfbWVtYmVyc2hpcCI6WyJvZmZsaW5lX2FjY2VzcyIsInVtYV9hdXRob3JpemF0aW9uIiwicGxhdGZvcm1fYWRtaW4iXSwiZW1haWxfdmVyaWZpZWQiOnRydWUsIm5hbWUiOiJQbGF0Zm9ybSBBZG1pbiIsInByZWZlcnJlZF91c2VybmFtZSI6InBmX2FkbWluIiwiZ2l2ZW5fbmFtZSI6IlBsYXRmb3JtIiwiZmFtaWx5X25hbWUiOiJBZG1pbiIsImVtYWlsIjoicGZfYWRtaW5Ac29kYXMuZXRyaS5yZS5rciIsImdyb3VwIjpbIi9vcmdhbml6YXRpb24vZGVmYXVsdF9vcmcvcm9sZXMvcGxhdGZvcm1fYWRtaW4iXX0.CncQYSukT3XnqiX8R5t49T_4SW56-lUzIPIGiyFY2IT5bLbJ0MXNwiqhfz5LGisFTwtNk1kArPjS-ZrDZOToPCuOMSZ1KbVxQdA44wA3q1HxVJC0u0TSMhIHxCgHRFM7Lh0bxoDz9bvnkMAilmpaSaHAwm7f6z2agMHys1APpxuV_6hqHutsbsDDOm7Mk7V-nTueBnwtv_p4KhOSeOJfqJliuoufo9aiMeaB5LSEb3itaRIioBp5ylrFOi9ERt-D3ckbGKYsruuVtj29xbUavFETkjqifhbRR12O9aA0hmwcILDBm02q1eGhAmf2uTpio0RcOiElNchtA7d8Ki8nrw";
+
+        KeycloakAdapter keycloakAdapter = new KeycloakAdapter();
+
+        keycloakAdapter.verifyToken(token);
 
         rgwService.getFileList(key, bucketName, prefix);
     }
@@ -170,7 +177,7 @@ public class RGWController {
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @GetMapping("/permission/quota/user/rate-limit/{uid}")
     public String getUserRateLimit(@Parameter(name = "uid", description = "유저 id") @PathVariable String uid) {
-        return rgwService.getUserRatelimit(uid);
+        return rgwService.getUserRateLimit(uid);
     }
 
     @Operation(summary = "prefix 경로의 폴더 및 파일 리스트 반환", description = "key 값과 버킷 이름, prefix을 입력하여 prefix 경로의 폴더 및 파일 리스트를 반환합니다", responses = {

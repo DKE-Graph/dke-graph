@@ -50,6 +50,14 @@ dependencies {
     implementation group: 'io.github.twonote', name: 'radosgw-admin4j', version: '2.0.8'
 //    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client' //추가
 
+    implementation 'org.keycloak:keycloak-core:18.0.0'
+    implementation 'org.keycloak:keycloak-adapter-core:18.0.0'
+    implementation 'org.keycloak:keycloak-spring-boot-starter:18.0.0'
+    implementation 'org.keycloak:keycloak-admin-client:18.0.0'
+    //implementation 'org.springframework.boot:spring-boot-starter-security'
+
+
+
 }
 //dependencyManagement {
 //    imports {
