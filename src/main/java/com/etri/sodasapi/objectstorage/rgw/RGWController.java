@@ -290,8 +290,8 @@ public class RGWController {
         Credential - Create
         uid를 파라미터로 받아 S3Credential을 생성하는 api
      */
-    @Operation(summary = "S3Credential 리스트 생성", description = "유저 id를 입력하여 S3Credential list를 생성합니다", responses = {
-            @ApiResponse(responseCode = "200", description = "S3Credential 리스트 생성 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = S3Credential.class))),
+    @Operation(summary = "S3Credential 생성", description = "유저 id를 입력하여 S3Credential을 생성합니다", responses = {
+            @ApiResponse(responseCode = "200", description = "S3Credential 생성 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = S3Credential.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @PostMapping("/credential/user/{uid}")
     public List<S3Credential> createCredential(@Parameter(name = "uid", description = "유저 id") @PathVariable String uid) {
