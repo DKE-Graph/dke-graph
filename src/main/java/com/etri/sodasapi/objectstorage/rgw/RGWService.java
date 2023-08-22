@@ -258,15 +258,17 @@ public class RGWService {
 
     public String getUserRateLimit(String uid){
         SodasRgwAdmin sodasRgwAdmin = getSodasRgwAdmin();
-
+        
         return sodasRgwAdmin.getUserRateLimit(uid);
     }
 
     public String setUserRateLimit(String uid, RateLimit rateLimit){
         SodasRgwAdmin sodasRgwAdmin = getSodasRgwAdmin();
 
+
         return sodasRgwAdmin.setUserRateLimit(uid, rateLimit);
     }
+
     public Map<String, List<?>> getFileList(Key key, String bucketName, String prefix) {
 
         String actualPrefix = (prefix != null) ? prefix : "";
