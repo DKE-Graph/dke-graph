@@ -321,7 +321,7 @@ public class RGWController {
         return rgwService.subUserList(uid);
     }
 
-    @PostMapping("/user")
+    @PostMapping("/credential/user")
     public User createUser(@RequestBody SUser user) {
         return rgwService.createUser(user);
     }

@@ -17,7 +17,7 @@ springdoc:
     groups-order: DESC
     doc-expansion: list
     tags-sorter: alpha
-    operationsSorter: method
+    operationsSorter: alpha
     disable-swagger-default-url: true
     display-request-duration: true
 
