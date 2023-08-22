@@ -175,6 +175,12 @@ public class RGWController {
         return rgwService.getUserRatelimit(uid);
     }
 
+
+    @PostMapping("/permission/quota/user/rate-limit/{uid}")
+    public String setUserRateLimit(@PathVariable String uid, @RequestBody RateLimit rateLimit){
+        return rgwService.setUserRateLimit(uid, rateLimit);
+    }
+
     @Operation(summary = "prefix 경로의 폴더 및 파일 리스트 반환", description = "key 값과 버킷 이름, prefix을 입력하여 prefix 경로의 폴더 및 파일 리스트를 반환합니다", responses = {
             @ApiResponse(responseCode = "200", description = "prefix 경로의 폴더 및 파일 리스트 반환 성공"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})

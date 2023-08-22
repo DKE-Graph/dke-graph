@@ -329,7 +329,7 @@ public class RGWService {
 
     public String getUserRatelimit(String uid){
         SodasRgwAdmin sodasRgwAdmin = getSodasRgwAdmin();
-
+        
         return sodasRgwAdmin.getUserRateLimit(uid);
     }
 
@@ -395,6 +395,14 @@ public class RGWService {
         }
 
         return bucketInfo;
+    }
+
+
+    public String setUserRateLimit(String uid, RateLimit rateLimit){
+        SodasRgwAdmin sodasRgwAdmin = getSodasRgwAdmin();
+
+
+        return sodasRgwAdmin.setUserRateLimit(uid, rateLimit);
     }
 
 
