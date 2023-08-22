@@ -16,6 +16,7 @@ import com.amazonaws.services.s3.transfer.Upload;
 import com.etri.sodasapi.objectstorage.common.*;
 import com.etri.sodasapi.objectstorage.common.SQuota;
 import com.etri.sodasapi.config.Constants;
+import com.etri.sodasapi.objectstorage.dashboard.DSService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -39,6 +40,7 @@ public class RGWService {
     private final Constants constants;
     private RgwAdmin rgwAdmin;
     private SodasRgwAdmin sodasRgwAdmin;
+    private final DSService dsService;
 
     private synchronized RgwAdmin getRgwAdmin() {
         if (this.rgwAdmin == null) {
@@ -87,7 +89,17 @@ public class RGWService {
 
     public Bucket createBucket(Key key, String bucketName) {
         AmazonS3 conn = getClient(key);
-        return conn.createBucket(bucketName);
+        Bucket newBucket = conn.createBucket(bucketName);
+
+        SQuota bucketQuota = new SQuota("true", "100", "100000000", "bucket");
+        SQuota userQuota = new SQuota("true", "100", "100000000", "user");
+        dsService.quotaConfigOperation(conn.getS3AccountOwner().getId(), bucketQuota);
+        dsService.quotaConfigOperation(conn.getS3AccountOwner().getId(), userQuota);
+
+        SQuota temp = new SQuota("true", "2", "1", "bucket");
+        setIndividualBucketQuota(conn.getS3AccountOwner().getId(), bucketName, temp);
+
+        return newBucket;
     }
 
     public void deleteBucket(Key key, String bucketName) {
@@ -233,9 +245,20 @@ public class RGWService {
     public Double quotaUtilizationInfo(String bucketName) {
         RgwAdmin rgwAdmin = getRgwAdmin();
 
-        Optional<BucketInfo> bucketInfo = rgwAdmin.getBucketInfo(bucketName);
-        BucketInfo bucketInfo1 = bucketInfo.get();
-        return (((double) bucketInfo1.getUsage().getRgwMain().getSize_actual() / (bucketInfo1.getBucketQuota().getMaxSizeKb() * 1024)) * 100);
+        if(rgwAdmin.getBucketInfo(bucketName).isPresent()) {
+            Optional<BucketInfo> bucketInfo = rgwAdmin.getBucketInfo(bucketName);
+            BucketInfo bucketInfo1 = bucketInfo.get();
+
+            if(bucketInfo1.getUsage().getRgwMain() != null) {
+                return (((double) bucketInfo1.getUsage().getRgwMain().getSize_actual() / (bucketInfo1.getBucketQuota().getMaxSizeKb() * 1024)) * 100);
+            }
+            else{
+                return (double) -1;
+            }
+        }
+        else{
+            return (double) -1;
+        }
     }
 
     public Map<String, Double> quotaUtilizationList(Key key){
@@ -244,6 +267,7 @@ public class RGWService {
         Map<String, Double> quotaUtilizationMap = new HashMap<>();
 
         for(SBucket sBucket : bucketList){
+            System.out.println(sBucket.getBucketName());
             quotaUtilizationMap.put(sBucket.getBucketName(), quotaUtilizationInfo(sBucket.getBucketName()));
         }
 
