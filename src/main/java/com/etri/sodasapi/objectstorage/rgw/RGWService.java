@@ -24,6 +24,7 @@ import org.twonote.rgwadmin4j.RgwAdminBuilder;
 import org.twonote.rgwadmin4j.model.*;
 import software.amazon.awssdk.core.exception.SdkClientException;
 
+import javax.swing.plaf.ScrollBarUI;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -235,6 +236,18 @@ public class RGWService {
         Optional<BucketInfo> bucketInfo = rgwAdmin.getBucketInfo(bucketName);
         BucketInfo bucketInfo1 = bucketInfo.get();
         return (((double) bucketInfo1.getUsage().getRgwMain().getSize_actual() / (bucketInfo1.getBucketQuota().getMaxSizeKb() * 1024)) * 100);
+    }
+
+    public Map<String, Double> quotaUtilizationList(Key key){
+        List<SBucket> bucketList = getBuckets(key);
+
+        Map<String, Double> quotaUtilizationMap = new HashMap<>();
+
+        for(SBucket sBucket : bucketList){
+            quotaUtilizationMap.put(sBucket.getBucketName(), quotaUtilizationInfo(sBucket.getBucketName()));
+        }
+
+        return quotaUtilizationMap;
     }
 
     public List<SubUser> createSubUser(String uid, SSubUser subUser) {
