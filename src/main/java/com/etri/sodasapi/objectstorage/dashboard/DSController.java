@@ -29,7 +29,7 @@ public class DSController {
     @Operation(summary = "유저 쿼타 정보 출력", description = "유저 id를 입력하여 유저의 쿼타 정보를 출력합니다", responses = {
             @ApiResponse(responseCode = "200", description = "유저 쿼타 정보 출력 성공", content = @Content(mediaType = "application/json",schema = @Schema(implementation = SQuota.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
-    @GetMapping("/quota/{uid}/user")
+    @GetMapping("/quota/user/size/{uid}")
     public ResponseEntity<List<HashMap>> userQuotaInfo(@Parameter(name = "uid", description = "유저 id") @PathVariable("uid") String userName){
         return ResponseEntity.status(HttpStatus.OK).body(dsService.userQoutaInfo(userName));
     }
@@ -37,7 +37,7 @@ public class DSController {
     @Operation(summary = "유저 쿼타 정보 출력", description = "유저 id를 입력하여 유저의 버킷 쿼타 정보를 출력합니다", responses = {
             @ApiResponse(responseCode = "200", description = "유저 버킷 쿼타 정보 출력 성공", content = @Content(mediaType = "application/json",schema = @Schema(implementation = SQuota.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
-    @GetMapping("/quota/{uid}/bucket")
+    @GetMapping("/quota/bucket/size/{uid}")
     public ResponseEntity<List<HashMap>> bucketQuotaInfo(@Parameter(name = "uid", description = "유저 id") @PathVariable("uid") String userName){
         return ResponseEntity.status(HttpStatus.OK).body(dsService.bucketQoutaInfo(userName));
     }
