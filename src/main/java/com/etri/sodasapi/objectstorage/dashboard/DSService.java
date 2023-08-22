@@ -42,7 +42,6 @@ public class DSService {
         ResponseEntity<HashMap> responseEntity = restTemplate.exchange(requestEntity, HashMap.class);
 
         List<HashMap> quotaList = new ArrayList<>();
-        quotaList.add((HashMap<String, Object>) responseEntity.getBody().get("bucket_quota"));
         quotaList.add((HashMap<String, Object>) responseEntity.getBody().get("user_quota"));
 
         return quotaList;
@@ -118,5 +117,30 @@ public class DSService {
         String token = (String)responseEntity.getBody().get("token");
         headers.add("Authorization", "Bearer " + token);
 
+    }
+
+    public List<HashMap> bucketQoutaInfo(String userName) {
+        getToken();
+
+        URI uri = UriComponentsBuilder
+                .fromUriString(MGR_ENDPOINT)
+                .path("/api/rgw/user/" + userName+"/quota")
+                .encode()
+                .build()
+                .toUri();
+
+        RequestEntity<Void> requestEntity = RequestEntity
+                .get(uri)
+                .headers(headers)
+                .build();
+
+        RestTemplate restTemplate = new RestTemplate();
+
+        ResponseEntity<HashMap> responseEntity = restTemplate.exchange(requestEntity, HashMap.class);
+
+        List<HashMap> quotaList = new ArrayList<>();
+        quotaList.add((HashMap<String, Object>) responseEntity.getBody().get("bucket_quota"));
+
+        return quotaList;
     }
 }

@@ -128,7 +128,7 @@ public class RGWService {
         AmazonS3 conn = getClient(key);
 //        ByteArrayInputStream input = new ByteArrayInputStream(file.getBytes());
 //        byte[] bytes = input.readAllBytes();
-        long partSize = 5 * 1024 * 1024;
+        long partSize = 30 * 1024 * 1024;
         long contentLength = file.getSize();
         int partCount = (int) Math.ceil((double) contentLength / partSize);
 
@@ -331,9 +331,7 @@ public class RGWService {
         for(User user : userList){
             quota = new HashMap<>();
             Quota userQuota = rgwAdmin.getUserQuota(user.getUserId()).get();
-            Quota bucketQuota = rgwAdmin.getBucketQuota(user.getUserId()).get();
             quota.put("userQuota", userQuota);
-            quota.put("bucketQuota", bucketQuota);
 
 //            String userRateLimit = getUserRatelimit(user.getUserId());
 //            quotaAndRateLimit.put("RateLimit", userRateLimit);
@@ -364,20 +362,26 @@ public class RGWService {
         return userRateInfo;
     }
 
-    public Map<String, BucketInfo> bucketsInfo(){
+    public Map<String, Map<String, Quota>> bucketsQuota(){
         RgwAdmin rgwAdmin = getRgwAdmin();
 
-        List<String> bucketList = rgwAdmin.listBucket();
+        List<User> userList = rgwAdmin.listUserInfo();
 
-        Map<String, BucketInfo> bucketInfoMap = new HashMap<>();
+        Map<String, Map<String, Quota>> bucketInfo = new HashMap<>();
+        Map<String, Quota> quota;
 
-        for(String bucket : bucketList){
-            BucketInfo bucketInfo = rgwAdmin.getBucketInfo(bucket).get();
-            bucketInfoMap.put(bucket, bucketInfo);
+        for(User user : userList){
+            quota = new HashMap<>();
+            Quota bucketQuota = rgwAdmin.getBucketQuota(user.getUserId()).get();
+            quota.put("bucketQuota", bucketQuota);
+
+//            String userRateLimit = getUserRatelimit(user.getUserId());
+//            quotaAndRateLimit.put("RateLimit", userRateLimit);
+
+            bucketInfo.put(user.getUserId(), quota);
         }
 
-
-        return bucketInfoMap;
+        return bucketInfo;
     }
 
 

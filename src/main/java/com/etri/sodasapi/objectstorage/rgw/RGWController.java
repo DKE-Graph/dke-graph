@@ -344,7 +344,7 @@ public class RGWController {
     }
 
     @GetMapping("/quota/bucket/size")
-    public Map<String, BucketInfo> bucketsInfo(){
-        return rgwService.bucketsInfo();
+    public Map<String, Map<String, Quota>> bucketsQuotaList(){
+        return rgwService.bucketsQuota();
     }
 }
