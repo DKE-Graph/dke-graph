@@ -470,6 +470,8 @@ public class RGWService {
 
     public User createUser(SUser user) {
         RgwAdmin rgwAdmin = getRgwAdmin();
+
+
         Map<String, String> userParameters = new HashMap<>();
         userParameters.put("display-name", user.getDisplayName());
         userParameters.put("email", user.getEmail());
@@ -528,6 +530,6 @@ public class RGWService {
 //
 //            conn.setObjectAcl("foo-test-bucket2",bObject.getObjectName(), accessControlList12);
 //        }
-        conn.setBucketAcl("foo-test-bucket2", CannedAccessControlList.PublicRead);
+//        conn.setBucketAcl("foo-test-bucket2", CannedAccessControlList.PublicRead);
     }
 }
