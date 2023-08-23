@@ -109,7 +109,7 @@ public class RGWService {
 
         AWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
         ClientConfiguration clientConfiguration = new ClientConfiguration();
-        return amazonS3 = AmazonS3ClientBuilder
+        return AmazonS3ClientBuilder
                 .standard()
                 .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(objectStorageConfig.getRgwEndpoint(), Regions.DEFAULT_REGION.getName()))
                 .withPathStyleAccessEnabled(true)
