@@ -1,6 +1,5 @@
 package com.etri.sodasapi.objectstorage.rgw;
 
-import com.amazonaws.AmazonServiceException;
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
@@ -10,12 +9,9 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.*;
-import com.amazonaws.services.s3.transfer.TransferManager;
-import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
-import com.amazonaws.services.s3.transfer.Upload;
 import com.etri.sodasapi.objectstorage.common.*;
 import com.etri.sodasapi.objectstorage.common.SQuota;
-import com.etri.sodasapi.config.Constants;
+import com.etri.sodasapi.config.ObjectStorageConfig;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,26 +20,31 @@ import org.twonote.rgwadmin4j.RgwAdminBuilder;
 import org.twonote.rgwadmin4j.model.*;
 import software.amazon.awssdk.core.exception.SdkClientException;
 
-import java.io.BufferedInputStream;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class RGWService {
-    private final Constants constants;
+    private final ObjectStorageConfig objectStorageConfig;
     private RgwAdmin rgwAdmin;
     private SodasRgwAdmin sodasRgwAdmin;
 
     private synchronized RgwAdmin getRgwAdmin() {
         if (this.rgwAdmin == null) {
-            rgwAdmin = new RgwAdminBuilder().accessKey(constants.getRgwAdminAccess())
-                    .secretKey(constants.getRgwAdminSecret())
-                    .endpoint(constants.getRgwEndpoint() + "/admin")
+            rgwAdmin = new RgwAdminBuilder().accessKey(objectStorageConfig.getRgwAdminAccess())
+                    .secretKey(objectStorageConfig.getRgwAdminSecret())
+                    .endpoint(objectStorageConfig.getRgwEndpoint() + "/admin")
                     .build();
         }
         return rgwAdmin;
@@ -51,7 +52,7 @@ public class RGWService {
 
     private SodasRgwAdmin getSodasRgwAdmin(){
         if(this.sodasRgwAdmin == null){
-            sodasRgwAdmin = new SodasRgwAdmin(constants);
+            sodasRgwAdmin = new SodasRgwAdmin(objectStorageConfig);
         }
         return sodasRgwAdmin;
     }
@@ -115,9 +116,9 @@ public class RGWService {
 
         AWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
         ClientConfiguration clientConfiguration = new ClientConfiguration();
-        return amazonS3 = AmazonS3ClientBuilder
+        return AmazonS3ClientBuilder
                 .standard()
-                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(constants.getRgwEndpoint(), Regions.DEFAULT_REGION.getName()))
+                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(objectStorageConfig.getRgwEndpoint(), Regions.DEFAULT_REGION.getName()))
                 .withPathStyleAccessEnabled(true)
                 .withClientConfiguration(clientConfiguration)
                 .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
@@ -314,9 +315,9 @@ public class RGWService {
         return userInfo.map(User::getS3Credentials).orElse(null);
     }
 
-    public String getUserRatelimit(String uid){
+    public String getUserRateLimit(String uid){
         SodasRgwAdmin sodasRgwAdmin = getSodasRgwAdmin();
-
+        
         return sodasRgwAdmin.getUserRateLimit(uid);
     }
 
@@ -353,7 +354,7 @@ public class RGWService {
         for(User user : userList){
             rateLimit = new HashMap<>();
 
-            String userRateLimit = getUserRatelimit(user.getUserId());
+            String userRateLimit = getUserRateLimit(user.getUserId());
             rateLimit.put("RateLimit", userRateLimit);
 
             userRateInfo.put(user.getUserId(), rateLimit);
@@ -384,6 +385,12 @@ public class RGWService {
         return bucketInfo;
     }
 
+    public String setUserRateLimit(String uid, RateLimit rateLimit){
+        SodasRgwAdmin sodasRgwAdmin = getSodasRgwAdmin();
+
+
+        return sodasRgwAdmin.setUserRateLimit(uid, rateLimit);
+    }
 
     public Map<String, List<?>> getFileList(Key key, String bucketName, String prefix) {
 
@@ -398,13 +405,11 @@ public class RGWService {
 
             ObjectListing objectListing = s3.listObjects(listObjectsRequest);
 
-            // 현재 디렉토리의 폴더만 가져옴
             List<String> folderList = objectListing.getCommonPrefixes()
                     .stream()
                     .filter(commonPrefix -> commonPrefix.startsWith(actualPrefix))
                     .collect(Collectors.toList());
 
-            // 현재 디렉토리의 파일만 가져옴
             List<S3ObjectSummary> fileList = objectListing.getObjectSummaries()
                     .stream()
                     .filter(objectSummary -> objectSummary.getKey().startsWith(actualPrefix) && !folderList.contains(objectSummary.getKey() + "/"))
@@ -485,4 +490,35 @@ public class RGWService {
 //        }
         conn.setBucketAcl("foo-test-bucket2", CannedAccessControlList.PublicRead);
     }
+
+    public String getBucketQuota() throws NoSuchAlgorithmException, InvalidKeyException {
+
+        String accessKey = "sodas_dev_access";
+        String secretKey = "sodas_dev_secret";
+        String bucket = "sample";
+        String endpoint = "http://object-storage.rook.221.154.134.31.traefik.me:10017";
+        String verb = "GET";
+        String path = "/admin/user";
+        String expiryMinutes = "10";
+
+        String url = getSignedUrl(verb, path, accessKey, secretKey, bucket, endpoint, expiryMinutes);
+        System.out.println(url);
+        return url;
+    }
+
+    public String getSignedUrl(String verb, String path, String accessKey, String secretKey, String bucket, String endpoint, String expiryMinutes) throws NoSuchAlgorithmException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeyException {
+
+        long expiryEpoch = (System.currentTimeMillis() / 1000) + (Integer.parseInt(expiryMinutes) * 60);
+
+        String canonicalizedResource = "/admin/user";
+        String stringToSign = verb + "\n\n\n" + expiryEpoch + "\n" + canonicalizedResource;
+
+        Mac mac = Mac.getInstance("HmacSHA1");
+        mac.init(new SecretKeySpec(secretKey.getBytes(StandardCharsets.UTF_8), "HmacSHA1"));
+        byte[] signatureBytes = mac.doFinal(stringToSign.getBytes(StandardCharsets.UTF_8));
+        String signature = URLEncoder.encode(Base64.getEncoder().encodeToString(signatureBytes), StandardCharsets.UTF_8);
+
+        return endpoint + canonicalizedResource + "?AWSAccessKeyId=" + accessKey + "&Expires=" + expiryEpoch + "&Signature=" + signature;
+    }
+
 }
