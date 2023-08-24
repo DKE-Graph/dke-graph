@@ -1,5 +1,6 @@
 package com.etri.sodasapi.objectstorage.rgw;
 
+import com.amazonaws.AmazonServiceException;
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
@@ -9,9 +10,13 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.*;
+import com.amazonaws.services.s3.transfer.TransferManager;
+import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
+import com.amazonaws.services.s3.transfer.Upload;
 import com.etri.sodasapi.objectstorage.common.*;
-import com.etri.sodasapi.objectstorage.common.Quota;
+import com.etri.sodasapi.objectstorage.common.SQuota;
 import com.etri.sodasapi.config.Constants;
+import com.etri.sodasapi.objectstorage.dashboard.DSService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,8 +25,11 @@ import org.twonote.rgwadmin4j.RgwAdminBuilder;
 import org.twonote.rgwadmin4j.model.*;
 import software.amazon.awssdk.core.exception.SdkClientException;
 
+import javax.swing.plaf.ScrollBarUI;
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -32,6 +40,7 @@ public class RGWService {
     private final Constants constants;
     private RgwAdmin rgwAdmin;
     private SodasRgwAdmin sodasRgwAdmin;
+    private final DSService dsService;
 
     private synchronized RgwAdmin getRgwAdmin() {
         if (this.rgwAdmin == null) {
@@ -80,7 +89,17 @@ public class RGWService {
 
     public Bucket createBucket(Key key, String bucketName) {
         AmazonS3 conn = getClient(key);
-        return conn.createBucket(bucketName);
+        Bucket newBucket = conn.createBucket(bucketName);
+
+        SQuota bucketQuota = new SQuota("true", "100", "100000000", "bucket");
+        SQuota userQuota = new SQuota("true", "100", "100000000", "user");
+        dsService.quotaConfigOperation(conn.getS3AccountOwner().getId(), bucketQuota);
+        dsService.quotaConfigOperation(conn.getS3AccountOwner().getId(), userQuota);
+
+        SQuota temp = new SQuota("true", "2", "1", "bucket");
+        setIndividualBucketQuota(conn.getS3AccountOwner().getId(), bucketName, temp);
+
+        return newBucket;
     }
 
     public void deleteBucket(Key key, String bucketName) {
@@ -120,8 +139,59 @@ public class RGWService {
 
     public void objectUpload(MultipartFile file, String bucketName, Key key) throws IOException {
         AmazonS3 conn = getClient(key);
-        ByteArrayInputStream input = new ByteArrayInputStream(file.getBytes());
-        System.out.println(conn.putObject(bucketName, file.getOriginalFilename(), input, new ObjectMetadata()));
+//        ByteArrayInputStream input = new ByteArrayInputStream(file.getBytes());
+//        byte[] bytes = input.readAllBytes();
+        long partSize = 30 * 1024 * 1024;
+        long contentLength = file.getSize();
+        int partCount = (int) Math.ceil((double) contentLength / partSize);
+
+        List<PartETag> partETags = new ArrayList<>();
+
+        String uploadId = initiateMultipartUpload(bucketName,file.getOriginalFilename(), conn);
+
+        for (int i = 0; i < partCount; i++) {
+            long start = i * partSize;
+            long end = Math.min(start + partSize, contentLength);
+
+            try (InputStream inputStream = file.getInputStream()) {
+                long skipBytes = inputStream.skip(start);
+                if (skipBytes != start) {
+                    throw new IOException("Could not skip to the desired position.");
+                }
+
+                byte[] buffer = new byte[(int) (end - start)];
+                int bytesRead = inputStream.read(buffer);
+
+                UploadPartRequest uploadPartRequest = new UploadPartRequest()
+                        .withBucketName(bucketName)
+                        .withKey(file.getOriginalFilename())
+                        .withUploadId(uploadId)
+                        .withPartNumber(i + 1)
+                        .withInputStream(new ByteArrayInputStream(buffer))
+                        .withPartSize(bytesRead);
+
+                UploadPartResult uploadPartResult = conn.uploadPart(uploadPartRequest);
+                partETags.add(uploadPartResult.getPartETag());
+            }
+        }
+
+        CompleteMultipartUploadRequest completeRequest = new CompleteMultipartUploadRequest()
+                .withBucketName(bucketName)
+                .withKey(file.getOriginalFilename())
+                .withUploadId(uploadId)
+                .withPartETags(partETags);
+
+        conn.completeMultipartUpload(completeRequest);
+
+        //        PutObjectRequest request = new PutObjectRequest(bucketName, file.getOriginalFilename(), file.getInputStream(), null)
+//        System.out.println(conn.putObject(bucketName, file.getOriginalFilename(), bytes, new ObjectMetadata()));
+//        System.out.println(conn.putObject(request));
+    }
+
+    public String initiateMultipartUpload(String bucketName, String key, AmazonS3 conn){
+        InitiateMultipartUploadRequest initiateRequest = new InitiateMultipartUploadRequest(bucketName, key);
+        InitiateMultipartUploadResult initiateResult = conn.initiateMultipartUpload(initiateRequest);
+        return initiateResult.getUploadId();
     }
 
     // TODO: 2023.7.22 Keycloak과 연동해 관리자 확인하는 코드 추가해야 함.
@@ -161,7 +231,7 @@ public class RGWService {
     }
 
 
-    public Quota setIndividualBucketQuota(String uid, String bucketName, Quota quota){
+    public SQuota setIndividualBucketQuota(String uid, String bucketName, SQuota quota){
         RgwAdmin rgwAdmin = getRgwAdmin();
 
         if(rgwAdmin.getUserQuota(uid).get().getMaxSizeKb() >= Long.parseLong(quota.getMax_size_kb())
@@ -175,9 +245,33 @@ public class RGWService {
     public Double quotaUtilizationInfo(String bucketName) {
         RgwAdmin rgwAdmin = getRgwAdmin();
 
-        Optional<BucketInfo> bucketInfo = rgwAdmin.getBucketInfo(bucketName);
-        BucketInfo bucketInfo1 = bucketInfo.get();
-        return (((double) bucketInfo1.getUsage().getRgwMain().getSize_actual() / (bucketInfo1.getBucketQuota().getMaxSizeKb() * 1024)) * 100);
+        if(rgwAdmin.getBucketInfo(bucketName).isPresent()) {
+            Optional<BucketInfo> bucketInfo = rgwAdmin.getBucketInfo(bucketName);
+            BucketInfo bucketInfo1 = bucketInfo.get();
+
+            if(bucketInfo1.getUsage().getRgwMain() != null) {
+                return (((double) bucketInfo1.getUsage().getRgwMain().getSize_actual() / (bucketInfo1.getBucketQuota().getMaxSizeKb() * 1024)) * 100);
+            }
+            else{
+                return (double) -1;
+            }
+        }
+        else{
+            return (double) -1;
+        }
+    }
+
+    public Map<String, Double> quotaUtilizationList(Key key){
+        List<SBucket> bucketList = getBuckets(key);
+
+        Map<String, Double> quotaUtilizationMap = new HashMap<>();
+
+        for(SBucket sBucket : bucketList){
+            System.out.println(sBucket.getBucketName());
+            quotaUtilizationMap.put(sBucket.getBucketName(), quotaUtilizationInfo(sBucket.getBucketName()));
+        }
+
+        return quotaUtilizationMap;
     }
 
     public List<SubUser> createSubUser(String uid, SSubUser subUser) {
@@ -228,6 +322,7 @@ public class RGWService {
 
     public void alterSubUserKey(String uid, String subUid, Key key) {
         RgwAdmin rgwAdmin = getRgwAdmin();
+        rgwAdmin.removeS3CredentialFromSubUser(uid, subUid, key.getAccessKey());
         rgwAdmin.createS3CredentialForSubUser(uid, subUid, key.getAccessKey(), key.getSecretKey());
     }
 
@@ -260,6 +355,70 @@ public class RGWService {
         SodasRgwAdmin sodasRgwAdmin = getSodasRgwAdmin();
         
         return sodasRgwAdmin.getUserRateLimit(uid);
+    }
+
+    public Map<String, Map<String, Quota>> usersQuota(){
+        RgwAdmin rgwAdmin = getRgwAdmin();
+
+        List<User> userList = rgwAdmin.listUserInfo();
+
+        Map<String, Map<String, Quota>> userInfo = new HashMap<>();
+        Map<String, Quota> quota;
+
+        for(User user : userList){
+            quota = new HashMap<>();
+            Quota userQuota = rgwAdmin.getUserQuota(user.getUserId()).get();
+            quota.put("userQuota", userQuota);
+
+//            String userRateLimit = getUserRatelimit(user.getUserId());
+//            quotaAndRateLimit.put("RateLimit", userRateLimit);
+
+            userInfo.put(user.getUserId(), quota);
+        }
+
+        return userInfo;
+    }
+
+    public Map<String, Map<String, String>> usersRateLimit(){
+        RgwAdmin rgwAdmin = getRgwAdmin();
+
+        List<User> userList = rgwAdmin.listUserInfo();
+
+        Map<String, Map<String, String>> userRateInfo = new HashMap<>();
+        Map<String, String> rateLimit;
+
+        for(User user : userList){
+            rateLimit = new HashMap<>();
+
+            String userRateLimit = getUserRatelimit(user.getUserId());
+            rateLimit.put("RateLimit", userRateLimit);
+
+            userRateInfo.put(user.getUserId(), rateLimit);
+        }
+
+        return userRateInfo;
+    }
+
+    public Map<String, Map<String, Quota>> bucketsQuota(){
+        RgwAdmin rgwAdmin = getRgwAdmin();
+
+        List<User> userList = rgwAdmin.listUserInfo();
+
+        Map<String, Map<String, Quota>> bucketInfo = new HashMap<>();
+        Map<String, Quota> quota;
+
+        for(User user : userList){
+            quota = new HashMap<>();
+            Quota bucketQuota = rgwAdmin.getBucketQuota(user.getUserId()).get();
+            quota.put("bucketQuota", bucketQuota);
+
+//            String userRateLimit = getUserRatelimit(user.getUserId());
+//            quotaAndRateLimit.put("RateLimit", userRateLimit);
+
+            bucketInfo.put(user.getUserId(), quota);
+        }
+
+        return bucketInfo;
     }
 
 
@@ -311,6 +470,8 @@ public class RGWService {
 
     public User createUser(SUser user) {
         RgwAdmin rgwAdmin = getRgwAdmin();
+
+
         Map<String, String> userParameters = new HashMap<>();
         userParameters.put("display-name", user.getDisplayName());
         userParameters.put("email", user.getEmail());
@@ -369,6 +530,6 @@ public class RGWService {
 //
 //            conn.setObjectAcl("foo-test-bucket2",bObject.getObjectName(), accessControlList12);
 //        }
-        conn.setBucketAcl("foo-test-bucket2", CannedAccessControlList.PublicRead);
+//        conn.setBucketAcl("foo-test-bucket2", CannedAccessControlList.PublicRead);
     }
 }

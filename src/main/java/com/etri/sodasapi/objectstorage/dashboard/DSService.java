@@ -1,6 +1,6 @@
 package com.etri.sodasapi.objectstorage.dashboard;
 
-import com.etri.sodasapi.objectstorage.common.Quota;
+import com.etri.sodasapi.objectstorage.common.SQuota;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.RequestEntity;
@@ -42,23 +42,22 @@ public class DSService {
         ResponseEntity<HashMap> responseEntity = restTemplate.exchange(requestEntity, HashMap.class);
 
         List<HashMap> quotaList = new ArrayList<>();
-        quotaList.add((HashMap<String, Object>) responseEntity.getBody().get("bucket_quota"));
         quotaList.add((HashMap<String, Object>) responseEntity.getBody().get("user_quota"));
 
         return quotaList;
     }
 
-    public void qoutaConfig(String userName, Quota quota) {
+    public void qoutaConfig(String userName, SQuota quota) {
         quotaConfigOperation(userName, quota);
     }
 
     public void qoutaDisable(String userName, String quotaType) {
         System.out.println(quotaType);
-        Quota quota = new Quota("false", "0", "0", quotaType);
+        SQuota quota = new SQuota("false", "0", "0", quotaType);
         quotaConfigOperation(userName, quota);
     }
 
-    public void quotaConfigOperation(String userName, Quota quota){
+    public void quotaConfigOperation(String userName, SQuota quota){
         getToken();
 
         URI uri = UriComponentsBuilder
@@ -118,5 +117,30 @@ public class DSService {
         String token = (String)responseEntity.getBody().get("token");
         headers.add("Authorization", "Bearer " + token);
 
+    }
+
+    public List<HashMap> bucketQoutaInfo(String userName) {
+        getToken();
+
+        URI uri = UriComponentsBuilder
+                .fromUriString(MGR_ENDPOINT)
+                .path("/api/rgw/user/" + userName+"/quota")
+                .encode()
+                .build()
+                .toUri();
+
+        RequestEntity<Void> requestEntity = RequestEntity
+                .get(uri)
+                .headers(headers)
+                .build();
+
+        RestTemplate restTemplate = new RestTemplate();
+
+        ResponseEntity<HashMap> responseEntity = restTemplate.exchange(requestEntity, HashMap.class);
+
+        List<HashMap> quotaList = new ArrayList<>();
+        quotaList.add((HashMap<String, Object>) responseEntity.getBody().get("bucket_quota"));
+
+        return quotaList;
     }
 }

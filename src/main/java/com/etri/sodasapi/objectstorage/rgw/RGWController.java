@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.twonote.rgwadmin4j.model.BucketInfo;
+import org.twonote.rgwadmin4j.model.Quota;
 import org.twonote.rgwadmin4j.model.S3Credential;
 import org.twonote.rgwadmin4j.model.User;
 
@@ -125,7 +127,7 @@ public class RGWController {
             @ApiResponse(responseCode = "200", description = "Object 생성 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = BObject.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @PostMapping("/data")
-    public String objectUpload(@Parameter(name = "file", description = "파일") @RequestParam("file") MultipartFile file,
+    public String objectUpload(@Parameter(name = "file", description = "파일") @RequestPart(value = "file", required = false) MultipartFile file,
                                @Parameter(name = "bucketName", description = "버킷 이름") @RequestParam("bucketName") String bucketName,
                                @Parameter(name = "accessKey", description = "접근키") @RequestParam("accessKey") String accessKey,
                                @Parameter(name = "secretKey", description = "비밀키") @RequestParam("secretKey") String secretKey) throws IOException {
@@ -194,7 +196,7 @@ public class RGWController {
         벼킷 각각의 크기 받아오기
      */
     @Operation(summary = "버킷 크기 조회", description = "버킷 이름을 입력하여 해당 버킷의 크기를 조회합니다", responses = {
-            @ApiResponse(responseCode = "200", description = "버킷 크기 조회 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Quota.class))),
+            @ApiResponse(responseCode = "200", description = "버킷 크기 조회 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = SQuota.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @GetMapping("/permission/quota/bucket/size/{bucketName}")
     public Map<String, Long> getIndividualBucketQuota(@Parameter(name = "bucketName", description = "버킷 이름") @PathVariable String bucketName) {
@@ -205,12 +207,12 @@ public class RGWController {
         버킷 각각의 크기 설정하기
      */
     @Operation(summary = "버킷 크기 설정", description = "유저 id와 버킷 이름, 할당량을 입력하여 버킷의 크기를 설정합니다", responses = {
-            @ApiResponse(responseCode = "200", description = "버킷 크기 설정 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Quota.class))),
+            @ApiResponse(responseCode = "200", description = "버킷 크기 설정 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = SQuota.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
-    @PostMapping("/permission/quota/bucket/size/{bucketName}")
-    public Quota setIndividualBucketQuota(@Parameter(name = "bucketName", description = "버킷 이름") @PathVariable String bucketName,
-                                          @Parameter(name = "uid", description = "유저 id") @RequestBody String uid,
-                                          @Parameter(name = "quota", description = "할당량") @RequestBody Quota quota) {
+    @PostMapping("/permission/quota/bucket/size/{bucketName}/{uid}")
+    public SQuota setIndividualBucketQuota(@Parameter(name = "bucketName", description = "버킷 이름") @PathVariable String bucketName,
+                                          @Parameter(name = "uid", description = "유저 id") @PathVariable String uid,
+                                          @Parameter(name = "quota", description = "할당량") @RequestBody SQuota quota) {
         return rgwService.setIndividualBucketQuota(uid, bucketName, quota);
     }
 
@@ -294,8 +296,8 @@ public class RGWController {
         Credential - Create
         uid를 파라미터로 받아 S3Credential을 생성하는 api
      */
-    @Operation(summary = "S3Credential 리스트 생성", description = "유저 id를 입력하여 S3Credential list를 생성합니다", responses = {
-            @ApiResponse(responseCode = "200", description = "S3Credential 리스트 생성 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = S3Credential.class))),
+    @Operation(summary = "S3Credential 생성", description = "유저 id를 입력하여 S3Credential을 생성합니다", responses = {
+            @ApiResponse(responseCode = "200", description = "S3Credential 생성 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = S3Credential.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @PostMapping("/credential/user/{uid}")
     public List<S3Credential> createCredential(@Parameter(name = "uid", description = "유저 id") @PathVariable String uid) {
@@ -335,5 +337,25 @@ public class RGWController {
     @GetMapping("/monitoring/{bucketName}")
     public Double quotaUtilizationInfo(@Parameter(name = "bucketName", description = "버킷 이름") @PathVariable String bucketName) {
         return rgwService.quotaUtilizationInfo(bucketName);
+    }
+
+    @GetMapping("/quota/user/size")
+    public Map<String, Map<String, Quota>> usersQuotaList(){
+        return rgwService.usersQuota();
+    }
+
+    @GetMapping("/quota/user/rate-limit")
+    public Map<String, Map<String, String>> usersRateLimit(){
+        return rgwService.usersRateLimit();
+    }
+
+    @GetMapping("/quota/bucket/size")
+    public Map<String, Map<String, Quota>> bucketsQuotaList(){
+        return rgwService.bucketsQuota();
+    }
+
+    @GetMapping("/monitoring")
+    public Map<String, Double> quotaUtilizationList(Key key){
+        return rgwService.quotaUtilizationList(key);
     }
 }
