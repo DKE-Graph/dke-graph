@@ -13,7 +13,6 @@ public class KeycloakConfig {
     private String resource;
     private Credentials credentials;
 
-
     public String getAuthServerUrl() {
         return authServerUrl;
     }

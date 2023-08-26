@@ -21,15 +21,19 @@ public class KeycloakFilter implements Filter {
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
         String jwt = resolveToken(httpServletRequest);
         String requestURI = httpServletRequest.getRequestURI();
-        AccessToken accessToken = keycloakAdapter.verifyToken(jwt);
 
-        if (StringUtils.hasText(jwt) && accessToken != null) {
-            logger.debug("인증된 사용자 입니다. " + keycloakAdapter.getAttribute(accessToken));
-        } else {
-            logger.debug("유효한 JWT 토큰이 없습니다, uri: {}", requestURI);
+        if(jwt != null){
+            AccessToken accessToken = keycloakAdapter.verifyToken(jwt);
+            if (StringUtils.hasText(jwt) && accessToken != null) {
+                logger.info("인증된 사용자 입니다. ");
+                chain.doFilter(request, response);
+            }else {
+                logger.info("유효한 토큰이 아닙니다, uri: {}", requestURI);
+            }
         }
-
-        chain.doFilter(request, response);
+        else {
+            logger.info("유효한 JWT 토큰이 없습니다, uri: {}", requestURI);
+        }
     }
 
     private String resolveToken(HttpServletRequest request) {

@@ -14,7 +14,7 @@ public class KeycloakFilterConfig {
                 FilterRegistrationBean<>();
         filterRegistrationBean.setFilter(new KeycloakFilter(new KeycloakAdapter()));
         filterRegistrationBean.setOrder(1);
-        filterRegistrationBean.addUrlPatterns("/object-storage");
+        filterRegistrationBean.addUrlPatterns("/object-storage/*");
         return filterRegistrationBean;
     }
 }
