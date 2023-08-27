@@ -500,7 +500,7 @@ public class RGWService {
         String verb = "GET";
         String path = "/admin/user";
         String expiryMinutes = "10";
-
+;
         String url = getSignedUrl(verb, path, accessKey, secretKey, bucket, endpoint, expiryMinutes);
         System.out.println(url);
         return url;
