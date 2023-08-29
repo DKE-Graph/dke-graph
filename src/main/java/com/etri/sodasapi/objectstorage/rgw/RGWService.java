@@ -1,6 +1,5 @@
 package com.etri.sodasapi.objectstorage.rgw;
 
-import com.amazonaws.AmazonServiceException;
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
@@ -10,13 +9,10 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.*;
-import com.amazonaws.services.s3.transfer.TransferManager;
-import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
-import com.amazonaws.services.s3.transfer.Upload;
 import com.etri.sodasapi.objectstorage.common.*;
 import com.etri.sodasapi.objectstorage.common.SQuota;
-import com.etri.sodasapi.config.Constants;
 import com.etri.sodasapi.objectstorage.dashboard.DSService;
+import com.etri.sodasapi.config.ObjectStorageConfig;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,9 +20,6 @@ import org.twonote.rgwadmin4j.RgwAdmin;
 import org.twonote.rgwadmin4j.RgwAdminBuilder;
 import org.twonote.rgwadmin4j.model.*;
 import software.amazon.awssdk.core.exception.SdkClientException;
-
-import javax.swing.plaf.ScrollBarUI;
-import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,16 +30,16 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class RGWService {
-    private final Constants constants;
+    private final ObjectStorageConfig objectStorageConfig;
     private RgwAdmin rgwAdmin;
     private SodasRgwAdmin sodasRgwAdmin;
     private final DSService dsService;
 
     private synchronized RgwAdmin getRgwAdmin() {
         if (this.rgwAdmin == null) {
-            rgwAdmin = new RgwAdminBuilder().accessKey(constants.getRgwAdminAccess())
-                    .secretKey(constants.getRgwAdminSecret())
-                    .endpoint(constants.getRgwEndpoint() + "/admin")
+            rgwAdmin = new RgwAdminBuilder().accessKey(objectStorageConfig.getRgwAdminAccess())
+                    .secretKey(objectStorageConfig.getRgwAdminSecret())
+                    .endpoint(objectStorageConfig.getRgwEndpoint() + "/admin")
                     .build();
         }
         return rgwAdmin;
@@ -54,7 +47,7 @@ public class RGWService {
 
     private SodasRgwAdmin getSodasRgwAdmin(){
         if(this.sodasRgwAdmin == null){
-            sodasRgwAdmin = new SodasRgwAdmin(constants);
+            sodasRgwAdmin = new SodasRgwAdmin(objectStorageConfig);
         }
         return sodasRgwAdmin;
     }
@@ -121,16 +114,14 @@ public class RGWService {
     }
 
     private synchronized AmazonS3 getClient(Key key) {
-        AmazonS3 amazonS3;
-
         String accessKey = key.getAccessKey();
         String secretKey = key.getSecretKey();
 
         AWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
         ClientConfiguration clientConfiguration = new ClientConfiguration();
-        return amazonS3 = AmazonS3ClientBuilder
+        return AmazonS3ClientBuilder
                 .standard()
-                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(constants.getRgwEndpoint(), Regions.DEFAULT_REGION.getName()))
+                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(objectStorageConfig.getRgwEndpoint(), Regions.DEFAULT_REGION.getName()))
                 .withPathStyleAccessEnabled(true)
                 .withClientConfiguration(clientConfiguration)
                 .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
@@ -351,7 +342,7 @@ public class RGWService {
         return userInfo.map(User::getS3Credentials).orElse(null);
     }
 
-    public String getUserRatelimit(String uid){
+    public String getUserRateLimit(String uid){
         SodasRgwAdmin sodasRgwAdmin = getSodasRgwAdmin();
         
         return sodasRgwAdmin.getUserRateLimit(uid);
@@ -390,7 +381,7 @@ public class RGWService {
         for(User user : userList){
             rateLimit = new HashMap<>();
 
-            String userRateLimit = getUserRatelimit(user.getUserId());
+            String userRateLimit = getUserRateLimit(user.getUserId());
             rateLimit.put("RateLimit", userRateLimit);
 
             userRateInfo.put(user.getUserId(), rateLimit);
@@ -421,14 +412,12 @@ public class RGWService {
         return bucketInfo;
     }
 
-
     public String setUserRateLimit(String uid, RateLimit rateLimit){
         SodasRgwAdmin sodasRgwAdmin = getSodasRgwAdmin();
 
 
         return sodasRgwAdmin.setUserRateLimit(uid, rateLimit);
     }
-
 
     public Map<String, List<?>> getFileList(Key key, String bucketName, String prefix) {
 
@@ -443,13 +432,11 @@ public class RGWService {
 
             ObjectListing objectListing = s3.listObjects(listObjectsRequest);
 
-            // 현재 디렉토리의 폴더만 가져옴
             List<String> folderList = objectListing.getCommonPrefixes()
                     .stream()
                     .filter(commonPrefix -> commonPrefix.startsWith(actualPrefix))
                     .collect(Collectors.toList());
 
-            // 현재 디렉토리의 파일만 가져옴
             List<S3ObjectSummary> fileList = objectListing.getObjectSummaries()
                     .stream()
                     .filter(objectSummary -> objectSummary.getKey().startsWith(actualPrefix) && !folderList.contains(objectSummary.getKey() + "/"))
@@ -499,37 +486,5 @@ public class RGWService {
             accessControlList.grantAllPermissions(grant);
             conn.setObjectAcl(bucketName, bObject.getObjectName(), accessControlList);
         }
-    }
-
-
-
-
-
-    public void bucketAclTest() {
-        AmazonS3 conn = getClient(new Key("MB9VKP4AC9TZPV1UDEO4" , "UYScnoXxLtmAemx4gAPjByZmbDnaYuOPOdpG7vMw"));
-//        AccessControlList accessControlList = conn.getBucketAcl("foo-test-bucket2");
-        // 기존 Grant를 가져올 Canonical ID 또는 AWS 계정 ID
-//        String existingCanonicalId = "foo_user2";
-//
-//        AccessControlList accessControlList = conn.getBucketAcl("foo-test-bucket2");
-//        Grant grant4 = new Grant(new CanonicalGrantee("foo_user2"), Permission.FullControl);
-//
-//        accessControlList.grantAllPermissions(grant4);
-//        conn.setBucketAcl("foo-test-bucket2", accessControlList);
-//
-//        List<BObject> objectList = getObjects(new Key("MB9VKP4AC9TZPV1UDEO4" , "UYScnoXxLtmAemx4gAPjByZmbDnaYuOPOdpG7vMw"), "foo-test-bucket2");
-//
-//        System.out.println(conn.getBucketAcl("foo-test-bucket2"));
-//
-//
-//        for(BObject bObject : objectList){
-//            AccessControlList accessControlList12 = conn.getObjectAcl("foo-test-bucket2", bObject.getObjectName());
-//            Grant grant5 = new Grant(new CanonicalGrantee("foo_user2"), Permission.FullControl);
-//
-//            accessControlList12.grantAllPermissions(grant5);
-//
-//            conn.setObjectAcl("foo-test-bucket2",bObject.getObjectName(), accessControlList12);
-//        }
-//        conn.setBucketAcl("foo-test-bucket2", CannedAccessControlList.PublicRead);
     }
 }

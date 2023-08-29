@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-public final class Constants {
+public final class ObjectStorageConfig {
 
     @Value("${MGR_ENDPOINT}")
     private String mgrEndpoint;
