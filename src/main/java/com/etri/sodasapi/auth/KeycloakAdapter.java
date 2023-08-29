@@ -1,5 +1,6 @@
 package com.etri.sodasapi.auth;
 
+import com.etri.sodasapi.objectstorage.rgw.RGWService;
 import io.jsonwebtoken.Jwts;
 import org.keycloak.adapters.KeycloakDeployment;
 import org.keycloak.adapters.KeycloakDeploymentBuilder;
@@ -10,7 +11,9 @@ import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.AccessTokenResponse;
 
 import java.io.InputStream;
+import java.lang.reflect.Array;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,6 +21,8 @@ import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.adapters.config.AdapterConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import javax.naming.event.ObjectChangeListener;
 
 @Component
 public class KeycloakAdapter {
@@ -65,10 +70,17 @@ public class KeycloakAdapter {
         return accessToken.getOtherClaims();
     }
 
-    public String getUserPk(String token){
+    public Map<String, Object> getUserPk(String token){
+
         try {
             KeycloakDeployment deployment = getKeycloakDeployment();
-            return AdapterTokenVerifier.verifyToken(token, deployment).getPreferredUsername();
+            AccessToken accessToken = AdapterTokenVerifier.verifyToken(token, deployment);
+
+            Map<String, Object> userInfo = new HashMap<>();
+            userInfo.put("group", (ArrayList<?>) accessToken.getOtherClaims().get("group"));
+            userInfo.put("userId", accessToken.getPreferredUsername());
+
+            return userInfo;
         } catch (VerificationException e){e.printStackTrace();}
 
         return null;

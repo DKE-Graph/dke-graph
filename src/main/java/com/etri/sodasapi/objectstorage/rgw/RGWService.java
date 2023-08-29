@@ -335,7 +335,7 @@ public class RGWService {
         rgwAdmin.removeS3Credential(uid, accessKey);
     }
 
-    public List<S3Credential> getS3Credential(String uid){
+    public List<S3Credential> getS3CredentialList(String uid){
         RgwAdmin rgwAdmin = getRgwAdmin();
         Optional<User> userInfo = rgwAdmin.getUserInfo(uid);
 
@@ -486,5 +486,9 @@ public class RGWService {
             accessControlList.grantAllPermissions(grant);
             conn.setObjectAcl(bucketName, bObject.getObjectName(), accessControlList);
         }
+    }
+
+    public S3Credential getS3Credential(String uid){
+        return this.getS3CredentialList(uid).get(0);
     }
 }

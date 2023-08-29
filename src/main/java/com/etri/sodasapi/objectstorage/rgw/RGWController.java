@@ -3,7 +3,6 @@ package com.etri.sodasapi.objectstorage.rgw;
 import com.amazonaws.services.s3.model.Bucket;
 import com.etri.sodasapi.auth.GetIdFromToken;
 import com.etri.sodasapi.auth.KeycloakAdapter;
-import com.etri.sodasapi.auth.KeycloakConfig;
 import com.etri.sodasapi.objectstorage.common.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -15,7 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.twonote.rgwadmin4j.model.BucketInfo;
 import org.twonote.rgwadmin4j.model.Quota;
 import org.twonote.rgwadmin4j.model.S3Credential;
 import org.twonote.rgwadmin4j.model.User;
@@ -27,6 +25,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 
 @RestController
@@ -34,6 +33,7 @@ import java.util.Map;
 @RequestMapping("/object-storage")
 public class RGWController {
     private final RGWService rgwService;
+    private final String PF_ADMIN = "/organization/default_org/roles/platform_admin";
 
     /*
         Permission - Data - List
@@ -43,7 +43,8 @@ public class RGWController {
             @ApiResponse(responseCode = "200", description = "bucket 조회 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = SBucket.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @GetMapping("/bucket")
-    public ResponseEntity<List<SBucket>> getBuckets(@Parameter(name = "key", description = "해당 key 값") Key key, @GetIdFromToken String userId) {
+    public ResponseEntity<List<SBucket>> getBuckets(@Parameter(name = "key", description = "해당 key 값") Key key, @GetIdFromToken Map<String, Object> userInfo) {
+
         if (rgwService.validAccess(key)) {
             return ResponseEntity.status(HttpStatus.OK).body(rgwService.getBuckets(key));
         } else {
@@ -118,10 +119,6 @@ public class RGWController {
         }
     }
 
-    // TODO: 2023-08-03T18:25:19.870+09:00  WARN 50273 --- [nio-8080-exec-7] c.amazonaws.services.s3.AmazonS3Client   : No content length specified for stream data.  Stream contents will be buffered in memory and could result in out of memory errors.
-    // TODO: 2023-08-03T18:25:20.944+09:00  WARN 50273 --- [nio-8080-exec-7] com.amazonaws.util.Base64                : JAXB is unavailable. Will fallback to SDK implementation which may be less performant.If you are using Java 9+, you will need to include javax.xml.bind:jaxb-api as a dependency.
-    // TODO: 파일 업로드할 때 이런 오류 발생
-    // TODO: 대용량 파일 업로드 수정해야 함
     /*
         Data - Create
 
@@ -162,7 +159,7 @@ public class RGWController {
 
     @Operation(summary = "테스트용 api")
     @GetMapping("/bucket/test")
-    public void test(@GetIdFromToken String userId) {
+    public void test(@GetIdFromToken Map<String, Object> userInfo) {
         Key key = new Key("MB9VKP4AC9TZPV1UDEO4", "UYScnoXxLtmAemx4gAPjByZmbDnaYuOPOdpG7vMw");
         String bucketName = "foo-test-bucket";
         String prefix = "test";
@@ -179,13 +176,22 @@ public class RGWController {
             @ApiResponse(responseCode = "200", description = "전송속도 제한 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = RateLimit.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @GetMapping("/permission/quota/user/rate-limit/{uid}")
-    public String getUserRateLimit(@Parameter(name = "uid", description = "유저 id") @PathVariable String uid) {
-        return rgwService.getUserRateLimit(uid);
+    public ResponseEntity<?> getUserRateLimit(@Parameter(name = "uid", description = "유저 id") @PathVariable String uid, @GetIdFromToken Map<String, Object> userInfo) {
+
+        if(!Objects.equals(((ArrayList<String>) userInfo.get("group")).get(0), PF_ADMIN)){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        return ResponseEntity.ok(rgwService.getUserRateLimit(uid));
     }
 
 
     @PostMapping("/permission/quota/user/rate-limit/{uid}")
-    public String setUserRateLimit(@PathVariable String uid, @RequestBody RateLimit rateLimit){
+    public String setUserRateLimit(@PathVariable String uid, @RequestBody RateLimit rateLimit, @GetIdFromToken Map<String, Object> userInfo) {
+
+        if(!Objects.equals(((ArrayList<String>) userInfo.get("group")).get(0), PF_ADMIN)){
+            return null;
+        }
         return rgwService.setUserRateLimit(uid, rateLimit);
     }
 
@@ -220,7 +226,11 @@ public class RGWController {
     @PostMapping("/permission/quota/bucket/size/{bucketName}/{uid}")
     public SQuota setIndividualBucketQuota(@Parameter(name = "bucketName", description = "버킷 이름") @PathVariable String bucketName,
                                           @Parameter(name = "uid", description = "유저 id") @PathVariable String uid,
-                                          @Parameter(name = "quota", description = "할당량") @RequestBody SQuota quota) {
+                                          @Parameter(name = "quota", description = "할당량") @RequestBody SQuota quota, @GetIdFromToken Map<String, Object> userInfo) {
+
+        if(!Objects.equals(((ArrayList<String>) userInfo.get("group")).get(0), PF_ADMIN)){
+            return null;
+        }
         return rgwService.setIndividualBucketQuota(uid, bucketName, quota);
     }
 
@@ -233,7 +243,12 @@ public class RGWController {
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @PostMapping("/credential/user/{uid}/sub-user")
     public void createSubUser(@Parameter(name = "uid", description = "유저 id") @PathVariable("uid") String uid,
-                              @Parameter(name = "subUser", description = "서브 유저") @RequestBody SSubUser subUser) {
+                              @Parameter(name = "subUser", description = "서브 유저") @RequestBody SSubUser subUser, @GetIdFromToken Map<String, Object> userInfo) {
+
+        if(!Objects.equals(((ArrayList<String>) userInfo.get("group")).get(0), PF_ADMIN)){
+            return;
+        }
+
         rgwService.createSubUser(uid, subUser);
     }
 
@@ -245,7 +260,12 @@ public class RGWController {
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @GetMapping("/credential/user/{uid}/sub-user/{subUid}")
     public String subUserInfo(@Parameter(name = "uid", description = "유저 id") @PathVariable("uid") String uid,
-                              @Parameter(name = "subUid", description = "서브유저 id") @PathVariable("subUid") String subUid) {
+                              @Parameter(name = "subUid", description = "서브유저 id") @PathVariable("subUid") String subUid, @GetIdFromToken Map<String, Object> userInfo) {
+
+        if(!Objects.equals(((ArrayList<String>) userInfo.get("group")).get(0), PF_ADMIN)){
+            return null;
+        }
+
         return rgwService.subUserInfo(uid, subUid);
     }
 
@@ -258,7 +278,13 @@ public class RGWController {
     @PostMapping("/credential/user/{uid}/sub-user/{subUid}")
     public void setSubUserPermission(@Parameter(name = "uid", description = "유저 id") @PathVariable("uid") String uid,
                                      @Parameter(name = "subUid", description = "서브유저 id") @PathVariable("subUid") String subUid,
-                                     @Parameter(name = "permission", description = "권한") @RequestBody String permission) {
+                                     @Parameter(name = "permission", description = "권한") @RequestBody String permission,
+                                     @GetIdFromToken Map<String, Object> userInfo) {
+
+        if(!Objects.equals(((ArrayList<String>) userInfo.get("group")).get(0), PF_ADMIN)){
+            return;
+        }
+
         rgwService.setSubUserPermission(uid, subUid, permission);
     }
 
@@ -271,7 +297,12 @@ public class RGWController {
     @DeleteMapping("/credential/user/{uid}/sub-user/{subUid}")
     public void deleteSubUser(@Parameter(name = "uid", description = "유저 id") @PathVariable("uid") String uid,
                               @Parameter(name = "subUid", description = "서브유저 id") @PathVariable("subUid") String subUid,
-                              @Parameter(name = "key", description = "해당 key 값") @RequestBody Key key) {
+                              @Parameter(name = "key", description = "해당 key 값") @RequestBody Key key,
+                              @GetIdFromToken Map<String, Object> userInfo) {
+
+        if(!Objects.equals(((ArrayList<String>) userInfo.get("group")).get(0), PF_ADMIN)){
+            return;
+        }
         rgwService.deleteSubUser(uid, subUid, key);
     }
 
@@ -284,7 +315,13 @@ public class RGWController {
     @PostMapping("/credential/user/{uid}/sub-user/{subUid}/key")
     public void alterSubUserKey(@Parameter(name = "uid", description = "유저 id") @PathVariable("uid") String uid,
                                 @Parameter(name = "subUid", description = "서브유저 id") @PathVariable("subUid") String subUid,
-                                @Parameter(name = "key", description = "해당 key 값") @RequestBody Key key) {
+                                @Parameter(name = "key", description = "해당 key 값") @RequestBody Key key,
+                                @GetIdFromToken Map<String, Object> userInfo) {
+
+        if(!Objects.equals(((ArrayList<String>) userInfo.get("group")).get(0), PF_ADMIN)){
+            return;
+        }
+
         rgwService.alterSubUserKey(uid, subUid, key);
     }
 
@@ -296,8 +333,14 @@ public class RGWController {
             @ApiResponse(responseCode = "200", description = "S3Credential 리스트 반환 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = S3Credential.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @GetMapping("/credential/user/{uid}")
-    public List<S3Credential> getCredential(@Parameter(name = "uid", description = "유저 id") @PathVariable String uid) {
-        return rgwService.getS3Credential(uid);
+    public List<S3Credential> getCredential(@Parameter(name = "uid", description = "유저 id")
+                                                @PathVariable String uid,
+                                            @GetIdFromToken Map<String, Object> userInfo) {
+
+        if(!Objects.equals(((ArrayList<String>) userInfo.get("group")).get(0), PF_ADMIN)){
+            return null;
+        }
+        return rgwService.getS3CredentialList(uid);
     }
 
     /*
@@ -308,7 +351,12 @@ public class RGWController {
             @ApiResponse(responseCode = "200", description = "S3Credential 생성 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = S3Credential.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @PostMapping("/credential/user/{uid}")
-    public List<S3Credential> createCredential(@Parameter(name = "uid", description = "유저 id") @PathVariable String uid) {
+    public List<S3Credential> createCredential(@Parameter(name = "uid", description = "유저 id") @PathVariable String uid,
+                                               @GetIdFromToken Map<String, Object> userInfo) {
+
+        if(!Objects.equals(((ArrayList<String>) userInfo.get("group")).get(0), PF_ADMIN)){
+            return null;
+        }
         return rgwService.createS3Credential(uid);
     }
 
@@ -322,7 +370,13 @@ public class RGWController {
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @DeleteMapping("/credential/user")
     public void deleteCredential(@Parameter(name = "uid", description = "유저 id") @PathVariable String uid,
-                                 @Parameter(name = "key", description = "해당 key 값") @PathVariable Key key) {
+                                 @Parameter(name = "key", description = "해당 key 값") @PathVariable Key key,
+                                 @GetIdFromToken Map<String, Object> userInfo) {
+
+        if(!Objects.equals(((ArrayList<String>) userInfo.get("group")).get(0), PF_ADMIN)){
+            return;
+        }
+
         rgwService.deleteS3Credential(uid, key.getAccessKey());
     }
 
@@ -332,7 +386,11 @@ public class RGWController {
     }
 
     @PostMapping("/credential/user")
-    public User createUser(@RequestBody SUser user) {
+    public User createUser(@RequestBody SUser user,
+                           @GetIdFromToken Map<String, Object> userInfo) {
+        if (userInfo.get("group") != PF_ADMIN) {
+            return null;
+        }
         return rgwService.createUser(user);
     }
 
