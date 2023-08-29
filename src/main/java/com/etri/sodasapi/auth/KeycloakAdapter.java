@@ -10,6 +10,8 @@ import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.AccessTokenResponse;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import org.keycloak.admin.client.Keycloak;
@@ -64,7 +66,13 @@ public class KeycloakAdapter {
     }
 
     public String getUserPk(String token){
-        return (String) Jwts.parserBuilder().setSigningKey(keycloakConfig.getCredentials().getSecret()).build().parseClaimsJws(token).getBody().get("userId");
+        try {
+            KeycloakDeployment deployment = getKeycloakDeployment();
+            return AdapterTokenVerifier.verifyToken(token, deployment).getPreferredUsername();
+        } catch (VerificationException e){e.printStackTrace();}
+
+        return null;
+        //return (String) Jwts.parserBuilder().setSigningKey(keycloakConfig.getCredentials().getSecret()).build().parseClaimsJws(token).getBody().get("sub");
     }
 
 }

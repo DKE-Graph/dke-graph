@@ -1,6 +1,7 @@
 package com.etri.sodasapi.objectstorage.rgw;
 
 import com.amazonaws.services.s3.model.Bucket;
+import com.etri.sodasapi.auth.GetIdFromToken;
 import com.etri.sodasapi.auth.KeycloakAdapter;
 import com.etri.sodasapi.auth.KeycloakConfig;
 import com.etri.sodasapi.objectstorage.common.*;
@@ -42,7 +43,7 @@ public class RGWController {
             @ApiResponse(responseCode = "200", description = "bucket 조회 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = SBucket.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @GetMapping("/bucket")
-    public ResponseEntity<List<SBucket>> getBuckets(@Parameter(name = "key", description = "해당 key 값") Key key) {
+    public ResponseEntity<List<SBucket>> getBuckets(@Parameter(name = "key", description = "해당 key 값") Key key, @GetIdFromToken String userId) {
         if (rgwService.validAccess(key)) {
             return ResponseEntity.status(HttpStatus.OK).body(rgwService.getBuckets(key));
         } else {
@@ -161,7 +162,7 @@ public class RGWController {
 
     @Operation(summary = "테스트용 api")
     @GetMapping("/bucket/test")
-    public void test() {
+    public void test(@GetIdFromToken String userId) {
         Key key = new Key("MB9VKP4AC9TZPV1UDEO4", "UYScnoXxLtmAemx4gAPjByZmbDnaYuOPOdpG7vMw");
         String bucketName = "foo-test-bucket";
         String prefix = "test";

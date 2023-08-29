@@ -35,6 +35,6 @@ public class GetIdFromTokenArgumentResolver implements HandlerMethodArgumentReso
 //            throw new BaseException(BaseExceptionCode.AUTHORIZATION_HEADER_NULL);
         }
 
-        return keycloakAdapter.getUserPk(authorizationHeader.substring(6));
+        return keycloakAdapter.getUserPk(authorizationHeader.substring(7));
     }
 }
