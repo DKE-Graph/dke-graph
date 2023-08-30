@@ -186,8 +186,13 @@ public class RGWService {
     }
 
     // TODO: 2023.7.22 Keycloak과 연동해 관리자 확인하는 코드 추가해야 함.
-    public boolean validAccess(Key key) {
-        return true;
+    public boolean validAccess(Map<String, Object> userInfo, String access) {
+        if(Objects.equals(((ArrayList<String>) userInfo.get("group")).get(0), access)) {
+            return true;
+        }
+        else{
+            return false;
+        }
     }
 
     public URL objectDownUrl(Key key, String bucketName, String object) {

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.twonote.rgwadmin4j.model.Quota;
 import org.twonote.rgwadmin4j.model.S3Credential;
+import org.twonote.rgwadmin4j.model.SubUser;
 import org.twonote.rgwadmin4j.model.User;
 
 import java.io.IOException;
@@ -44,12 +45,7 @@ public class RGWController {
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @GetMapping("/bucket")
     public ResponseEntity<List<SBucket>> getBuckets(@Parameter(name = "key", description = "해당 key 값") Key key, @GetIdFromToken Map<String, Object> userInfo) {
-
-        if (rgwService.validAccess(key)) {
-            return ResponseEntity.status(HttpStatus.OK).body(rgwService.getBuckets(key));
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ArrayList<>());
-        }
+        return ResponseEntity.status(HttpStatus.OK).body(rgwService.getBuckets(key));
     }
 
     /*
@@ -61,11 +57,7 @@ public class RGWController {
     @PostMapping("/bucket/{bucketName}")
     public ResponseEntity<Bucket> createBucket(@Parameter(name = "key", description = "해당 key 값") @RequestBody Key key,
                                                @Parameter(name = "bucketName", description = "버킷 이름") @PathVariable String bucketName) {
-        if (rgwService.validAccess(key)) {
-            return ResponseEntity.status(HttpStatus.OK).body(rgwService.createBucket(key, bucketName));
-        } else {
-            return ResponseEntity.status(HttpStatus.OK).body(rgwService.createBucket(key, bucketName));
-        }
+        return ResponseEntity.status(HttpStatus.OK).body(rgwService.createBucket(key, bucketName));
     }
 
     /*
@@ -77,11 +69,7 @@ public class RGWController {
     @DeleteMapping("/bucket/{bucketName}")
     public void deleteBucket(@Parameter(name = "key", description = "해당 key 값") @RequestBody Key key,
                              @Parameter(name = "bucketName", description = "버킷 이름") @PathVariable String bucketName) {
-        if (rgwService.validAccess(key)) {
-            rgwService.deleteBucket(key, bucketName);
-        } else {
-            rgwService.deleteBucket(key, bucketName);
-        }
+        rgwService.deleteBucket(key, bucketName);
     }
 
     /*
@@ -93,13 +81,8 @@ public class RGWController {
     @GetMapping("/data/{bucketName}")
     public ResponseEntity<List<BObject>> getObjects(@PathVariable String bucketName,
                                                     Key key
-    )
-            throws NoSuchAlgorithmException, InvalidKeyException {
-        if (rgwService.validAccess(key)) {
-            return ResponseEntity.status(HttpStatus.OK).body(rgwService.getObjects(key, bucketName));
-        } else {
-            return ResponseEntity.status(HttpStatus.OK).body(rgwService.getObjects(key, bucketName));
-        }
+    ) {
+        return ResponseEntity.status(HttpStatus.OK).body(rgwService.getObjects(key, bucketName));
     }
 
     /*
@@ -112,16 +95,11 @@ public class RGWController {
     public void deleteObject(@Parameter(name = "key", description = "해당 key 값") @RequestBody Key key,
                              @Parameter(name = "bucketName", description = "버킷 이름") @PathVariable String bucketName,
                              @Parameter(name = "object", description = "해당 object") @PathVariable String object) {
-        if (rgwService.validAccess(key)) {
-            rgwService.deleteObject(key, bucketName, object);
-        } else {
-            rgwService.deleteObject(key, bucketName, object);
-        }
+        rgwService.deleteObject(key, bucketName, object);
     }
 
     /*
         Data - Create
-
      */
     @Operation(summary = "object 생성", description = "파일,버킷 이름,접근키,비밀키를 입력하여 오브젝트를 생성합니다", responses = {
             @ApiResponse(responseCode = "200", description = "Object 생성 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = BObject.class))),
@@ -178,21 +156,23 @@ public class RGWController {
     @GetMapping("/permission/quota/user/rate-limit/{uid}")
     public ResponseEntity<?> getUserRateLimit(@Parameter(name = "uid", description = "유저 id") @PathVariable String uid, @GetIdFromToken Map<String, Object> userInfo) {
 
-        if(!Objects.equals(((ArrayList<String>) userInfo.get("group")).get(0), PF_ADMIN)){
+        if(rgwService.validAccess(userInfo, PF_ADMIN)){
+            return ResponseEntity.ok(rgwService.getUserRateLimit(uid));
+        }else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-
-        return ResponseEntity.ok(rgwService.getUserRateLimit(uid));
     }
 
 
     @PostMapping("/permission/quota/user/rate-limit/{uid}")
-    public String setUserRateLimit(@PathVariable String uid, @RequestBody RateLimit rateLimit, @GetIdFromToken Map<String, Object> userInfo) {
+    public ResponseEntity<String> setUserRateLimit(@PathVariable String uid, @RequestBody RateLimit rateLimit, @GetIdFromToken Map<String, Object> userInfo) {
 
-        if(!Objects.equals(((ArrayList<String>) userInfo.get("group")).get(0), PF_ADMIN)){
-            return null;
+        if(rgwService.validAccess(userInfo, PF_ADMIN)){
+            return ResponseEntity.ok(rgwService.setUserRateLimit(uid, rateLimit));
+        }else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        return rgwService.setUserRateLimit(uid, rateLimit);
+
     }
 
     @Operation(summary = "prefix 경로의 폴더 및 파일 리스트 반환", description = "key 값과 버킷 이름, prefix을 입력하여 prefix 경로의 폴더 및 파일 리스트를 반환합니다", responses = {
@@ -224,14 +204,15 @@ public class RGWController {
             @ApiResponse(responseCode = "200", description = "버킷 크기 설정 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = SQuota.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @PostMapping("/permission/quota/bucket/size/{bucketName}/{uid}")
-    public SQuota setIndividualBucketQuota(@Parameter(name = "bucketName", description = "버킷 이름") @PathVariable String bucketName,
+    public ResponseEntity<SQuota> setIndividualBucketQuota(@Parameter(name = "bucketName", description = "버킷 이름") @PathVariable String bucketName,
                                           @Parameter(name = "uid", description = "유저 id") @PathVariable String uid,
                                           @Parameter(name = "quota", description = "할당량") @RequestBody SQuota quota, @GetIdFromToken Map<String, Object> userInfo) {
 
-        if(!Objects.equals(((ArrayList<String>) userInfo.get("group")).get(0), PF_ADMIN)){
-            return null;
+        if(rgwService.validAccess(userInfo, PF_ADMIN)){
+            return ResponseEntity.ok(rgwService.setIndividualBucketQuota(uid, bucketName, quota));
+        }else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        return rgwService.setIndividualBucketQuota(uid, bucketName, quota);
     }
 
 
@@ -242,14 +223,13 @@ public class RGWController {
             @ApiResponse(responseCode = "200", description = "서브 유저 생성 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = SSubUser.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @PostMapping("/credential/user/{uid}/sub-user")
-    public void createSubUser(@Parameter(name = "uid", description = "유저 id") @PathVariable("uid") String uid,
-                              @Parameter(name = "subUser", description = "서브 유저") @RequestBody SSubUser subUser, @GetIdFromToken Map<String, Object> userInfo) {
-
-        if(!Objects.equals(((ArrayList<String>) userInfo.get("group")).get(0), PF_ADMIN)){
-            return;
+    public ResponseEntity<List<SubUser>> createSubUser(@Parameter(name = "uid", description = "유저 id") @PathVariable("uid") String uid,
+                                                       @Parameter(name = "subUser", description = "서브 유저") @RequestBody SSubUser subUser, @GetIdFromToken Map<String, Object> userInfo) {
+        if(rgwService.validAccess(userInfo, PF_ADMIN)){
+            return ResponseEntity.ok(rgwService.createSubUser(uid, subUser));
+        }else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-
-        rgwService.createSubUser(uid, subUser);
     }
 
     /*
@@ -259,14 +239,14 @@ public class RGWController {
             @ApiResponse(responseCode = "200", description = "서브유저 권한정보 출력 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = SSubUser.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @GetMapping("/credential/user/{uid}/sub-user/{subUid}")
-    public String subUserInfo(@Parameter(name = "uid", description = "유저 id") @PathVariable("uid") String uid,
+    public ResponseEntity<String> subUserInfo(@Parameter(name = "uid", description = "유저 id") @PathVariable("uid") String uid,
                               @Parameter(name = "subUid", description = "서브유저 id") @PathVariable("subUid") String subUid, @GetIdFromToken Map<String, Object> userInfo) {
 
-        if(!Objects.equals(((ArrayList<String>) userInfo.get("group")).get(0), PF_ADMIN)){
-            return null;
+        if(rgwService.validAccess(userInfo, PF_ADMIN)){
+            return ResponseEntity.ok(rgwService.subUserInfo(uid, subUid));
+        }else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-
-        return rgwService.subUserInfo(uid, subUid);
     }
 
     /*
@@ -276,16 +256,17 @@ public class RGWController {
             @ApiResponse(responseCode = "200", description = "서브유저 권한 수정 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = SSubUser.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @PostMapping("/credential/user/{uid}/sub-user/{subUid}")
-    public void setSubUserPermission(@Parameter(name = "uid", description = "유저 id") @PathVariable("uid") String uid,
+    public ResponseEntity setSubUserPermission(@Parameter(name = "uid", description = "유저 id") @PathVariable("uid") String uid,
                                      @Parameter(name = "subUid", description = "서브유저 id") @PathVariable("subUid") String subUid,
                                      @Parameter(name = "permission", description = "권한") @RequestBody String permission,
                                      @GetIdFromToken Map<String, Object> userInfo) {
 
-        if(!Objects.equals(((ArrayList<String>) userInfo.get("group")).get(0), PF_ADMIN)){
-            return;
+        if(rgwService.validAccess(userInfo, PF_ADMIN)){
+            rgwService.setSubUserPermission(uid, subUid, permission);
+            return ResponseEntity.ok("Subuser permission set successfully.");
+        }else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-
-        rgwService.setSubUserPermission(uid, subUid, permission);
     }
 
     /*
@@ -295,15 +276,17 @@ public class RGWController {
             @ApiResponse(responseCode = "200", description = "서브유저 삭제 성공"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @DeleteMapping("/credential/user/{uid}/sub-user/{subUid}")
-    public void deleteSubUser(@Parameter(name = "uid", description = "유저 id") @PathVariable("uid") String uid,
+    public ResponseEntity<Object> deleteSubUser(@Parameter(name = "uid", description = "유저 id") @PathVariable("uid") String uid,
                               @Parameter(name = "subUid", description = "서브유저 id") @PathVariable("subUid") String subUid,
                               @Parameter(name = "key", description = "해당 key 값") @RequestBody Key key,
                               @GetIdFromToken Map<String, Object> userInfo) {
 
-        if(!Objects.equals(((ArrayList<String>) userInfo.get("group")).get(0), PF_ADMIN)){
-            return;
+        if(rgwService.validAccess(userInfo, PF_ADMIN)){
+            rgwService.deleteSubUser(uid, subUid, key);
+            return ResponseEntity.ok("Subuser permission set successfully.");
+        }else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        rgwService.deleteSubUser(uid, subUid, key);
     }
 
     /*
@@ -313,16 +296,17 @@ public class RGWController {
             @ApiResponse(responseCode = "200", description = "서브유저 키 변경 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = SSubUser.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @PostMapping("/credential/user/{uid}/sub-user/{subUid}/key")
-    public void alterSubUserKey(@Parameter(name = "uid", description = "유저 id") @PathVariable("uid") String uid,
+    public ResponseEntity<?> alterSubUserKey(@Parameter(name = "uid", description = "유저 id") @PathVariable("uid") String uid,
                                 @Parameter(name = "subUid", description = "서브유저 id") @PathVariable("subUid") String subUid,
                                 @Parameter(name = "key", description = "해당 key 값") @RequestBody Key key,
                                 @GetIdFromToken Map<String, Object> userInfo) {
 
-        if(!Objects.equals(((ArrayList<String>) userInfo.get("group")).get(0), PF_ADMIN)){
-            return;
+        if(rgwService.validAccess(userInfo, PF_ADMIN)){
+            rgwService.alterSubUserKey(uid, subUid, key);
+            return ResponseEntity.ok("Subuser permission set successfully.");
+        }else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-
-        rgwService.alterSubUserKey(uid, subUid, key);
     }
 
     /*
@@ -333,14 +317,16 @@ public class RGWController {
             @ApiResponse(responseCode = "200", description = "S3Credential 리스트 반환 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = S3Credential.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @GetMapping("/credential/user/{uid}")
-    public List<S3Credential> getCredential(@Parameter(name = "uid", description = "유저 id")
+    public ResponseEntity<?> getCredential(@Parameter(name = "uid", description = "유저 id")
                                                 @PathVariable String uid,
                                             @GetIdFromToken Map<String, Object> userInfo) {
 
-        if(!Objects.equals(((ArrayList<String>) userInfo.get("group")).get(0), PF_ADMIN)){
-            return null;
+        if(rgwService.validAccess(userInfo, PF_ADMIN)){
+            rgwService.getS3CredentialList(uid);
+            return ResponseEntity.ok("Subuser permission set successfully.");
+        }else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        return rgwService.getS3CredentialList(uid);
     }
 
     /*
@@ -351,13 +337,14 @@ public class RGWController {
             @ApiResponse(responseCode = "200", description = "S3Credential 생성 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = S3Credential.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @PostMapping("/credential/user/{uid}")
-    public List<S3Credential> createCredential(@Parameter(name = "uid", description = "유저 id") @PathVariable String uid,
+    public ResponseEntity<List<S3Credential>> createCredential(@Parameter(name = "uid", description = "유저 id") @PathVariable String uid,
                                                @GetIdFromToken Map<String, Object> userInfo) {
 
-        if(!Objects.equals(((ArrayList<String>) userInfo.get("group")).get(0), PF_ADMIN)){
-            return null;
+        if(rgwService.validAccess(userInfo, PF_ADMIN)){
+            return ResponseEntity.ok(rgwService.createS3Credential(uid));
+        }else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        return rgwService.createS3Credential(uid);
     }
 
     // TODO: 자신의 subuser만 제어 가능하도록 valid access key 함수 넣어야 하는지?
@@ -369,15 +356,16 @@ public class RGWController {
             @ApiResponse(responseCode = "200", description = "S3Credential 리스트 삭제 성공"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @DeleteMapping("/credential/user")
-    public void deleteCredential(@Parameter(name = "uid", description = "유저 id") @PathVariable String uid,
+    public ResponseEntity<?> deleteCredential(@Parameter(name = "uid", description = "유저 id") @PathVariable String uid,
                                  @Parameter(name = "key", description = "해당 key 값") @PathVariable Key key,
                                  @GetIdFromToken Map<String, Object> userInfo) {
 
-        if(!Objects.equals(((ArrayList<String>) userInfo.get("group")).get(0), PF_ADMIN)){
-            return;
+        if(rgwService.validAccess(userInfo, PF_ADMIN)){
+            rgwService.deleteS3Credential(uid, key.getAccessKey());
+            return ResponseEntity.ok("Subuser permission set successfully.");
+        }else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-
-        rgwService.deleteS3Credential(uid, key.getAccessKey());
     }
 
     @GetMapping("/credential/user/sub-user/{uid}")
@@ -386,16 +374,18 @@ public class RGWController {
     }
 
     @PostMapping("/credential/user")
-    public User createUser(@RequestBody SUser user,
+    public ResponseEntity<User> createUser(@RequestBody SUser user,
                            @GetIdFromToken Map<String, Object> userInfo) {
-        if (userInfo.get("group") != PF_ADMIN) {
-            return null;
+
+        if(rgwService.validAccess(userInfo, PF_ADMIN)){
+            return ResponseEntity.ok(rgwService.createUser(user));
+        }else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        return rgwService.createUser(user);
     }
 
     /*
-    버킷 사용도 %로 계산하여 출력
+        버킷 사용도 %로 계산하여 출력
     */
     @Operation(summary = "버킷 사용도 출력", description = "버킷 이름을 입력하여 해당 버킷의 사용도를 %로 출력합니다", responses = {
             @ApiResponse(responseCode = "200", description = "버킷 사용도 출력 성공"),
