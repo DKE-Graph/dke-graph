@@ -22,34 +22,35 @@ import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.adapters.config.AdapterConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.twonote.rgwadmin4j.model.S3Credential;
 
 import javax.naming.event.ObjectChangeListener;
 
+import static org.apache.http.client.methods.RequestBuilder.put;
+
 @Component
+@RequiredArgsConstructor
 public class KeycloakAdapter {
 
-    private KeycloakConfig keycloakConfig;
-    private RGWService rgwService;
+    private final KeycloakConfig keycloakConfig;
+    private final RGWService rgwService;
 
-    public KeycloakAdapter(){
-        this.keycloakConfig = new KeycloakConfig();
-
-        KeycloakConfig.Credentials credentials = new KeycloakConfig.Credentials();
-        credentials.setSecret("ae46ef1b-f7bc-47db-8096-d821ffb999e1");
-        keycloakConfig.setCredentials(credentials);
-        keycloakConfig.setRealm("master-i");
-        keycloakConfig.setResource("platform");
-        keycloakConfig.setAuthServerUrl("http://keycloak.221.154.134.31.traefik.me:10017/");
-
-    }
+//    public KeycloakAdapter() {
+//        this(keycloakConfig, rgwService);
+//    }
 
     public KeycloakDeployment getKeycloakDeployment() {
         AdapterConfig adapterConfig = new AdapterConfig();
         adapterConfig.setAuthServerUrl(keycloakConfig.getAuthServerUrl());
         adapterConfig.setRealm(keycloakConfig.getRealm());
         adapterConfig.setResource(keycloakConfig.getResource());
-        adapterConfig.setCredentials(new HashMap<>());
-        adapterConfig.getCredentials().put("secret", keycloakConfig.getCredentials().getSecret());
+
+        Map<String, Object> credential =  new HashMap<String, Object>() {
+            {
+                put("secret", keycloakConfig.getCredentials().getSecret());
+            }
+        };
+        adapterConfig.setCredentials(credential);
 
         return KeycloakDeploymentBuilder.build(adapterConfig);
     }
@@ -59,7 +60,7 @@ public class KeycloakAdapter {
         KeycloakDeployment deployment = getKeycloakDeployment();
 
         try {
-            System.out.println(getAttribute(AdapterTokenVerifier.verifyToken(tokenString, deployment)));
+            //System.out.println(getAttribute(AdapterTokenVerifier.verifyToken(tokenString, deployment)));
             return AdapterTokenVerifier.verifyToken(tokenString, deployment);
         } catch (VerificationException e) {
             // 토큰 검증 실패
@@ -82,6 +83,10 @@ public class KeycloakAdapter {
             Map<String, Object> userInfo = new HashMap<>();
             userInfo.put("group", (ArrayList<?>) accessToken.getOtherClaims().get("group"));
             userInfo.put("userId", accessToken.getPreferredUsername());
+
+            S3Credential s3Credential =  rgwService.getS3Credential(accessToken.getPreferredUsername());
+            userInfo.put("accessKey", s3Credential.getAccessKey());
+            userInfo.put("secretKey", s3Credential.getSecretKey());
 
             return userInfo;
         } catch (VerificationException e){e.printStackTrace();}

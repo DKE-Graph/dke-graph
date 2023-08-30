@@ -1,12 +1,13 @@
 package com.etri.sodasapi.auth;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
-@Component
 @ConfigurationProperties(prefix = "keycloak")
+@Component
 public class KeycloakConfig {
     private String authServerUrl;
     private String realm;
