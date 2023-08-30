@@ -1,5 +1,6 @@
 package com.etri.sodasapi.objectstorage.dashboard;
 
+import com.etri.sodasapi.config.ObjectStorageConfig;
 import com.etri.sodasapi.objectstorage.common.SQuota;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -16,9 +17,7 @@ import java.util.List;
 
 @Service
 public class DSService {
-
-    @Value("${MGR_ENDPOINT}")
-    private String MGR_ENDPOINT;
+    ObjectStorageConfig objectStorageConfig;
 
     private HttpHeaders headers;
 
@@ -26,7 +25,7 @@ public class DSService {
         getToken();
 
         URI uri = UriComponentsBuilder
-                .fromUriString(MGR_ENDPOINT)
+                .fromUriString(objectStorageConfig.getMgrEndpoint())
                 .path("/api/rgw/user/" + userName+"/quota")
                 .encode()
                 .build()
@@ -61,7 +60,7 @@ public class DSService {
         getToken();
 
         URI uri = UriComponentsBuilder
-                .fromUriString(MGR_ENDPOINT)
+                .fromUriString(objectStorageConfig.getMgrEndpoint())
                 .path("/api/rgw/user/" + userName + "/quota")
                 .encode()
                 .build()
@@ -90,7 +89,7 @@ public class DSService {
         }
 
         URI uri = UriComponentsBuilder
-                .fromUriString(MGR_ENDPOINT)
+                .fromUriString(objectStorageConfig.getMgrEndpoint())
                 .path("/api/auth")
                 .encode()
                 .build()
@@ -123,7 +122,7 @@ public class DSService {
         getToken();
 
         URI uri = UriComponentsBuilder
-                .fromUriString(MGR_ENDPOINT)
+                .fromUriString(objectStorageConfig.getMgrEndpoint())
                 .path("/api/rgw/user/" + userName+"/quota")
                 .encode()
                 .build()

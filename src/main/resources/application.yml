@@ -1,13 +1,14 @@
-MGR_ENDPOINT:
-  http://dashboard.rook.221.154.134.31.traefik.me:10017
-RGW_ENDPOINT:
-  http://object-storage.rook.221.154.134.31.traefik.me:10017
-RGW_ADMIN_ACCESS:
-  sodas_dev_access
-RGW_ADMIN_SECRET:
-  sodas_dev_secret
-RGW_ADMIN_UID:
-  sodas_dev_user
+object-storage:
+  mgrEndpoint:
+    http://dashboard.rook.221.154.134.31.traefik.me:10017
+  rgwEndpoint:
+    http://object-storage.rook.221.154.134.31.traefik.me:10017
+  rgwAdminAccess:
+    sodas_dev_access
+  rgwAdminSecret:
+    sodas_dev_secret
+  rgwAdminUid:
+    sodas_dev_user
 
 springdoc:
   api-docs:

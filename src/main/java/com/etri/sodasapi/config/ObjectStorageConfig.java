@@ -2,24 +2,38 @@ package com.etri.sodasapi.config;
 
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 @Component
+@ConfigurationProperties(prefix = "object-storage")
 public final class ObjectStorageConfig {
 
-    @Value("${MGR_ENDPOINT}")
     private String mgrEndpoint;
-
-    @Value("${RGW_ENDPOINT}")
     private String rgwEndpoint;
-
-    @Value("${RGW_ADMIN_ACCESS}")
     private String rgwAdminAccess;
-
-    @Value("${RGW_ADMIN_SECRET}")
     private String rgwAdminSecret;
 
-    @Value("${RGW_ADMIN_UID}")
+    public void setMgrEndpoint(String mgrEndpoint) {
+        this.mgrEndpoint = mgrEndpoint;
+    }
+
+    public void setRgwEndpoint(String rgwEndpoint) {
+        this.rgwEndpoint = rgwEndpoint;
+    }
+
+    public void setRgwAdminAccess(String rgwAdminAccess) {
+        this.rgwAdminAccess = rgwAdminAccess;
+    }
+
+    public void setRgwAdminSecret(String rgwAdminSecret) {
+        this.rgwAdminSecret = rgwAdminSecret;
+    }
+
+    public void setRgwAdminUID(String rgwAdminUID) {
+        this.rgwAdminUID = rgwAdminUID;
+    }
+
     private String rgwAdminUID;
 
     public String getMgrEndpoint() {
