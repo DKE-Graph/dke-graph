@@ -87,6 +87,7 @@ public class KeycloakAdapter {
             S3Credential s3Credential =  rgwService.getS3Credential(accessToken.getPreferredUsername());
             userInfo.put("accessKey", s3Credential.getAccessKey());
             userInfo.put("secretKey", s3Credential.getSecretKey());
+            userInfo.put("credential", s3Credential);
 
             return userInfo;
         } catch (VerificationException e){e.printStackTrace();}

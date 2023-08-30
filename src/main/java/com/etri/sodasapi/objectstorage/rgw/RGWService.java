@@ -53,7 +53,7 @@ public class RGWService {
     }
 
 
-    public List<SBucket> getBuckets(Key key) {
+    public List<SBucket> getBuckets(S3Credential key) {
         AmazonS3 conn = getClient(key);
         List<Bucket> buckets = conn.listBuckets();
         List<SBucket> bucketList = new ArrayList<>();
@@ -64,7 +64,7 @@ public class RGWService {
         return bucketList;
     }
 
-    public List<BObject> getObjects(Key key, String bucketName) {
+    public List<BObject> getObjects(S3Credential key, String bucketName) {
         AmazonS3 conn = getClient(key);
         ObjectListing objects = conn.listObjects(bucketName);
 
@@ -80,7 +80,7 @@ public class RGWService {
         return objectList;
     }
 
-    public Bucket createBucket(Key key, String bucketName) {
+    public Bucket createBucket(S3Credential key, String bucketName) {
         AmazonS3 conn = getClient(key);
         Bucket newBucket = conn.createBucket(bucketName);
 
@@ -95,7 +95,7 @@ public class RGWService {
         return newBucket;
     }
 
-    public void deleteBucket(Key key, String bucketName) {
+    public void deleteBucket(S3Credential key, String bucketName) {
         AmazonS3 conn = getClient(key);
 
         List<BObject> objectList = getObjects(key, bucketName);
@@ -107,13 +107,13 @@ public class RGWService {
         conn.deleteBucket(bucketName);
     }
 
-    public void deleteObject(Key key, String bucketName, String object) {
+    public void deleteObject(S3Credential key, String bucketName, String object) {
         AmazonS3 conn = getClient(key);
 
         conn.deleteObject(bucketName, object);
     }
 
-    private synchronized AmazonS3 getClient(Key key) {
+    private synchronized AmazonS3 getClient(S3Credential key) {
         String accessKey = key.getAccessKey();
         String secretKey = key.getSecretKey();
 
@@ -128,7 +128,7 @@ public class RGWService {
                 .build();
     }
 
-    public void objectUpload(MultipartFile file, String bucketName, Key key) throws IOException {
+    public void objectUpload(MultipartFile file, String bucketName, S3Credential key) throws IOException {
         AmazonS3 conn = getClient(key);
 //        ByteArrayInputStream input = new ByteArrayInputStream(file.getBytes());
 //        byte[] bytes = input.readAllBytes();
@@ -195,7 +195,7 @@ public class RGWService {
         }
     }
 
-    public URL objectDownUrl(Key key, String bucketName, String object) {
+    public URL objectDownUrl(S3Credential key, String bucketName, String object) {
         AmazonS3 conn = getClient(key);
 
         GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(bucketName, object);
@@ -257,7 +257,7 @@ public class RGWService {
         }
     }
 
-    public Map<String, Double> quotaUtilizationList(Key key){
+    public Map<String, Double> quotaUtilizationList(S3Credential key){
         List<SBucket> bucketList = getBuckets(key);
 
         Map<String, Double> quotaUtilizationMap = new HashMap<>();
@@ -424,7 +424,7 @@ public class RGWService {
         return sodasRgwAdmin.setUserRateLimit(uid, rateLimit);
     }
 
-    public Map<String, List<?>> getFileList(Key key, String bucketName, String prefix) {
+    public Map<String, List<?>> getFileList(S3Credential key, String bucketName, String prefix) {
 
         String actualPrefix = (prefix != null) ? prefix : "";
         final AmazonS3 s3 = getClient(key);
@@ -470,7 +470,7 @@ public class RGWService {
         return rgwAdmin.createUser(user.getUid(), userParameters);
     }
 
-    public void addBucketUser(Key key, String rgwuser, String permission, String bucketName) {
+    public void addBucketUser(S3Credential key, String rgwuser, String permission, String bucketName) {
         AmazonS3 conn = getClient(key);
 
         AccessControlList accessControlList = conn.getBucketAcl(bucketName);

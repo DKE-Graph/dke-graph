@@ -39,8 +39,9 @@ public class RGWController {
             @ApiResponse(responseCode = "200", description = "bucket 조회 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = SBucket.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @GetMapping("/bucket")
-    public ResponseEntity<List<SBucket>> getBuckets(@Parameter(name = "key", description = "해당 key 값") Key key, @GetIdFromToken Map<String, Object> userInfo) {
-        return ResponseEntity.status(HttpStatus.OK).body(rgwService.getBuckets(key));
+    public ResponseEntity<List<SBucket>> getBuckets(@GetIdFromToken Map<String, Object> userInfo) {
+
+        return ResponseEntity.status(HttpStatus.OK).body(rgwService.getBuckets((S3Credential) userInfo.get("credential")));
     }
 
     /*
@@ -50,9 +51,10 @@ public class RGWController {
             @ApiResponse(responseCode = "200", description = "bucket 생성 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = SBucket.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @PostMapping("/bucket/{bucketName}")
-    public ResponseEntity<Bucket> createBucket(@Parameter(name = "key", description = "해당 key 값") @RequestBody Key key,
+    public ResponseEntity<Bucket> createBucket(
+            @Parameter(name = "key", description = "해당 key 값") @GetIdFromToken Map<String, Object> userInfo,
                                                @Parameter(name = "bucketName", description = "버킷 이름") @PathVariable String bucketName) {
-        return ResponseEntity.status(HttpStatus.OK).body(rgwService.createBucket(key, bucketName));
+        return ResponseEntity.status(HttpStatus.OK).body(rgwService.createBucket((S3Credential) userInfo.get("credential"), bucketName));
     }
 
     /*
@@ -62,9 +64,9 @@ public class RGWController {
             @ApiResponse(responseCode = "200", description = "bucket 삭제 성공"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @DeleteMapping("/bucket/{bucketName}")
-    public void deleteBucket(@Parameter(name = "key", description = "해당 key 값") @RequestBody Key key,
+    public void deleteBucket(@Parameter(name = "key", description = "해당 key 값") @GetIdFromToken Map<String, Object> userInfo,
                              @Parameter(name = "bucketName", description = "버킷 이름") @PathVariable String bucketName) {
-        rgwService.deleteBucket(key, bucketName);
+        rgwService.deleteBucket((S3Credential) userInfo.get("credential"), bucketName);
     }
 
     /*
@@ -75,9 +77,9 @@ public class RGWController {
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @GetMapping("/data/{bucketName}")
     public ResponseEntity<List<BObject>> getObjects(@PathVariable String bucketName,
-                                                    Key key
+                                                    @GetIdFromToken Map<String, Object> userInfo
     ) {
-        return ResponseEntity.status(HttpStatus.OK).body(rgwService.getObjects(key, bucketName));
+        return ResponseEntity.status(HttpStatus.OK).body(rgwService.getObjects((S3Credential) userInfo.get("credential"), bucketName));
     }
 
     /*
@@ -87,10 +89,10 @@ public class RGWController {
             @ApiResponse(responseCode = "200", description = "Object 삭제 성공"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @DeleteMapping("/data/{bucketName}/{object}")
-    public void deleteObject(@Parameter(name = "key", description = "해당 key 값") @RequestBody Key key,
+    public void deleteObject(@Parameter(name = "key", description = "해당 key 값") @GetIdFromToken Map<String, Object> userInfo,
                              @Parameter(name = "bucketName", description = "버킷 이름") @PathVariable String bucketName,
                              @Parameter(name = "object", description = "해당 object") @PathVariable String object) {
-        rgwService.deleteObject(key, bucketName, object);
+        rgwService.deleteObject((S3Credential) userInfo.get("credential"), bucketName, object);
     }
 
     /*
@@ -102,11 +104,9 @@ public class RGWController {
     @PostMapping("/data")
     public String objectUpload(@Parameter(name = "file", description = "파일") @RequestPart(value = "file", required = false) MultipartFile file,
                                @Parameter(name = "bucketName", description = "버킷 이름") @RequestParam("bucketName") String bucketName,
-                               @Parameter(name = "accessKey", description = "접근키") @RequestParam("accessKey") String accessKey,
-                               @Parameter(name = "secretKey", description = "비밀키") @RequestParam("secretKey") String secretKey) throws IOException {
-        Key key = new Key(accessKey, secretKey);
+                               @Parameter(name = "token", description = "토큰") @GetIdFromToken Map<String, Object> userInfo) throws IOException {
 
-        rgwService.objectUpload(file, bucketName, key);
+        rgwService.objectUpload(file, bucketName, (S3Credential) userInfo.get("credential"));
 
         return file.getOriginalFilename();
     }
@@ -118,23 +118,21 @@ public class RGWController {
             @ApiResponse(responseCode = "200", description = "Object의 url 다운로드 성공"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @GetMapping("/data/{bucketName}/{object}")
-    public URL objectDownUrl(@Parameter(name = "key", description = "해당 key 값") @RequestBody Key key,
+    public URL objectDownUrl(@Parameter(name = "token", description = "토큰") @GetIdFromToken Map<String, Object> userInfo,
                              @Parameter(name = "bucketName", description = "버킷 이름") @PathVariable String bucketName,
                              @Parameter(name = "object", description = "오브젝트") @PathVariable String object) {
-        return rgwService.objectDownUrl(key, bucketName, object);
+        return rgwService.objectDownUrl((S3Credential) userInfo.get("credential"), bucketName, object);
     }
 
     // TODO: excel 정리된 것 처럼 매핑해야함
     @PostMapping("/permission/acl/bucket/{bucketName}")
-    public void addBucketUser(@RequestBody Key key, @RequestBody String rgwUser, @RequestBody String permission, @PathVariable String bucketName) {
-        rgwService.addBucketUser(key, rgwUser, permission, bucketName);
+    public void addBucketUser(@GetIdFromToken Map<String, Object> userInfo, @RequestBody String rgwUser, @RequestBody String permission, @PathVariable String bucketName) {
+        rgwService.addBucketUser((S3Credential) userInfo.get("credential"), rgwUser, permission, bucketName);
     }
 
     @Operation(summary = "테스트용 api")
     @GetMapping("/bucket/test")
     public void test(@GetIdFromToken Map<String, Object> userInfo) {
-        Key key = new Key("MB9VKP4AC9TZPV1UDEO4", "UYScnoXxLtmAemx4gAPjByZmbDnaYuOPOdpG7vMw");
-
     }
 
     @Operation(summary = "전송속도 제한", description = "API의 과도한 호출을 제한하기 위해 유저의 API 전송속도와 호출수를 제한합니다", responses = {
@@ -166,10 +164,10 @@ public class RGWController {
             @ApiResponse(responseCode = "200", description = "prefix 경로의 폴더 및 파일 리스트 반환 성공"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @PostMapping("/data/{bucketName}/files")
-    public Map<String, List<?>> getFileList(@Parameter(name = "key", description = "해당 key 값") @RequestBody Key key,
+    public Map<String, List<?>> getFileList(@Parameter(name = "token", description = "토큰") @GetIdFromToken Map<String, Object> userInfo,
                                             @Parameter(name = "bucketName", description = "버킷 이름") @PathVariable String bucketName,
                                             @Parameter(name = "prefix", description = "prefix") @RequestParam(required = false) String prefix) {
-        return rgwService.getFileList(key, bucketName, prefix);
+        return rgwService.getFileList((S3Credential) userInfo.get("credential"), bucketName, prefix);
     }
 
     /*
@@ -243,14 +241,14 @@ public class RGWController {
             @ApiResponse(responseCode = "200", description = "서브유저 권한 수정 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = SSubUser.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @PostMapping("/credential/user/{uid}/sub-user/{subUid}")
-    public ResponseEntity setSubUserPermission(@Parameter(name = "uid", description = "유저 id") @PathVariable("uid") String uid,
+    public ResponseEntity<?> setSubUserPermission(@Parameter(name = "uid", description = "유저 id") @PathVariable("uid") String uid,
                                      @Parameter(name = "subUid", description = "서브유저 id") @PathVariable("subUid") String subUid,
                                      @Parameter(name = "permission", description = "권한") @RequestBody String permission,
                                      @GetIdFromToken Map<String, Object> userInfo) {
 
         if(rgwService.validAccess(userInfo, PF_ADMIN)){
             rgwService.setSubUserPermission(uid, subUid, permission);
-            return ResponseEntity.ok("Subuser permission set successfully.");
+            return ResponseEntity.ok("Subuser permission update successfully.");
         }else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
@@ -270,7 +268,7 @@ public class RGWController {
 
         if(rgwService.validAccess(userInfo, PF_ADMIN)){
             rgwService.deleteSubUser(uid, subUid, key);
-            return ResponseEntity.ok("Subuser permission set successfully.");
+            return ResponseEntity.ok("Subuser deleted.");
         }else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
@@ -342,12 +340,11 @@ public class RGWController {
             @ApiResponse(responseCode = "200", description = "S3Credential 리스트 삭제 성공"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @DeleteMapping("/credential/user")
-    public ResponseEntity<?> deleteCredential(@Parameter(name = "uid", description = "유저 id") @PathVariable String uid,
-                                 @Parameter(name = "key", description = "해당 key 값") @PathVariable Key key,
-                                 @GetIdFromToken Map<String, Object> userInfo) {
+    public ResponseEntity<?> deleteCredential(@GetIdFromToken Map<String, Object> userInfo) {
 
         if(rgwService.validAccess(userInfo, PF_ADMIN)){
-            rgwService.deleteS3Credential(uid, key.getAccessKey());
+            S3Credential s3Credential = (S3Credential) userInfo.get("credential");
+            rgwService.deleteS3Credential((String) userInfo.get("uName"), s3Credential.getAccessKey());
             return ResponseEntity.ok("Subuser permission set successfully.");
         }else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -397,7 +394,7 @@ public class RGWController {
     }
 
     @GetMapping("/monitoring")
-    public Map<String, Double> quotaUtilizationList(Key key) {
-        return rgwService.quotaUtilizationList(key);
+    public Map<String, Double> quotaUtilizationList(@GetIdFromToken Map<String, Object> userInfo) {
+        return rgwService.quotaUtilizationList((S3Credential) userInfo.get("credential"));
     }
 }
