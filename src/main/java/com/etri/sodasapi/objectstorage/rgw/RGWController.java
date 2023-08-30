@@ -322,8 +322,7 @@ public class RGWController {
                                             @GetIdFromToken Map<String, Object> userInfo) {
 
         if(rgwService.validAccess(userInfo, PF_ADMIN)){
-            rgwService.getS3CredentialList(uid);
-            return ResponseEntity.ok("Subuser permission set successfully.");
+            return ResponseEntity.ok(rgwService.getS3CredentialList(uid));
         }else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }

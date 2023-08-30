@@ -322,7 +322,7 @@ public class RGWService {
         rgwAdmin.createS3CredentialForSubUser(uid, subUid, key.getAccessKey(), key.getSecretKey());
     }
 
-    // nodejs 코드에서 입력 파라미터로 uid만을 받게 설계돼 있어서 우리도 key 빼야할지 고민해봐야함.
+    // TODO: nodejs 코드에서 입력 파라미터로 uid만을 받게 설계돼 있어서 우리도 key 빼야할지 고민해봐야함.
     public void createS3Credential(String uid, Key key){
         RgwAdmin rgwAdmin = getRgwAdmin();
 

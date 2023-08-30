@@ -2,6 +2,7 @@ package com.etri.sodasapi.auth;
 
 import com.etri.sodasapi.objectstorage.rgw.RGWService;
 import io.jsonwebtoken.Jwts;
+import lombok.RequiredArgsConstructor;
 import org.keycloak.adapters.KeycloakDeployment;
 import org.keycloak.adapters.KeycloakDeploymentBuilder;
 import org.keycloak.adapters.rotation.AdapterTokenVerifier;
@@ -28,6 +29,7 @@ import javax.naming.event.ObjectChangeListener;
 public class KeycloakAdapter {
 
     private KeycloakConfig keycloakConfig;
+    private RGWService rgwService;
 
     public KeycloakAdapter(){
         this.keycloakConfig = new KeycloakConfig();
@@ -71,6 +73,7 @@ public class KeycloakAdapter {
     }
 
     public Map<String, Object> getUserPk(String token){
+        System.out.println(rgwService.getS3Credential("sodas_dev_user"));
 
         try {
             KeycloakDeployment deployment = getKeycloakDeployment();
