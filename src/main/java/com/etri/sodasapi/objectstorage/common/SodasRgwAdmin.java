@@ -1,6 +1,6 @@
 package com.etri.sodasapi.objectstorage.common;
 
-import com.etri.sodasapi.config.Constants;
+import com.etri.sodasapi.config.ObjectStorageConfig;
 import com.etri.sodasapi.objectstorage.utils.CustomAuthInterceptor;
 import okhttp3.*;
 import org.twonote.rgwadmin4j.impl.RgwAdminException;
@@ -11,23 +11,23 @@ import java.util.Map;
 
 
 public class SodasRgwAdmin {
-    private final Constants constants;
+    private final ObjectStorageConfig objectStorageConfig;
     private final OkHttpClient client;
 
-    public SodasRgwAdmin(Constants constants){
-        this.constants = constants;
+    public SodasRgwAdmin(ObjectStorageConfig objectStorageConfig){
+        this.objectStorageConfig = objectStorageConfig;
         this.client = new OkHttpClient.Builder()
-                .addInterceptor(new CustomAuthInterceptor(constants.getRgwAdminAccess(), constants.getRgwAdminSecret()))
+                .addInterceptor(new CustomAuthInterceptor(objectStorageConfig.getRgwAdminAccess(), objectStorageConfig.getRgwAdminSecret()))
                 .build();
     }
 
     public String getUserRateLimit(String uid){
-        HttpUrl url = HttpUrl.parse(constants.getRgwEndpoint()+ "/admin")
+        HttpUrl url = HttpUrl.parse(objectStorageConfig.getRgwEndpoint()+ "/admin")
                 .newBuilder()
                 .addPathSegment("ratelimit")
                 .addQueryParameter("ratelimit-scope", "user")
                 .addQueryParameter("uid", uid)
-                .addQueryParameter("AWSAccessKeyId", constants.getRgwAdminAccess())
+                .addQueryParameter("AWSAccessKeyId", objectStorageConfig.getRgwAdminAccess())
                 .build();
 
         Request request = new Request.Builder()
@@ -41,12 +41,12 @@ public class SodasRgwAdmin {
     }
 
     public String setUserRateLimit(String uid, RateLimit rateLimit){
-        HttpUrl url = HttpUrl.parse(constants.getRgwEndpoint()+ "/admin")
+        HttpUrl url = HttpUrl.parse(objectStorageConfig.getRgwEndpoint()+ "/admin")
                 .newBuilder()
                 .addPathSegment("ratelimit")
                 .addQueryParameter("ratelimit-scope", "user")
                 .addQueryParameter("uid", uid)
-                .addQueryParameter("AWSAccessKeyId", constants.getRgwAdminAccess())
+                .addQueryParameter("AWSAccessKeyId", objectStorageConfig.getRgwAdminAccess())
                 .addQueryParameter("format", "json")
                 .addQueryParameter("enabled", rateLimit.getEnabled())
                 .addQueryParameter("max-read-bytes", String.valueOf(rateLimit.getMaxReadBytes()))
