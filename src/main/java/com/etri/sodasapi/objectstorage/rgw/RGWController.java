@@ -66,7 +66,7 @@ public class RGWController {
     @Operation(summary = "bucket 삭제", description = "key값을 확인하여 해당 bucket을 삭제합니다", responses = {
             @ApiResponse(responseCode = "200", description = "bucket 삭제 성공"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
-    @DeleteMapping("/bucket/{bucketName}")
+    @PostMapping("/bucket/{bucketName}")
     public void deleteBucket(@Parameter(name = "key", description = "해당 key 값") @RequestBody Key key,
                              @Parameter(name = "bucketName", description = "버킷 이름") @PathVariable String bucketName) {
         rgwService.deleteBucket(key, bucketName);
@@ -91,7 +91,7 @@ public class RGWController {
     @Operation(summary = "Object 삭제", description = "key값과 버킷 이름을 확인하여 해당 Object를 삭제합니다", responses = {
             @ApiResponse(responseCode = "200", description = "Object 삭제 성공"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
-    @DeleteMapping("/data/{bucketName}/{object}")
+    @PostMapping("/data/{bucketName}/{object}")
     public void deleteObject(@Parameter(name = "key", description = "해당 key 값") @RequestBody Key key,
                              @Parameter(name = "bucketName", description = "버킷 이름") @PathVariable String bucketName,
                              @Parameter(name = "object", description = "해당 object") @PathVariable String object) {
@@ -275,7 +275,7 @@ public class RGWController {
     @Operation(summary = "서브 유저 삭제", description = "유저 id와 서브유저 id, key 값을 입력하여 해당 서브유저를 삭제합니다", responses = {
             @ApiResponse(responseCode = "200", description = "서브유저 삭제 성공"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
-    @DeleteMapping("/credential/user/{uid}/sub-user/{subUid}")
+    @PostMapping("/credential/user/{uid}/sub-user/{subUid}")
     public ResponseEntity<Object> deleteSubUser(@Parameter(name = "uid", description = "유저 id") @PathVariable("uid") String uid,
                               @Parameter(name = "subUid", description = "서브유저 id") @PathVariable("subUid") String subUid,
                               @Parameter(name = "key", description = "해당 key 값") @RequestBody Key key,
@@ -355,7 +355,7 @@ public class RGWController {
     @Operation(summary = "S3Credential 리스트 삭제", description = "유저 id와 key 값을 입력하여 S3Credential list를 삭제합니다", responses = {
             @ApiResponse(responseCode = "200", description = "S3Credential 리스트 삭제 성공"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
-    @DeleteMapping("/credential/user")
+    @PostMapping("/credential/user")
     public ResponseEntity<?> deleteCredential(@Parameter(name = "uid", description = "유저 id") @PathVariable String uid,
                                  @Parameter(name = "key", description = "해당 key 값") @PathVariable Key key,
                                  @GetIdFromToken Map<String, Object> userInfo) {
