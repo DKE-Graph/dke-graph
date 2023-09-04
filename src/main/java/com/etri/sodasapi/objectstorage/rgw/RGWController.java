@@ -67,8 +67,8 @@ public class RGWController {
     @Operation(summary = "bucket 삭제", description = "key값을 확인하여 해당 bucket을 삭제합니다", responses = {
             @ApiResponse(responseCode = "200", description = "bucket 삭제 성공"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
-    @DeleteMapping("/bucket/{bucketName}")
-    public void deleteBucket(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "해당 key 값") @RequestBody Key key,
+    @PostMapping("/bucket/{bucketName}")
+    public void deleteBucket(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "해당 key 값")@RequestBody Key key,
                              @Parameter(name = "bucketName", description = "버킷 이름") @PathVariable String bucketName) {
         rgwService.deleteBucket(key, bucketName);
     }
@@ -92,20 +92,15 @@ public class RGWController {
     @Operation(summary = "Object 삭제", description = "key값과 버킷 이름을 확인하여 해당 Object를 삭제합니다", responses = {
             @ApiResponse(responseCode = "200", description = "Object 삭제 성공"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
-    @DeleteMapping("/data/{bucketName}/{object}")
-    public void deleteObject(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "해당 key 값")  @RequestBody Key key,
+    @PostMapping("/data/{bucketName}/{object}")
+    public void deleteObject(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "해당 key 값") @RequestBody Key key,
                              @Parameter(name = "bucketName", description = "버킷 이름") @PathVariable String bucketName,
                              @Parameter(name = "object", description = "해당 object") @PathVariable String object) {
         rgwService.deleteObject(key, bucketName, object);
     }
 
-    // TODO: 2023-08-03T18:25:19.870+09:00  WARN 50273 --- [nio-8080-exec-7] c.amazonaws.services.s3.AmazonS3Client   : No content length specified for stream data.  Stream contents will be buffered in memory and could result in out of memory errors.
-    // TODO: 2023-08-03T18:25:20.944+09:00  WARN 50273 --- [nio-8080-exec-7] com.amazonaws.util.Base64                : JAXB is unavailable. Will fallback to SDK implementation which may be less performant.If you are using Java 9+, you will need to include javax.xml.bind:jaxb-api as a dependency.
-    // TODO: 파일 업로드할 때 이런 오류 발생
-    // TODO: 대용량 파일 업로드 수정해야 함
     /*
         Data - Create
-
      */
     @Operation(summary = "object 생성", description = "파일,버킷 이름,접근키,비밀키를 입력하여 오브젝트를 생성합니다", responses = {
             @ApiResponse(responseCode = "200", description = "Object 생성 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = BObject.class))),
@@ -293,7 +288,7 @@ public class RGWController {
     @Operation(summary = "서브 유저 삭제", description = "유저 id와 서브유저 id, key 값을 입력하여 해당 서브유저를 삭제합니다", responses = {
             @ApiResponse(responseCode = "200", description = "서브유저 삭제 성공"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
-    @DeleteMapping("/credential/user/{uid}/sub-user/{subUid}")
+    @PostMapping("/credential/user/{uid}/sub-user/{subUid}")
     public ResponseEntity<Object> deleteSubUser(@Parameter(name = "uid", description = "유저 id") @PathVariable("uid") String uid,
                                                 @Parameter(name = "subUid", description = "서브유저 id") @PathVariable("subUid") String subUid,
                                                 @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "해당 key 값")  @RequestBody Key key,
@@ -371,7 +366,7 @@ public class RGWController {
     @Operation(summary = "S3Credential 리스트 삭제", description = "유저 id와 key 값을 입력하여 S3Credential list를 삭제합니다", responses = {
             @ApiResponse(responseCode = "200", description = "S3Credential 리스트 삭제 성공"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
-    @DeleteMapping("/credential/user")
+    @PostMapping("/credential/user")
     public ResponseEntity<?> deleteCredential(@Parameter(name = "uid", description = "유저 id") @PathVariable String uid,
                                               @Parameter(name = "key", description = "해당 key 값") @PathVariable Key key,
                                               @GetIdFromToken Map<String, Object> userInfo) {
