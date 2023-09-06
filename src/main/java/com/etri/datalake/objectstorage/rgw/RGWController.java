@@ -148,6 +148,24 @@ public class RGWController {
         }
     }
 
+    @GetMapping("/permission/quota/users/rate-limit")
+    public ResponseEntity<?> setUserRateLimit(@Parameter(name = "uidList", description = "유저 id list") @RequestBody List<String> userList, @GetIdFromToken Map<String, Object> userInfo) {
+        if(rgwService.validAccess(userInfo, PF_ADMIN)){
+            return ResponseEntity.ok(rgwService.getUserRateLimitList(userList));
+        }else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+    }
+
+    @PostMapping("/permission/quota/users/rate-limit")
+    public ResponseEntity<String> setUserRateLimitList(@RequestBody Map<String, RateLimit> userRateLimits, @GetIdFromToken Map<String, Object> userInfo) {
+
+        if(rgwService.validAccess(userInfo, PF_ADMIN)){
+            return ResponseEntity.ok(rgwService.setUserRateLimitList(userRateLimits));
+        }else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+    }
 
     @PostMapping("/permission/quota/user/rate-limit/{uid}")
     public ResponseEntity<String> setUserRateLimit(@PathVariable String uid, @RequestBody RateLimit rateLimit, @GetIdFromToken Map<String, Object> userInfo) {
