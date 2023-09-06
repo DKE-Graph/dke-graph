@@ -36,7 +36,7 @@ public class RGWController {
         Permission - Data - List
         버킷 정보를 읽어옴
      */
-    @Operation(summary = "bucket 조회", description = "토큰을 통해 유저의 버킷을 조회합니다", responses = {
+    @Operation(summary = "bucket 조회", description = "유저의 버킷을 조회합니다", responses = {
             @ApiResponse(responseCode = "200", description = "bucket 조회 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = SBucket.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @GetMapping("/bucket")
