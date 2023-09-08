@@ -365,6 +365,7 @@ public class RGWController {
         return ResponseEntity.ok(rgwService.subUserList(uid));
     }
 
+    @Operation(summary = "유저 생성", description = "유저를 생성합니다")
     @PostMapping("/credential/user")
     public ResponseEntity<User> createUser(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "유저") @RequestBody SUser user,
                                            @GetIdFromToken Map<String, Object> userInfo) {
@@ -387,6 +388,7 @@ public class RGWController {
         return ResponseEntity.ok(rgwService.quotaUtilizationInfo(bucketName));
     }
 
+    @Operation(summary = "유저 쿼타 리스트 출력", description = "유저의 쿼타 리스트를 출력합니다")
     @GetMapping("/quota/user/size")
     public ResponseEntity<Map<String, Map<String, Quota>>> usersQuotaList(@GetIdFromToken Map<String, Object> userInfo) {
         if (rgwService.validAccess(userInfo, PF_ADMIN)) {
