@@ -1,14 +1,14 @@
 object-storage:
   mgrEndpoint:
-    ${MGR_ENDPOINT}
+    http://dashboard.rook.221.154.134.31.traefik.me:10017
   rgwEndpoint:
-    ${RGW_ENDPOINT}
+    http://object-storage.rook.221.154.134.31.traefik.me:10017
   rgwAdminAccess:
-    ${RGW_ADMIN_ACCESS}
+    sodas_dev_access
   rgwAdminSecret:
-    ${RGW_ADMIN_SECRET}
+    sodas_dev_secret
   rgwAdminUid:
-    ${RGW_ADMIN_UID}
+    sodas_dev_user
 
 springdoc:
   api-docs:
@@ -17,16 +17,16 @@ springdoc:
     path: /swagger-ui/index.html
     groups-order: DESC
     doc-expansion: list
-    tags-sorter: method
+    tags-sorter: alpha
     operationsSorter: alpha
     disable-swagger-default-url: true
     display-request-duration: true
 
 keycloak:
-  realm: ${KEYCLOAK_REALM}
-  authServerUrl: ${KEYCLOAK_AUTH_URL}
+  realm: master-i
+  authServerUrl: http://keycloak.221.154.134.31.traefik.me:10017/
   sslRequired: none
-  resource: ${KEYCLOAK_RESOURCE}
+  resource: platform
   credentials:
-    secret: ${KEYCLOAK_CREDENTIAL_SECRET}
+    secret: ae46ef1b-f7bc-47db-8096-d821ffb999e1
   confidentialPort: 0

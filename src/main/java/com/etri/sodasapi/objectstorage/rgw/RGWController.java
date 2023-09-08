@@ -63,9 +63,9 @@ public class RGWController {
     @Operation(summary = "bucket 삭제", description = "버킷 이름을 확인하여 해당 버킷을 삭제합니다", responses = {
             @ApiResponse(responseCode = "200", description = "bucket 삭제 성공"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
-    @DeleteMapping("/bucket/{bucketName}")
-    public ResponseEntity<?> deleteBucket(@GetIdFromToken Map<String, Object> userInfo,
-                                          @Parameter(name = "bucketName", description = "버킷 이름") @PathVariable String bucketName) {
+    @PostMapping("/bucket/{bucketName}/delete")
+    public ResponseEntity<?> deleteBucket(@Parameter(name = "key", description = "해당 key 값") @GetIdFromToken Map<String, Object> userInfo,
+                             @Parameter(name = "bucketName", description = "버킷 이름") @PathVariable String bucketName) {
         rgwService.deleteBucket((S3Credential) userInfo.get("credential"), bucketName);
         return ResponseEntity.ok().build();
     }
@@ -89,10 +89,10 @@ public class RGWController {
     @Operation(summary = "object 삭제", description = "버킷 이름을 확인하여 해당 오브젝트를 삭제합니다", responses = {
             @ApiResponse(responseCode = "200", description = "Object 삭제 성공"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
-    @DeleteMapping("/data/{bucketName}/{object}")
-    public ResponseEntity<?> deleteObject(@GetIdFromToken Map<String, Object> userInfo,
-                                          @Parameter(name = "bucketName", description = "버킷 이름") @PathVariable String bucketName,
-                                          @Parameter(name = "object", description = "해당 object") @PathVariable String object) {
+    @PostMapping("/data/{bucketName}/{object}/delete")
+    public ResponseEntity<?> deleteObject(@Parameter(name = "key", description = "해당 key 값") @GetIdFromToken Map<String, Object> userInfo,
+                             @Parameter(name = "bucketName", description = "버킷 이름") @PathVariable String bucketName,
+                             @Parameter(name = "object", description = "해당 object") @PathVariable String object) {
         rgwService.deleteObject((S3Credential) userInfo.get("credential"), bucketName, object);
         return ResponseEntity.ok().build();
     }
@@ -156,6 +156,25 @@ public class RGWController {
     @Operation(summary = "전송 속도 제한", description = "API의 과도한 호출을 제한하기 위해 유저의 API 전송속도와 호출수를 제한합니다", responses = {
             @ApiResponse(responseCode = "200", description = "전송속도 제한 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = RateLimit.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
+    @GetMapping("/permission/quota/users/rate-limit")
+    public ResponseEntity<?> setUserRateLimit(@Parameter(name = "uidList", description = "유저 id list") @RequestBody List<String> userList, @GetIdFromToken Map<String, Object> userInfo) {
+        if(rgwService.validAccess(userInfo, PF_ADMIN)){
+            return ResponseEntity.ok(rgwService.getUserRateLimitList(userList));
+        }else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+    }
+
+    @PostMapping("/permission/quota/users/rate-limit")
+    public ResponseEntity<String> setUserRateLimitList(@RequestBody Map<String, RateLimit> userRateLimits, @GetIdFromToken Map<String, Object> userInfo) {
+
+        if(rgwService.validAccess(userInfo, PF_ADMIN)){
+            return ResponseEntity.ok(rgwService.setUserRateLimitList(userRateLimits));
+        }else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+    }
+
     @PostMapping("/permission/quota/user/rate-limit/{uid}")
     public ResponseEntity<String> setUserRateLimit(@Parameter(name = "uid", description = "유저 id") @PathVariable String uid,
                                                    @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "제한 속도") @RequestBody RateLimit rateLimit,
@@ -272,12 +291,14 @@ public class RGWController {
     @Operation(summary = "서브 유저 삭제", description = "유저 id와 서브유저 id을 입력하여 해당 서브유저를 삭제합니다", responses = {
             @ApiResponse(responseCode = "200", description = "서브유저 삭제 성공"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
-    @PostMapping("/credential/user/{uid}/sub-user/{subUid}/delete")
-    public ResponseEntity<Object> deleteSubUser(@Parameter(name = "uid", description = "유저 id") @PathVariable String uid,
-                                                @Parameter(name = "subUid", description = "서브유저 id") @PathVariable String subUid,
-                                                @GetIdFromToken Map<String, Object> userInfo) {
-        if (rgwService.validAccess(userInfo, PF_ADMIN)) {
-//            rgwService.deleteSubUser(uid, subUid, key);
+    @DeleteMapping("/credential/user/{uid}/sub-user/{subUid}")
+    public ResponseEntity<Object> deleteSubUser(@Parameter(name = "uid", description = "유저 id") @PathVariable("uid") String uid,
+                              @Parameter(name = "subUid", description = "서브유저 id") @PathVariable("subUid") String subUid,
+                              @Parameter(name = "key", description = "해당 key 값") @RequestBody Key key,
+                              @GetIdFromToken Map<String, Object> userInfo) {
+
+        if(rgwService.validAccess(userInfo, PF_ADMIN)){
+            rgwService.deleteSubUser(uid, subUid, key);
             return ResponseEntity.ok("Subuser deleted.");
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -348,11 +369,13 @@ public class RGWController {
     @Operation(summary = "S3Credential 리스트 삭제", description = "유저 id를 입력하여 S3Credential list를 삭제합니다", responses = {
             @ApiResponse(responseCode = "200", description = "S3Credential 리스트 삭제 성공"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
-    @PostMapping("/credential/user/delete")
-    public ResponseEntity<?> deleteCredential(@GetIdFromToken Map<String, Object> userInfo) {
-        if (rgwService.validAccess(userInfo, PF_ADMIN)) {
-            S3Credential s3Credential = (S3Credential) userInfo.get("credential");
-            rgwService.deleteS3Credential((String) userInfo.get("uName"), s3Credential.getAccessKey());
+    @DeleteMapping("/credential/user")
+    public ResponseEntity<?> deleteCredential(@GetIdFromToken Map<String, Object> userInfo,
+                                              @Parameter(name = "uid", description = "유저 id") @PathVariable String uid,
+                                              @Parameter(name = "key", description = "해당 key 값") @PathVariable Key key) {
+
+        if(rgwService.validAccess(userInfo, PF_ADMIN)){
+            rgwService.deleteS3Credential(uid, key.getAccessKey());
             return ResponseEntity.ok("Subuser permission set successfully.");
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -390,34 +413,23 @@ public class RGWController {
 
     @Operation(summary = "유저 쿼타 리스트 출력", description = "유저의 쿼타 리스트를 출력합니다")
     @GetMapping("/quota/user/size")
-    public ResponseEntity<Map<String, Map<String, Quota>>> usersQuotaList(@GetIdFromToken Map<String, Object> userInfo) {
-        if (rgwService.validAccess(userInfo, PF_ADMIN)) {
-            return ResponseEntity.ok(rgwService.usersQuota());
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+    public ResponseEntity<Map<String, Map<String, Quota>>> usersQuotaList(){
+        return ResponseEntity.ok(rgwService.usersQuota());
     }
 
     @GetMapping("/quota/user/rate-limit")
-    public ResponseEntity<Map<String, Map<String, String>>> usersRateLimit(@GetIdFromToken Map<String, Object> userInfo) {
-        if (rgwService.validAccess(userInfo, PF_ADMIN)) {
-            return ResponseEntity.ok(rgwService.usersRateLimit());
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+    public ResponseEntity<Map<String, Map<String, String>>> usersRateLimit(){
+
+        return ResponseEntity.ok(rgwService.usersRateLimit());
     }
 
     @GetMapping("/quota/bucket/size")
-    public ResponseEntity<Map<String, Map<String, Quota>>> bucketsQuotaList(@GetIdFromToken Map<String, Object> userInfo) {
-        if (rgwService.validAccess(userInfo, PF_ADMIN)) {
-            return ResponseEntity.ok(rgwService.bucketsQuota());
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+    public ResponseEntity<Map<String, Map<String, Quota>>> bucketsQuotaList(){
+        return ResponseEntity.ok(rgwService.bucketsQuota());
     }
 
     @PostMapping("/quota/bucket/size/{uid}")
-    public ResponseEntity<Quota> bucketsQuota(@PathVariable String uid) {
+    public ResponseEntity<Quota> bucketsQuota(@PathVariable String uid){
         return ResponseEntity.ok(rgwService.bucketsQuota(uid));
     }
 

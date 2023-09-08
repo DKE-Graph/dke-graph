@@ -365,9 +365,17 @@ public class RGWService {
 
     public String getUserRateLimit(String uid){
         SodasRgwAdmin sodasRgwAdmin = getSodasRgwAdmin();
-        
         return sodasRgwAdmin.getUserRateLimit(uid);
     }
+
+    public List<String> getUserRateLimitList(List<String> uidList){
+        List<String> response = new ArrayList<>();
+        for (String uid : uidList){
+            response.add(getUserRateLimit(uid));
+        }
+        return response;
+    }
+
 
     public Map<String, Map<String, Quota>> usersQuota(){
         RgwAdmin rgwAdmin = getRgwAdmin();
@@ -443,9 +451,17 @@ public class RGWService {
 
     public String setUserRateLimit(String uid, RateLimit rateLimit){
         SodasRgwAdmin sodasRgwAdmin = getSodasRgwAdmin();
-
-
         return sodasRgwAdmin.setUserRateLimit(uid, rateLimit);
+    }
+
+    public String setUserRateLimitList(Map<String, RateLimit> userRateLimits){
+        List<String> response = new ArrayList<>();
+
+        for (String key: userRateLimits.keySet()){
+            RateLimit rateLimit = userRateLimits.get(key);
+            response.add(setUserRateLimit(key, rateLimit));
+        }
+        return response.toString();
     }
 
     public Map<String, List<?>> getFileList(S3Credential key, String bucketName, String prefix) {
@@ -494,11 +510,11 @@ public class RGWService {
         return rgwAdmin.createUser(user.getUid(), userParameters);
     }
 
-    public void addBucketUser(S3Credential key, String rgwuser, String permission, String bucketName) {
+    public void addBucketUser(S3Credential key, String rgwUser, String permission, String bucketName) {
         AmazonS3 conn = getClient(key);
 
         AccessControlList accessControlList = conn.getBucketAcl(bucketName);
-        Grant grant = new Grant(new CanonicalGrantee(rgwuser), Permission.valueOf(permission));
+        Grant grant = new Grant(new CanonicalGrantee(rgwUser), Permission.valueOf(permission));
 
         accessControlList.grantAllPermissions(grant);
         conn.setBucketAcl(bucketName, accessControlList);
