@@ -60,7 +60,10 @@ public class RGWController {
     /*
         Permission - Data - Delete
      */
-    @DeleteMapping("/bucket/{bucketName}")
+    @Operation(summary = "bucket 삭제", description = "key값을 확인하여 해당 bucket을 삭제합니다", responses = {
+            @ApiResponse(responseCode = "200", description = "bucket 삭제 성공"),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
+    @PostMapping("/bucket/{bucketName}/delete")
     public ResponseEntity<?> deleteBucket(@Parameter(name = "key", description = "해당 key 값") @GetIdFromToken Map<String, Object> userInfo,
                              @Parameter(name = "bucketName", description = "버킷 이름") @PathVariable String bucketName) {
         rgwService.deleteBucket((S3Credential) userInfo.get("credential"), bucketName);
@@ -83,7 +86,10 @@ public class RGWController {
     /*
         Data - Delete
      */
-    @DeleteMapping("/data/{bucketName}/{object}")
+    @Operation(summary = "Object 삭제", description = "key값과 버킷 이름을 확인하여 해당 Object를 삭제합니다", responses = {
+            @ApiResponse(responseCode = "200", description = "Object 삭제 성공"),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
+    @PostMapping("/data/{bucketName}/{object}/delete")
     public ResponseEntity<?> deleteObject(@Parameter(name = "key", description = "해당 key 값") @GetIdFromToken Map<String, Object> userInfo,
                              @Parameter(name = "bucketName", description = "버킷 이름") @PathVariable String bucketName,
                              @Parameter(name = "object", description = "해당 object") @PathVariable String object) {
@@ -142,6 +148,24 @@ public class RGWController {
         }
     }
 
+    @GetMapping("/permission/quota/users/rate-limit")
+    public ResponseEntity<?> setUserRateLimit(@Parameter(name = "uidList", description = "유저 id list") @RequestBody List<String> userList, @GetIdFromToken Map<String, Object> userInfo) {
+        if(rgwService.validAccess(userInfo, PF_ADMIN)){
+            return ResponseEntity.ok(rgwService.getUserRateLimitList(userList));
+        }else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+    }
+
+    @PostMapping("/permission/quota/users/rate-limit")
+    public ResponseEntity<String> setUserRateLimitList(@RequestBody Map<String, RateLimit> userRateLimits, @GetIdFromToken Map<String, Object> userInfo) {
+
+        if(rgwService.validAccess(userInfo, PF_ADMIN)){
+            return ResponseEntity.ok(rgwService.setUserRateLimitList(userRateLimits));
+        }else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+    }
 
     @PostMapping("/permission/quota/user/rate-limit/{uid}")
     public ResponseEntity<String> setUserRateLimit(@PathVariable String uid, @RequestBody RateLimit rateLimit, @GetIdFromToken Map<String, Object> userInfo) {
@@ -255,7 +279,9 @@ public class RGWController {
             @ApiResponse(responseCode = "200", description = "서브유저 삭제 성공"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @PostMapping("/credential/user/{uid}/sub-user/{subUid}/delete")
-    public ResponseEntity<Object> deleteSubUser(@PathVariable String uid, @PathVariable String subUid,
+    public ResponseEntity<Object> deleteSubUser(@Parameter(name = "uid", description = "유저 id") @PathVariable("uid") String uid,
+                              @Parameter(name = "subUid", description = "서브유저 id") @PathVariable("subUid") String subUid,
+                              @Parameter(name = "key", description = "해당 key 값") @RequestBody Key key,
                               @GetIdFromToken Map<String, Object> userInfo) {
 
         if(rgwService.validAccess(userInfo, PF_ADMIN)){
@@ -328,14 +354,13 @@ public class RGWController {
         Credential - Delete
         uid와 key를 받아 S3Credential을 삭제하는 api
      */
-    @Operation(summary = "S3Credential 리스트 삭제", description = "유저 id와 key 값을 입력하여 S3Credential list를 삭제합니다", responses = {
+    @Operation(summary = "S3Credential 삭제", description = "유저 id와 key 값을 입력하여 S3Credential을 삭제합니다", responses = {
             @ApiResponse(responseCode = "200", description = "S3Credential 리스트 삭제 성공"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @PostMapping("/credential/user/delete")
     public ResponseEntity<?> deleteCredential(@GetIdFromToken Map<String, Object> userInfo) {
         if(rgwService.validAccess(userInfo, PF_ADMIN)){
-            S3Credential s3Credential = (S3Credential) userInfo.get("credential");
-            rgwService.deleteS3Credential((String) userInfo.get("uName"), s3Credential.getAccessKey());
+            rgwService.deleteS3Credential(uid, key.getAccessKey());
             return ResponseEntity.ok("Subuser permission set successfully.");
         }else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
