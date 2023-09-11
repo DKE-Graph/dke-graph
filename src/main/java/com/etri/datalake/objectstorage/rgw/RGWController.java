@@ -393,7 +393,7 @@ public class RGWController {
             @ApiResponse(responseCode = "200", description = "버킷 사용도 출력 성공"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @GetMapping("/monitoring/{bucketName}")
-    public ResponseEntity<Double> quotaUtilizationInfo(@Parameter(name = "bucketName", description = "버킷 이름") @PathVariable String bucketName) {
+    public ResponseEntity<Map<String, String>> quotaUtilizationInfo(@Parameter(name = "bucketName", description = "버킷 이름") @PathVariable String bucketName) {
         return ResponseEntity.ok(rgwService.quotaUtilizationInfo(bucketName));
     }
 
@@ -419,7 +419,7 @@ public class RGWController {
     }
 
     @GetMapping("/monitoring")
-    public ResponseEntity<Map<String, Double>> quotaUtilizationList(@GetIdFromToken Map<String, Object> userInfo) {
+    public ResponseEntity<Map<String, String>> quotaUtilizationList(@GetIdFromToken Map<String, Object> userInfo) {
         return ResponseEntity.ok(rgwService.quotaUtilizationList((S3Credential) userInfo.get("credential")));
     }
 }

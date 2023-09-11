@@ -238,33 +238,33 @@ public class RGWService {
         return quota;
     }
 
-    public Double quotaUtilizationInfo(String bucketName) {
+    public Map<String, String> quotaUtilizationInfo(String bucketName) {
         RgwAdmin rgwAdmin = getRgwAdmin();
+        Map<String, String> result = new HashMap<>();
 
         if(rgwAdmin.getBucketInfo(bucketName).isPresent()) {
             Optional<BucketInfo> bucketInfo = rgwAdmin.getBucketInfo(bucketName);
             BucketInfo bucketInfo1 = bucketInfo.get();
 
             if(bucketInfo1.getUsage().getRgwMain() != null) {
-                return (((double) bucketInfo1.getUsage().getRgwMain().getSize_actual() / (bucketInfo1.getBucketQuota().getMaxSizeKb() * 1024)) * 100);
-            }
-            else{
-                return (double) -1;
+                double usage = (((double) bucketInfo1.getUsage().getRgwMain().getSize_actual() / (bucketInfo1.getBucketQuota().getMaxSizeKb() * 1024)) * 100);
+                result.put("result", Double.toString(usage) + "%");
+
+                return result;
             }
         }
-        else{
-            return (double) -1;
-        }
+        result.put("result", "-1%");
+        return result;
     }
 
-    public Map<String, Double> quotaUtilizationList(S3Credential key){
+    public Map<String, String> quotaUtilizationList(S3Credential key){
         List<SBucket> bucketList = getBuckets(key);
 
-        Map<String, Double> quotaUtilizationMap = new HashMap<>();
+        Map<String, String> quotaUtilizationMap = new HashMap<>();
 
         for(SBucket sBucket : bucketList){
             System.out.println(sBucket.getBucketName());
-            quotaUtilizationMap.put(sBucket.getBucketName(), quotaUtilizationInfo(sBucket.getBucketName()));
+            quotaUtilizationMap.put(sBucket.getBucketName(), quotaUtilizationInfo(sBucket.getBucketName()).get("result"));
         }
 
         return quotaUtilizationMap;
