@@ -174,9 +174,25 @@ public class RGWService {
 
         conn.completeMultipartUpload(completeRequest);
 
+
         //        PutObjectRequest request = new PutObjectRequest(bucketName, file.getOriginalFilename(), file.getInputStream(), null)
 //        System.out.println(conn.putObject(bucketName, file.getOriginalFilename(), bytes, new ObjectMetadata()));
 //        System.out.println(conn.putObject(request));
+
+        addUserPermissionToObject(conn, bucketName, file.getOriginalFilename());
+    }
+
+    public void addUserPermissionToObject(AmazonS3 conn, String bucketName, String filename){
+        AccessControlList accessControlList = conn.getBucketAcl(bucketName);
+        List<Grant> grants = accessControlList.getGrantsAsList();
+        AccessControlList objectAcl = conn.getObjectAcl(bucketName, filename);
+
+        for(Grant grant : grants){
+            Grant newGrant = new Grant(new CanonicalGrantee(grant.getGrantee().getIdentifier()), grant.getPermission());
+            objectAcl.grantAllPermissions(newGrant);
+        }
+
+        conn.setObjectAcl(bucketName, filename, objectAcl);
     }
 
     public String initiateMultipartUpload(String bucketName, String key, AmazonS3 conn){

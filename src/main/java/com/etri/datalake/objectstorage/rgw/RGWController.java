@@ -278,14 +278,14 @@ public class RGWController {
     @Operation(summary = "서브 유저 삭제", description = "유저 id와 서브유저 id, key 값을 입력하여 해당 서브유저를 삭제합니다", responses = {
             @ApiResponse(responseCode = "200", description = "서브유저 삭제 성공"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
-    @DeleteMapping("/credential/user/{uid}/sub-user/{subUid}")
+    @PostMapping("/credential/user/{uid}/sub-user/{subUid}/delete")
     public ResponseEntity<Object> deleteSubUser(@Parameter(name = "uid", description = "유저 id") @PathVariable("uid") String uid,
                               @Parameter(name = "subUid", description = "서브유저 id") @PathVariable("subUid") String subUid,
                               @Parameter(name = "key", description = "해당 key 값") @RequestBody Key key,
                               @GetIdFromToken Map<String, Object> userInfo) {
 
         if(rgwService.validAccess(userInfo, PF_ADMIN)){
-            rgwService.deleteSubUser(uid, subUid, key);
+//            rgwService.deleteSubUser(uid, subUid, key);
             return ResponseEntity.ok("Subuser deleted.");
         }else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -357,13 +357,10 @@ public class RGWController {
     @Operation(summary = "S3Credential 삭제", description = "유저 id와 key 값을 입력하여 S3Credential을 삭제합니다", responses = {
             @ApiResponse(responseCode = "200", description = "S3Credential 리스트 삭제 성공"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
-    @DeleteMapping("/credential/user")
-    public ResponseEntity<?> deleteCredential(@GetIdFromToken Map<String, Object> userInfo,
-                                              @Parameter(name = "uid", description = "유저 id") @PathVariable String uid,
-                                              @Parameter(name = "key", description = "해당 key 값") @PathVariable Key key) {
-
+    @PostMapping("/credential/user/delete")
+    public ResponseEntity<?> deleteCredential(@GetIdFromToken Map<String, Object> userInfo) {
         if(rgwService.validAccess(userInfo, PF_ADMIN)){
-            rgwService.deleteS3Credential(uid, key.getAccessKey());
+//            rgwService.deleteS3Credential(uid, key.getAccessKey());
             return ResponseEntity.ok("Subuser permission set successfully.");
         }else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -398,19 +395,30 @@ public class RGWController {
     }
 
     @GetMapping("/quota/user/size")
-    public ResponseEntity<Map<String, Map<String, Quota>>> usersQuotaList(){
-        return ResponseEntity.ok(rgwService.usersQuota());
+    public ResponseEntity<Map<String, Map<String, Quota>>> usersQuotaList(@GetIdFromToken Map<String, Object> userInfo){
+        if(rgwService.validAccess(userInfo, PF_ADMIN)){
+            return ResponseEntity.ok(rgwService.usersQuota());
+        }else{
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
     }
 
     @GetMapping("/quota/user/rate-limit")
-    public ResponseEntity<Map<String, Map<String, String>>> usersRateLimit(){
-
-        return ResponseEntity.ok(rgwService.usersRateLimit());
+    public ResponseEntity<Map<String, Map<String, String>>> usersRateLimit(@GetIdFromToken Map<String, Object> userInfo){
+        if(rgwService.validAccess(userInfo, PF_ADMIN)){
+            return ResponseEntity.ok(rgwService.usersRateLimit());
+        }else{
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
     }
 
     @GetMapping("/quota/bucket/size")
-    public ResponseEntity<Map<String, Map<String, Quota>>> bucketsQuotaList(){
-        return ResponseEntity.ok(rgwService.bucketsQuota());
+    public ResponseEntity<Map<String, Map<String, Quota>>> bucketsQuotaList(@GetIdFromToken Map<String, Object> userInfo){
+        if(rgwService.validAccess(userInfo, PF_ADMIN)){
+            return ResponseEntity.ok(rgwService.bucketsQuota());
+        }else{
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
     }
 
     @PostMapping("/quota/bucket/size/{uid}")
