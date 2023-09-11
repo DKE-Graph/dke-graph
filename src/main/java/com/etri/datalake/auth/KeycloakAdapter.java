@@ -81,7 +81,7 @@ public class KeycloakAdapter {
 
             return userInfo;
         } catch (VerificationException e){e.printStackTrace();}
-
+;
         return null;
         //return (String) Jwts.parserBuilder().setSigningKey(keycloakConfig.getCredentials().getSecret()).build().parseClaimsJws(token).getBody().get("sub");
     }
