@@ -64,8 +64,8 @@ public class RGWController {
             @ApiResponse(responseCode = "200", description = "bucket 삭제 성공"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @PostMapping("/bucket/{bucketName}/delete")
-    public ResponseEntity<?> deleteBucket(@Parameter(name = "key", description = "해당 key 값") @GetIdFromToken Map<String, Object> userInfo,
-                             @Parameter(name = "bucketName", description = "버킷 이름") @PathVariable String bucketName) {
+    public ResponseEntity<?> deleteBucket(@GetIdFromToken Map<String, Object> userInfo,
+                                          @Parameter(name = "bucketName", description = "버킷 이름") @PathVariable String bucketName) {
         rgwService.deleteBucket((S3Credential) userInfo.get("credential"), bucketName);
         return ResponseEntity.ok().build();
     }
