@@ -360,7 +360,7 @@ public class RGWController {
     @PostMapping("/credential/user/delete")
     public ResponseEntity<?> deleteCredential(@GetIdFromToken Map<String, Object> userInfo) {
         if(rgwService.validAccess(userInfo, PF_ADMIN)){
-            rgwService.deleteS3Credential(uid, key.getAccessKey());
+//            rgwService.deleteS3Credential(uid, key.getAccessKey());
             return ResponseEntity.ok("Subuser permission set successfully.");
         }else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
