@@ -2,6 +2,7 @@ package com.etri.datalake.objectstorage.dashboard;
 
 import com.etri.datalake.config.ObjectStorageConfig;
 import com.etri.datalake.objectstorage.common.SQuota;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
@@ -15,8 +16,9 @@ import java.util.HashMap;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class DSService {
-    ObjectStorageConfig objectStorageConfig;
+    private final ObjectStorageConfig objectStorageConfig;
 
     private HttpHeaders headers;
 
