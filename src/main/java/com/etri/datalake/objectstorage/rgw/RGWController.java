@@ -356,7 +356,9 @@ public class RGWController {
         }
     }
 
-    @Operation(summary = "서브유저 리스트 출력", description = "유저 아이디를 입력하여 해당 유저의 서브유저 리스트를 출력합니다")
+    @Operation(summary = "서브유저 리스트 출력", description = "유저 아이디를 입력하여 해당 유저의 서브유저 리스트를 출력합니다", responses = {
+            @ApiResponse(responseCode = "200", description = "서브 유저 리스트 출력 성공"),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @GetMapping("/user/credential/sub-user/")
     public ResponseEntity<Map<String, String>> subUserList(@Parameter(name = "uid", description = "유저 아이디")@GetIdFromToken Map<String, Object> userInfo) {
             return ResponseEntity.ok(rgwService.subUserList((String) userInfo.get("userId")));
@@ -371,7 +373,9 @@ public class RGWController {
         }
     }
 
-    @Operation(summary = "유저 생성", description = "유저를 생성합니다")
+    @Operation(summary = "유저 생성", description = "유저를 생성합니다", responses = {
+            @ApiResponse(responseCode = "200", description = "유저 생성 성공"),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @PostMapping("/user/credential")
     public ResponseEntity<User> createUser(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "유저") @RequestBody SUser user,
                                            @GetIdFromToken Map<String, Object> userInfo) {
@@ -393,7 +397,9 @@ public class RGWController {
         return ResponseEntity.ok(rgwService.quotaUtilizationInfo(bucketName));
     }
 
-    @Operation(summary = "유저 쿼타 리스트 출력", description = "유저의 쿼타 리스트를 출력합니다")
+    @Operation(summary = "유저 쿼타 리스트 출력", description = "유저의 쿼타 리스트를 출력합니다", responses = {
+            @ApiResponse(responseCode = "200", description = "쿼타 리스트 출력 성공"),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @GetMapping("/quota/user/size")
     public ResponseEntity<Map<String, Map<String, Quota>>> usersQuotaList(@GetIdFromToken Map<String, Object> userInfo){
         if(rgwService.validAccess(userInfo, PF_ADMIN)){
@@ -402,7 +408,10 @@ public class RGWController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
-
+    //모든 유저 rate limit 출력
+    @Operation(summary = "모든 유저 전송 속도 출력", description = "모든 유저의 전송 속도를 출력합니다", responses = {
+            @ApiResponse(responseCode = "200", description = "전송 속도 출력 성공"),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @GetMapping("/quota/user/rate-limit")
     public ResponseEntity<Map<String, Map<String, String>>> usersRateLimit(@GetIdFromToken Map<String, Object> userInfo){
         if(rgwService.validAccess(userInfo, PF_ADMIN)){
@@ -411,7 +420,10 @@ public class RGWController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
-
+    //모든 유저 버킷 쿼타 출력
+    @Operation(summary = "모든 유저 버킷 쿼타 출력", description = "모든 유저의 버킷 쿼타를 출력합니다", responses = {
+            @ApiResponse(responseCode = "200", description = "버킷 쿼타 출력 성공"),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @GetMapping("/quota/bucket/size")
     public ResponseEntity<Map<String, Map<String, Quota>>> bucketsQuotaList(@GetIdFromToken Map<String, Object> userInfo){
         if(rgwService.validAccess(userInfo, PF_ADMIN)){
@@ -420,12 +432,19 @@ public class RGWController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
-
+    // 한 유저의 버켓의 쿼타 출력
+    @Operation(summary = "유저의 버킷 쿼타 출력", description = "해당 토큰 유저의 버킷 쿼타를 출력합니다", responses = {
+            @ApiResponse(responseCode = "200", description = "버킷 쿼타 출력 성공"),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @PostMapping("/quota/bucket/size/{uid}")
     public ResponseEntity<Quota> bucketsQuota(@PathVariable String uid){
         return ResponseEntity.ok(rgwService.bucketsQuota(uid));
     }
 
+    // 해당 토큰 유저의 모든 버킷 사용도 출력
+    @Operation(summary = "유저의 모든 버킷 사용도 출력", description = "해당 토큰 유저의 모든 버킷 사용도를 출력합니다", responses = {
+            @ApiResponse(responseCode = "200", description = "버킷 사용도 출력 성공"),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @GetMapping("/monitoring")
     public ResponseEntity<Map<String, String>> quotaUtilizationList(@GetIdFromToken Map<String, Object> userInfo) {
         return ResponseEntity.ok(rgwService.quotaUtilizationList((S3Credential) userInfo.get("credential")));
