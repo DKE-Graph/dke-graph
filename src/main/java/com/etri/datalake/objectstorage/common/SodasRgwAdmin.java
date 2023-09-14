@@ -2,14 +2,18 @@ package com.etri.datalake.objectstorage.common;
 
 import com.etri.datalake.config.ObjectStorageConfig;
 import com.etri.datalake.objectstorage.utils.CustomAuthInterceptor;
+import jdk.jfr.Registered;
+import lombok.RequiredArgsConstructor;
 import okhttp3.*;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 import org.twonote.rgwadmin4j.impl.RgwAdminException;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-
+@Component
 public class SodasRgwAdmin {
     private final ObjectStorageConfig objectStorageConfig;
     private final OkHttpClient client;

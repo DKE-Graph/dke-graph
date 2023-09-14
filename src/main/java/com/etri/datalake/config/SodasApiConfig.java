@@ -15,7 +15,7 @@ public class SodasApiConfig {
     public OpenAPI openAPI() {
         Info info = new Info().title("Sodas-Api")
                 .version("0.0.1")
-                .description("Spring Boot를 이용한 Sodas API입니다.");
+                .description("우측 하단의 Authorize 클릭 후 토큰 입력시 해당 토큰의 유저로 각 API 테스트 가능");
 
         String jwtSchemeName = "jwtAuth";
         SecurityRequirement securityRequirement = new SecurityRequirement().addList(jwtSchemeName);
