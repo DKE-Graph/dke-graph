@@ -128,17 +128,18 @@ public class RGWService {
                 .build();
     }
 
-    public void objectUpload(MultipartFile file, String bucketName, S3Credential key) throws IOException {
+    public void objectUpload(MultipartFile file, String bucketName, S3Credential key, String objectKey) throws IOException {
         AmazonS3 conn = getClient(key);
 //        ByteArrayInputStream input = new ByteArrayInputStream(file.getBytes());
 //        byte[] bytes = input.readAllBytes();
+        String objectKeyName = (objectKey == null) ? file.getOriginalFilename() : objectKey;
         long partSize = 30 * 1024 * 1024;
         long contentLength = file.getSize();
         int partCount = (int) Math.ceil((double) contentLength / partSize);
 
         List<PartETag> partETags = new ArrayList<>();
 
-        String uploadId = initiateMultipartUpload(bucketName,file.getOriginalFilename(), conn);
+        String uploadId = initiateMultipartUpload(bucketName,objectKeyName, conn);
 
         for (int i = 0; i < partCount; i++) {
             long start = i * partSize;
@@ -155,7 +156,7 @@ public class RGWService {
 
                 UploadPartRequest uploadPartRequest = new UploadPartRequest()
                         .withBucketName(bucketName)
-                        .withKey(file.getOriginalFilename())
+                        .withKey(objectKeyName)
                         .withUploadId(uploadId)
                         .withPartNumber(i + 1)
                         .withInputStream(new ByteArrayInputStream(buffer))
@@ -168,7 +169,7 @@ public class RGWService {
 
         CompleteMultipartUploadRequest completeRequest = new CompleteMultipartUploadRequest()
                 .withBucketName(bucketName)
-                .withKey(file.getOriginalFilename())
+                .withKey(objectKeyName)
                 .withUploadId(uploadId)
                 .withPartETags(partETags);
 
@@ -179,7 +180,7 @@ public class RGWService {
 //        System.out.println(conn.putObject(bucketName, file.getOriginalFilename(), bytes, new ObjectMetadata()));
 //        System.out.println(conn.putObject(request));
 
-        addUserPermissionToObject(conn, bucketName, file.getOriginalFilename());
+        addUserPermissionToObject(conn, bucketName, objectKeyName);
     }
 
     public void addUserPermissionToObject(AmazonS3 conn, String bucketName, String filename){
@@ -509,6 +510,17 @@ public class RGWService {
         userParameters.put("email", user.getEmail());
         return rgwAdmin.createUser(user.getUid(), userParameters);
     }
+
+    public Map<String, String> deleteUser(String userId) {
+        RgwAdmin rgwAdmin = getRgwAdmin();
+
+        rgwAdmin.removeUser(userId);
+        Map<String, String> response = new HashMap<>();
+        response.put("result", "success");
+
+        return response;
+    }
+
 
     public void addBucketUser(S3Credential key, String rgwUser, String permission, String bucketName) {
         AmazonS3 conn = getClient(key);
