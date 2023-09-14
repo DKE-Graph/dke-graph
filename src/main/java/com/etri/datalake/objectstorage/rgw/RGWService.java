@@ -322,7 +322,9 @@ public class RGWService {
         Map<String, String> userInfoMap = new HashMap<>();
 
         for(String subUser : subUserList){
-            userInfoMap.put(subUser, subUserInfo(uid, subUser).toUpperCase());
+            String[] parts = subUser.split(":");
+            String orgSubUser = parts[1];
+            userInfoMap.put(orgSubUser, subUserInfo(uid, orgSubUser).toUpperCase());
         }
 
         return userInfoMap;

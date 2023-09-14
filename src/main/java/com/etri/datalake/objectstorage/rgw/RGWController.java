@@ -225,11 +225,11 @@ public class RGWController {
     @Operation(summary = "서브 유저 생성", description = "유저 id를 입력하여 해당 유저의 서브 유저를 생성합니다", responses = {
             @ApiResponse(responseCode = "200", description = "서브 유저 생성 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = SSubUser.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
-    @PostMapping("/credential/user/{uid}/sub-user")
-    public ResponseEntity<List<SubUser>> createSubUser(@Parameter(name = "uid", description = "유저 id") @PathVariable("uid") String uid,
+    @PostMapping("/credential/user/sub-user")
+    public ResponseEntity<List<SubUser>> createSubUser(
                                                        @Parameter(name = "subUser", description = "서브 유저") @RequestBody SSubUser subUser, @GetIdFromToken Map<String, Object> userInfo) {
         if(rgwService.validAccess(userInfo, PF_ADMIN)){
-            return ResponseEntity.ok(rgwService.createSubUser(uid, subUser));
+            return ResponseEntity.ok(rgwService.createSubUser((String) userInfo.get("userId"), subUser));
         }else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
@@ -343,7 +343,7 @@ public class RGWController {
                                                @GetIdFromToken Map<String, Object> userInfo) {
 
         if(rgwService.validAccess(userInfo, PF_ADMIN)){
-            return ResponseEntity.ok(rgwService.createS3Credential(uid));
+            return ResponseEntity.ok(rgwService.createS3Credential((String) userInfo.get("userId")));
         }else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
@@ -367,9 +367,10 @@ public class RGWController {
         }
     }
 
-    @GetMapping("/credential/user/sub-user/{uid}")
-    public ResponseEntity<Map<String, String>> subUserList(@PathVariable String uid) {
-        return ResponseEntity.ok(rgwService.subUserList(uid));
+    @GetMapping("/credential/user/sub-user")
+    public ResponseEntity<Map<String, String>> subUserList(@GetIdFromToken Map<String, Object> userInfo) {
+        System.out.println((String) userInfo.get("userId"));
+        return ResponseEntity.ok(rgwService.subUserList((String) userInfo.get("userId")));
     }
 
     @PostMapping("/credential/user")
