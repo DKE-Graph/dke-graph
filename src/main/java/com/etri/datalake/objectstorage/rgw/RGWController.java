@@ -2,7 +2,7 @@ package com.etri.datalake.objectstorage.rgw;
 
 import com.amazonaws.services.s3.model.Bucket;
 import com.etri.datalake.auth.GetIdFromToken;
-import com.etri.datalake.objectstorage.common.*;
+import com.etri.datalake.objectstorage.constants.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;

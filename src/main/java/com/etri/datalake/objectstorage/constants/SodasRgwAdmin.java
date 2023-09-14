@@ -1,11 +1,8 @@
-package com.etri.datalake.objectstorage.common;
+package com.etri.datalake.objectstorage.constants;
 
-import com.etri.datalake.config.ObjectStorageConfig;
+import com.etri.datalake.config.objectstorage.ObjectStorageConfig;
 import com.etri.datalake.objectstorage.utils.CustomAuthInterceptor;
-import jdk.jfr.Registered;
-import lombok.RequiredArgsConstructor;
 import okhttp3.*;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 import org.twonote.rgwadmin4j.impl.RgwAdminException;
 

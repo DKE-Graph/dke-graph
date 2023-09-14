@@ -1,4 +1,4 @@
-package com.etri.datalake.config;
+package com.etri.datalake.config.common;
 
 import com.etri.datalake.auth.GetIdFromTokenArgumentResolver;
 import org.springframework.context.annotation.Configuration;

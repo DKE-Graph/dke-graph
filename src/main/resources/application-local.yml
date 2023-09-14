@@ -31,18 +31,5 @@ keycloak:
     secret: ae46ef1b-f7bc-47db-8096-d821ffb999e1
   confidentialPort: 0
 
-spring:
-  datasource:
-    driver-class-name: com.clickhouse.jdbc.ClickHouseDriver
-    url: jdbc:clickhouse://localhost:8123/test_db
-    username: root
-    password: rootroot
-  jpa:
-    database-platform: org.hibernate.dialect.MySQLDialect
-#    hibernate:
-#      ddl-auto: update
-#      naming:
-#        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-#    database-platform: org.hibernate.dialect.MySQL5Dialect
 
 
