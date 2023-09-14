@@ -1,12 +1,11 @@
 package com.etri.datalake.objectstorage.dashboard;
 
-import com.etri.datalake.config.ObjectStorageConfig;
-import com.etri.datalake.objectstorage.common.SQuota;
+import com.etri.datalake.config.objectstorage.ObjectStorageConfig;
+import com.etri.datalake.objectstorage.constants.SQuota;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;

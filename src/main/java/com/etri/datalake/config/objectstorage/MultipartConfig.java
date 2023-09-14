@@ -1,4 +1,4 @@
-package com.etri.datalake.config;
+package com.etri.datalake.config.objectstorage;
 
 import jakarta.servlet.MultipartConfigElement;
 import org.springframework.beans.factory.annotation.Value;

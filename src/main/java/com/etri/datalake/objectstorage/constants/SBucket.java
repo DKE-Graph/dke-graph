@@ -1,4 +1,4 @@
-package com.etri.datalake.objectstorage.common;
+package com.etri.datalake.objectstorage.constants;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;

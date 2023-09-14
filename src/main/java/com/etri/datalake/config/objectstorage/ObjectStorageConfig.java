@@ -1,4 +1,4 @@
-package com.etri.datalake.config;
+package com.etri.datalake.config.objectstorage;
 
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
