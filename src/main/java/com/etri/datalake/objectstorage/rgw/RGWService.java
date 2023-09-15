@@ -443,9 +443,6 @@ public class RGWService {
             Quota bucketQuota = rgwAdmin.getBucketQuota(user.getUserId()).get();
             quota.put("bucketQuota", bucketQuota);
 
-//            String userRateLimit = getUserRatelimit(user.getUserId());
-//            quotaAndRateLimit.put("RateLimit", userRateLimit);
-
             bucketInfo.put(user.getUserId(), quota);
         }
 
