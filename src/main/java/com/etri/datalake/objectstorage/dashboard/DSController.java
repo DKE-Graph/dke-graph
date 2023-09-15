@@ -1,6 +1,6 @@
 package com.etri.datalake.objectstorage.dashboard;
 
-import com.etri.datalake.objectstorage.common.SQuota;
+import com.etri.datalake.objectstorage.constants.SQuota;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
