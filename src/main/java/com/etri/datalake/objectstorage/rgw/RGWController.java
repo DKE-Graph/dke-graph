@@ -87,7 +87,7 @@ public class RGWController {
     /*
         Data - Delete
      */
-    @Operation(summary = "Object 삭제", description = "버킷 이름을 확인하여 해당 오브젝트를 삭제합니다", responses = {
+    @Operation(summary = "object 삭제", description = "버킷 이름을 확인하여 해당 오브젝트를 삭제합니다", responses = {
             @ApiResponse(responseCode = "200", description = "오브젝트 삭제 성공"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @PostMapping("/data/{bucketName}/{object}/delete")
