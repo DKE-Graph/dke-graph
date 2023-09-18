@@ -37,7 +37,7 @@ public class RGWController {
         Permission - Data - List
         버킷 정보를 읽어옴
      */
-    @Operation(summary = "bucket 조회", description = "유저의 버킷을 조회합니다", responses = {
+    @Operation(summary = "버킷 조회", description = "유저의 버킷을 조회합니다", responses = {
             @ApiResponse(responseCode = "200", description = "버킷 조회 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = SBucket.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @GetMapping("/bucket")
@@ -49,7 +49,7 @@ public class RGWController {
     /*
         Permission - Data - Create
      */
-    @Operation(summary = "bucket 생성", description = "버킷 이름을 주어 버킷을 생성합니다", responses = {
+    @Operation(summary = "버킷 생성", description = "버킷 이름을 주어 버킷을 생성합니다", responses = {
             @ApiResponse(responseCode = "200", description = "버킷 생성 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = SBucket.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @PostMapping("/bucket/{bucketName}")
@@ -61,7 +61,7 @@ public class RGWController {
     /*
         Permission - Data - Delete
      */
-    @Operation(summary = "bucket 삭제", description = "버킷 이름을 확인하여 해당 버킷을 삭제합니다", responses = {
+    @Operation(summary = "버킷 삭제", description = "버킷 이름을 확인하여 해당 버킷을 삭제합니다", responses = {
             @ApiResponse(responseCode = "200", description = "버킷 삭제 성공"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @PostMapping("/bucket/{bucketName}/delete")
@@ -74,7 +74,7 @@ public class RGWController {
     /*
         Data - List
      */
-    @Operation(summary = "object 조회", description = "버킷 이름을 확인하여 해당 오브젝트를 조회합니다", responses = {
+    @Operation(summary = "오브젝트 조회", description = "버킷 이름을 확인하여 해당 오브젝트를 조회합니다", responses = {
             @ApiResponse(responseCode = "200", description = "오브젝트 조회 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = BObject.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @GetMapping("/data/{bucketName}")
@@ -87,7 +87,7 @@ public class RGWController {
     /*
         Data - Delete
      */
-    @Operation(summary = "object 삭제", description = "버킷 이름을 확인하여 해당 오브젝트를 삭제합니다", responses = {
+    @Operation(summary = "오브젝트 삭제", description = "버킷 이름을 확인하여 해당 오브젝트를 삭제합니다", responses = {
             @ApiResponse(responseCode = "200", description = "오브젝트 삭제 성공"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @PostMapping("/data/{bucketName}/{object}/delete")
@@ -101,7 +101,7 @@ public class RGWController {
     /*
         Data - Create
      */
-    @Operation(summary = "object 생성", description = "파일,버킷 이름를 입력하여 오브젝트를 생성합니다", responses = {
+    @Operation(summary = "오브젝트 생성", description = "파일,버킷 이름를 입력하여 오브젝트를 생성합니다", responses = {
             @ApiResponse(responseCode = "200", description = "오브젝트 생성 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = BObject.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @PostMapping(value = "/data", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -116,7 +116,7 @@ public class RGWController {
     /*
         Data - Get
      */
-    @Operation(summary = "object의 다운로드 url 생성", description = "버킷 이름, 오브젝트를 입력하여 해당 오브젝트의 다운로드 url을 생성합니다.", responses = {
+    @Operation(summary = "오브젝트 다운로드 url 생성", description = "버킷 이름, 오브젝트를 입력하여 해당 오브젝트의 다운로드 url을 생성합니다.", responses = {
             @ApiResponse(responseCode = "200", description = "오브젝트의 url 다운로드 성공"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @GetMapping("/data/{bucketName}/{object}")
