@@ -10,6 +10,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -19,16 +21,16 @@ import org.twonote.rgwadmin4j.model.Quota;
 import org.twonote.rgwadmin4j.model.S3Credential;
 import org.twonote.rgwadmin4j.model.SubUser;
 import org.twonote.rgwadmin4j.model.User;
+import org.springframework.data.domain.Pageable;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
-
 @Tag(name = "RGW Controller", description = "RGW 컨트롤러 API 문서입니다")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/object-storage")
+@RequestMapping("/datalake/object-storage")
 public class RGWController {
     private final RGWService rgwService;
     private final String PF_ADMIN = "/organization/default_org/roles/platform_admin";
@@ -41,9 +43,9 @@ public class RGWController {
             @ApiResponse(responseCode = "200", description = "버킷 조회 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = SBucket.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @GetMapping("/bucket")
-    public ResponseEntity<List<SBucket>> getBuckets(@GetIdFromToken Map<String, Object> userInfo) {
+    public ResponseEntity<Page<SBucket>> getBuckets(@GetIdFromToken Map<String, Object> userInfo, Pageable pageable) {
 
-        return ResponseEntity.status(HttpStatus.OK).body(rgwService.getBuckets((S3Credential) userInfo.get("credential")));
+        return ResponseEntity.status(HttpStatus.OK).body(rgwService.getBuckets((S3Credential) userInfo.get("credential"), pageable));
     }
 
     /*
