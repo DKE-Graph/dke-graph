@@ -68,7 +68,7 @@ public class RGWService {
 
         List<SBucket> bucketList = new ArrayList<>();
 
-        for(int i = pageIdx; i < pageIdx + 10; i++){
+        for(int i = startIdx; i < endIdx; i++){
             Bucket myBucket = buckets.get(i);
             bucketList.add(new SBucket(myBucket.getName(), myBucket.getCreationDate()));
         }

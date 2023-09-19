@@ -36,5 +36,12 @@ spring:
     web:
       pageable:
         default-page-size: 10
+  datasource:
+    driver-class-name: com.clickhouse.jdbc.ClickHouseDriver
+    url: jdbc:clickhouse://localhost:8123/test_db
+    username: root
+    password: rootroot
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
 
 
