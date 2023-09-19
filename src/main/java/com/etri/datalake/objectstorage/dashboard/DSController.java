@@ -18,7 +18,7 @@ import java.util.Map;
 @Tag(name = "DS Controller", description = "DS 컨트롤러 API 문서입니다")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/object-storage")
+@RequestMapping("/datalake/object-storage")
 public class DSController {
     private final DSService dsService;
 
