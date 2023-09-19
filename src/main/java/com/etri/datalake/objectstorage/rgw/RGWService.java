@@ -14,6 +14,7 @@ import com.etri.datalake.objectstorage.constants.SQuota;
 import com.etri.datalake.objectstorage.dashboard.DSService;
 import com.etri.datalake.config.objectstorage.ObjectStorageConfig;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.twonote.rgwadmin4j.RgwAdmin;
@@ -56,10 +57,11 @@ public class RGWService {
     public List<SBucket> getBuckets(S3Credential key) {
         AmazonS3 conn = getClient(key);
         List<Bucket> buckets = conn.listBuckets();
+
         List<SBucket> bucketList = new ArrayList<>();
 
-        for (Bucket mybucket : buckets) {
-            bucketList.add(new SBucket(mybucket.getName(), mybucket.getCreationDate()));
+        for(Bucket myBucket : buckets){
+            bucketList.add(new SBucket(myBucket.getName(), myBucket.getCreationDate()));
         }
         return bucketList;
     }
