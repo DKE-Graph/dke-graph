@@ -57,22 +57,16 @@ public class RGWService {
     }
 
 
-    public Page<SBucket> getBuckets(S3Credential key, Pageable pageable) {
+    public List<SBucket> getBuckets(S3Credential key) {
         AmazonS3 conn = getClient(key);
         List<Bucket> buckets = conn.listBuckets();
 
-        int pageIdx = pageable.getPageNumber();
-        int pageSize = pageable.getPageSize();
-        int startIdx = pageIdx * pageSize;
-        int endIdx = Math.min(startIdx + pageSize, buckets.size());
-
         List<SBucket> bucketList = new ArrayList<>();
 
-        for(int i = startIdx; i < endIdx; i++){
-            Bucket myBucket = buckets.get(i);
+        for(Bucket myBucket : buckets){
             bucketList.add(new SBucket(myBucket.getName(), myBucket.getCreationDate()));
         }
-        return new PageImpl<>(bucketList, pageable, buckets.size());
+        return bucketList;
     }
 
     public List<BObject> getObjects(S3Credential key, String bucketName) {
@@ -286,14 +280,14 @@ public class RGWService {
     }
 
     public Map<String, String> quotaUtilizationList(S3Credential key){
-//        List<SBucket> bucketList = getBuckets(key);
+        List<SBucket> bucketList = getBuckets(key);
 
         Map<String, String> quotaUtilizationMap = new HashMap<>();
 
-//        for(SBucket sBucket : bucketList){
-//            System.out.println(sBucket.getBucketName());
-//            quotaUtilizationMap.put(sBucket.getBucketName(), quotaUtilizationInfo(sBucket.getBucketName()).get("result"));
-//        }
+        for(SBucket sBucket : bucketList){
+            System.out.println(sBucket.getBucketName());
+            quotaUtilizationMap.put(sBucket.getBucketName(), quotaUtilizationInfo(sBucket.getBucketName()).get("result"));
+        }
 
         return quotaUtilizationMap;
     }
