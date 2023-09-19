@@ -171,7 +171,8 @@ public class RGWController {
             @ApiResponse(responseCode = "200", description = "전송 속도 설정 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = RateLimit.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @PostMapping("/permission/quota/users/rate-limit")
-    public ResponseEntity<String> setUserRateLimitList(@RequestBody Map<String, RateLimit> userRateLimits, @GetIdFromToken Map<String, Object> userInfo) {
+    public ResponseEntity<String> setUserRateLimitList(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "사용자 이름 배열") @RequestBody Map<String, RateLimit> userRateLimits,
+                                                       @GetIdFromToken Map<String, Object> userInfo) {
 
         if(rgwService.validAccess(userInfo, PF_ADMIN)){
             return ResponseEntity.ok(rgwService.setUserRateLimitList(userRateLimits));
@@ -240,7 +241,7 @@ public class RGWController {
     /*
         서브 유저 생성
      */
-    @Operation(summary = "서브 유저 생성", description = "유저 아이디를 입력하여 해당 유저의 서브 유저를 생성합니다", responses = {
+    @Operation(summary = "서브 유저 생성", description = "서브 유저를 생성합니다", responses = {
             @ApiResponse(responseCode = "200", description = "서브 유저 생성 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = SSubUser.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @PostMapping("/user/credential/sub-user")
@@ -252,7 +253,7 @@ public class RGWController {
     /*
         서브 유저의 권한 정보 출력
      */
-    @Operation(summary = "서브유저 권한정보 출력", description = "유저 아이디와 서브유저 아이디를 입력하여 해당 서브 유저의 권한정보를 출력합니다", responses = {
+    @Operation(summary = "서브유저 권한정보 출력", description = "서브유저 아이디를 입력하여 해당 서브 유저의 권한정보를 출력합니다", responses = {
             @ApiResponse(responseCode = "200", description = "서브유저 권한정보 출력 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = SSubUser.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @GetMapping("/user/credential/sub-user/{subUid}")
@@ -269,7 +270,7 @@ public class RGWController {
     /*
         서브 유저의 권한 수정
      */
-    @Operation(summary = "서브유저 권한 수정", description = "유저 아이디와 서브유저 아이디를 입력하여 해당 서브 유저의 권한을 수정합니다.(Read, Write, read-write, pull)", responses = {
+    @Operation(summary = "서브유저 권한 수정", description = "서브유저 아이디를 입력하여 해당 서브 유저의 권한을 수정합니다.(Read, Write, read-write, pull)", responses = {
             @ApiResponse(responseCode = "200", description = "서브유저 권한 수정 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = SSubUser.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @PostMapping("/user/credential/sub-user/{subUid}")
@@ -283,7 +284,7 @@ public class RGWController {
     /*
         서브 유저 삭제
      */
-    @Operation(summary = "서브 유저 삭제", description = "유저 아이디와 서브유저 아이디을 입력하여 해당 서브유저를 삭제합니다", responses = {
+    @Operation(summary = "서브 유저 삭제", description = "서브유저 아이디을 입력하여 해당 서브유저를 삭제합니다", responses = {
             @ApiResponse(responseCode = "200", description = "서브유저 삭제 성공"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @PostMapping("/user/credential/sub-user/{subUid}/delete")
@@ -297,7 +298,7 @@ public class RGWController {
     /*
         서브 유저의 엑세스키와 시크릿 키 변경
      */
-    @Operation(summary = "서브유저 키 변경", description = "유저 아이디, 서브유저 아이디, 키 값을 입력하여 서브 유저의 비밀키를 변경합니다", responses = {
+    @Operation(summary = "서브유저 키 변경", description = "서브유저 아이디, 키 값을 입력하여 서브 유저의 비밀키를 변경합니다", responses = {
             @ApiResponse(responseCode = "200", description = "서브유저 키 변경 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = SSubUser.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @PostMapping("/user/credential/sub-user/{subUid}/key")
@@ -362,19 +363,20 @@ public class RGWController {
         }
     }
 
-    @Operation(summary = "서브유저 리스트 출력", description = "유저 아이디를 입력하여 해당 유저의 서브유저 리스트를 출력합니다", responses = {
+    @Operation(summary = "서브유저 리스트 출력", description = "유저의 서브유저 리스트를 출력합니다", responses = {
             @ApiResponse(responseCode = "200", description = "서브 유저 리스트 출력 성공"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @GetMapping("/user/credential/sub-user/")
-    public ResponseEntity<Map<String, String>> subUserList(@Parameter(name = "uid", description = "유저 아이디")@GetIdFromToken Map<String, Object> userInfo) {
+    public ResponseEntity<Map<String, String>> subUserList(@GetIdFromToken Map<String, Object> userInfo) {
             return ResponseEntity.ok(rgwService.subUserList((String) userInfo.get("userId")));
     }
 
-    @Operation(summary = "유저 삭제", description = "유저를 삭제합니다", responses = {
+    @Operation(summary = "유저 삭제", description = "유저 아이디를 입력받아 유저를 삭제합니다", responses = {
             @ApiResponse(responseCode = "200", description = "유저 삭제 성공"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @PostMapping("/user/delete")
-    public ResponseEntity<Map<String, String>> deleteUser(@GetIdFromToken Map<String, Object> userInfo, @RequestBody String userId){
+    public ResponseEntity<Map<String, String>> deleteUser(@GetIdFromToken Map<String, Object> userInfo,
+                                                          @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "유저 아이디") @RequestBody String userId){
         if(rgwService.validAccess(userInfo, PF_ADMIN)){
             return ResponseEntity.ok(rgwService.deleteUser(userId));
         }else{
@@ -404,8 +406,8 @@ public class RGWController {
         return ResponseEntity.ok(rgwService.quotaUtilizationInfo(bucketName));
     }
 
-    @Operation(summary = "유저 쿼타 리스트 출력", description = "유저의 쿼타 리스트를 출력합니다", responses = {
-            @ApiResponse(responseCode = "200", description = "쿼타 리스트 출력 성공"),
+    @Operation(summary = "모든 유저 쿼타 리스트 출력", description = "모든 유저의 쿼타 리스트를 출력합니다", responses = {
+            @ApiResponse(responseCode = "200", description = "모든 유저 쿼타 리스트 출력 성공"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @GetMapping("/permission/quota/user/size")
     public ResponseEntity<Map<String, Map<String, Quota>>> usersQuotaList(@GetIdFromToken Map<String, Object> userInfo){
