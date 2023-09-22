@@ -15,10 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.twonote.rgwadmin4j.model.Quota;
-import org.twonote.rgwadmin4j.model.S3Credential;
-import org.twonote.rgwadmin4j.model.SubUser;
-import org.twonote.rgwadmin4j.model.User;
+import org.twonote.rgwadmin4j.model.*;
 
 import java.io.IOException;
 import java.net.URL;
@@ -41,12 +38,20 @@ public class RGWController {
         rgwService.linkBucket();
     }
 
-    @Operation(summary = "bucket 조회", description = "유저의 버킷들을 조회합니다", responses = {
+    @Operation(summary = "bucket 리스트 조회", description = "유저의 버킷들을 조회합니다", responses = {
             @ApiResponse(responseCode = "200", description = "버킷 조회 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = SBucket.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
     @GetMapping("/bucket/list")
     public ResponseEntity<List<SBucket>> getBuckets(@GetIdFromToken Map<String, Object> userInfo) {
         return ResponseEntity.status(HttpStatus.OK).body(rgwService.getBuckets((S3Credential) userInfo.get("credential")));
+    }
+
+    @Operation(summary = "bucket 조회", description = "유저의 버킷을 조회합니다", responses = {
+            @ApiResponse(responseCode = "200", description = "버킷 조회 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = SBucket.class))),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
+    @GetMapping("/bucket/get/{bucketName}")
+    public ResponseEntity<BucketInfo> getBuckets(@GetIdFromToken Map<String, Object> userInfo, @PathVariable String bucketName) {
+        return ResponseEntity.status(HttpStatus.OK).body(rgwService.getBucketInfo(bucketName));
     }
 
     /*
