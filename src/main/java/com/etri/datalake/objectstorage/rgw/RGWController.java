@@ -67,10 +67,10 @@ public class RGWController {
     @Operation(summary = "bucket 삭제", description = "버킷 이름을 확인하여 해당 버킷을 삭제합니다", responses = {
             @ApiResponse(responseCode = "200", description = "버킷 삭제 성공"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
-    @PostMapping("/bucket/{bucketName}/delete")
-    public ResponseEntity<?> deleteBucket(@GetIdFromToken Map<String, Object> userInfo,
+    @PostMapping("/bucket/{bucketName}/remove")
+    public ResponseEntity<?> removeBucket(@GetIdFromToken Map<String, Object> userInfo,
                              @Parameter(name = "bucketName", description = "버킷 이름") @PathVariable String bucketName) {
-        rgwService.deleteBucket((S3Credential) userInfo.get("credential"), bucketName);
+        rgwService.removeBucket((S3Credential) userInfo.get("credential"), bucketName);
         return ResponseEntity.ok().build();
     }
 
@@ -93,11 +93,11 @@ public class RGWController {
     @Operation(summary = "object 삭제", description = "버킷 이름을 확인하여 해당 오브젝트를 삭제합니다", responses = {
             @ApiResponse(responseCode = "200", description = "오브젝트 삭제 성공"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
-    @PostMapping("/data/{bucketName}/{objectKey}/delete")
-    public ResponseEntity<?> deleteObject(@GetIdFromToken Map<String, Object> userInfo,
+    @PostMapping("/data/{bucketName}/{objectKey}/remove")
+    public ResponseEntity<?> removeObject(@GetIdFromToken Map<String, Object> userInfo,
                              @Parameter(name = "bucketName", description = "버킷 이름") @PathVariable String bucketName,
                              @Parameter(name = "objectKey", description = "오브젝트 이름") @PathVariable String objectKey) {
-        rgwService.deleteObject((S3Credential) userInfo.get("credential"), bucketName, objectKey);
+        rgwService.removeObject((S3Credential) userInfo.get("credential"), bucketName, objectKey);
         return ResponseEntity.ok().build();
     }
 
@@ -274,12 +274,12 @@ public class RGWController {
     @Operation(summary = "서브 유저 삭제", description = "유저 아이디와 서브유저 아이디을 입력하여 해당 서브유저를 삭제합니다", responses = {
             @ApiResponse(responseCode = "200", description = "서브유저 삭제 성공"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
-    @PostMapping("/user/credential/sub-user/{subUid}/delete")
-    public ResponseEntity<Object> deleteSubUser(@Parameter(name = "subUid", description = "서브유저 아이디") @PathVariable("subUid") String subUid,
+    @PostMapping("/user/credential/sub-user/{subUid}/remove")
+    public ResponseEntity<Object> removeSubUser(@Parameter(name = "subUid", description = "서브유저 아이디") @PathVariable("subUid") String subUid,
                               @Parameter(name = "key", description = "해당 키 값") @RequestBody Key key,
                               @GetIdFromToken Map<String, Object> userInfo) {
-            rgwService.deleteSubUser((String)userInfo.get("userId"), subUid, key);
-            return ResponseEntity.ok("Subuser deleted.");
+            rgwService.removeSubUser((String)userInfo.get("userId"), subUid, key);
+            return ResponseEntity.ok("Subuser removed.");
     }
 
     /*
@@ -340,10 +340,10 @@ public class RGWController {
     @Operation(summary = "S3Credential 리스트 삭제", description = "유저 아이디를 입력하여 S3Credential list를 삭제합니다", responses = {
             @ApiResponse(responseCode = "200", description = "S3Credential 리스트 삭제 성공"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
-    @PostMapping("/user/credential/delete")
-    public ResponseEntity<?> deleteCredential(@GetIdFromToken Map<String, Object> userInfo) {
+    @PostMapping("/user/credential/remove")
+    public ResponseEntity<?> removeCredential(@GetIdFromToken Map<String, Object> userInfo) {
         if(rgwService.validAccess(userInfo, PF_ADMIN)){
-//            rgwService.deleteS3Credential(uid, key.getAccessKey());
+//            rgwService.removeS3Credential(uid, key.getAccessKey());
             return ResponseEntity.ok("Delete credential successfully.");
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -361,10 +361,10 @@ public class RGWController {
     @Operation(summary = "유저 삭제", description = "유저를 삭제합니다", responses = {
             @ApiResponse(responseCode = "200", description = "유저 삭제 성공"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
-    @PostMapping("/user/delete")
-    public ResponseEntity<Map<String, String>> deleteUser(@GetIdFromToken Map<String, Object> userInfo, @RequestBody String userId){
+    @PostMapping("/user/remove")
+    public ResponseEntity<Map<String, String>> removeUser(@GetIdFromToken Map<String, Object> userInfo, @RequestBody String userId){
         if(rgwService.validAccess(userInfo, PF_ADMIN)){
-            return ResponseEntity.ok(rgwService.deleteUser(userId));
+            return ResponseEntity.ok(rgwService.removeUser(userId));
         }else{
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
