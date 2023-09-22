@@ -376,10 +376,10 @@ public class RGWService {
         return sodasRgwAdmin.getUserRateLimit(uid);
     }
 
-    public List<String> getUserRateLimitList(List<String> uidList){
-        List<String> response = new ArrayList<>();
+    public Map<String, String> getUserRateLimitList(List<String> uidList){
+        Map<String, String> response = new HashMap<>();
         for (String uid : uidList){
-            response.add(getUserRateLimit(uid));
+            response.put(uid, getUserRateLimit(uid));
         }
         return response;
     }
