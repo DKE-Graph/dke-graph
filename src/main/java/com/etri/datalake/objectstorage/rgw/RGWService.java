@@ -14,7 +14,6 @@ import com.etri.datalake.objectstorage.constants.SQuota;
 import com.etri.datalake.objectstorage.dashboard.DSService;
 import com.etri.datalake.config.objectstorage.ObjectStorageConfig;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.twonote.rgwadmin4j.RgwAdmin;
@@ -243,12 +242,10 @@ public class RGWService {
         return individualBucketQuota;
     }
 
-    public void getBucketInfo(String bucketName){
+    public BucketInfo getBucketInfo(String bucketName){
         RgwAdmin rgwAdmin = getRgwAdmin();
 
-        long usage =  rgwAdmin.getBucketInfo(bucketName).get().getUsage().getRgwMain().getSize();
-
-        System.out.println(usage);
+        return rgwAdmin.getBucketInfo(bucketName).get();
     }
 
 
