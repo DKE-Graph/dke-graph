@@ -18,7 +18,7 @@ import java.util.Map;
 @Tag(name = "DS Controller", description = "DS 컨트롤러 API 문서입니다")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/object-storage")
+@RequestMapping("/datalake/object-storage")
 public class DSController {
     private final DSService dsService;
 
@@ -50,7 +50,7 @@ public class DSController {
     @Operation(summary = "유저 쿼타 설정", description = "유저 id와 쿼타를 입력하여 유저의 쿼타를 설정합니다", responses = {
             @ApiResponse(responseCode = "200", description = "유저 쿼타 설정 성공", content = @Content(mediaType = "application/json",schema = @Schema(implementation = SQuota.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
-    @PostMapping("/quota/{uid}/config")
+    @PostMapping("/permission/quota/user/{uid}/size/update")
     public ResponseEntity userQuotaConfig(@Parameter(name = "uid", description = "유저 id")@PathVariable("uid") String userName,
                                           @RequestBody SQuota quota){
         dsService.qoutaConfig(userName, quota);
@@ -64,7 +64,7 @@ public class DSController {
     @Operation(summary = "유저 쿼타 사용 금지 설정", description = "유저 id를 입력하여 유저의 쿼타의 사용을 금지합니다", responses = {
             @ApiResponse(responseCode = "200", description = "유저 쿼타 사용 금지 설정 성공"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
-    @DeleteMapping("/quota/{uid}/config")
+    @PostMapping("/permission/quota/user/{uid}/size/remove")
     public void userQuotaDisable(@Parameter(name = "uid", description = "유저 id")@PathVariable("uid") String userName,
                                  @RequestBody Map<String, String> body){
         dsService.qoutaDisable(userName, body.get("quota_type"));

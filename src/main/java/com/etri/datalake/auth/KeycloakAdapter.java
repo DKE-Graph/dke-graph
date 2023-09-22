@@ -25,9 +25,6 @@ public class KeycloakAdapter {
     private final KeycloakConfig keycloakConfig;
     private final RGWService rgwService;
 
-//    public KeycloakAdapter() {
-//        this(keycloakConfig, rgwService);
-//    }
 
     public KeycloakDeployment getKeycloakDeployment() {
         AdapterConfig adapterConfig = new AdapterConfig();
@@ -64,8 +61,6 @@ public class KeycloakAdapter {
     }
 
     public Map<String, Object> getUserPk(String token){
-        System.out.println(rgwService.getS3Credential("sodas_dev_user"));
-
         try {
             KeycloakDeployment deployment = getKeycloakDeployment();
             AccessToken accessToken = AdapterTokenVerifier.verifyToken(token, deployment);

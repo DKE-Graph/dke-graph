@@ -46,13 +46,24 @@ public class RGWService {
         return rgwAdmin;
     }
 
+    public void linkBucket(){
+        RgwAdmin rgwAdmin = getRgwAdmin();
+
+        System.out.printf(rgwAdmin.getUsage().toString());
+
+        String uid = "sodas_dev_access";
+        String bucketName = "test";
+
+        String bucketId = rgwAdmin.getBucketInfo(uid).get().getId();
+        rgwAdmin.linkBucket(bucketName, bucketId, uid);
+    }
+
     private SodasRgwAdmin getSodasRgwAdmin(){
         if(this.sodasRgwAdmin == null){
             sodasRgwAdmin = new SodasRgwAdmin(objectStorageConfig);
         }
         return sodasRgwAdmin;
     }
-
 
     public List<SBucket> getBuckets(S3Credential key) {
         AmazonS3 conn = getClient(key);
@@ -206,12 +217,7 @@ public class RGWService {
 
     // TODO: 2023.7.22 Keycloak과 연동해 관리자 확인하는 코드 추가해야 함.
     public boolean validAccess(Map<String, Object> userInfo, String access) {
-        if(Objects.equals(((ArrayList<String>) userInfo.get("group")).get(0), access)) {
-            return true;
-        }
-        else{
-            return false;
-        }
+        return Objects.equals(((ArrayList<String>) userInfo.get("group")).get(0), access);
     }
 
     public URL objectDownUrl(S3Credential key, String bucketName, String object) {
