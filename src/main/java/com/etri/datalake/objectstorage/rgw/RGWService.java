@@ -36,7 +36,7 @@ public class RGWService {
     private SodasRgwAdmin sodasRgwAdmin;
     private final DSService dsService;
 
-    private synchronized RgwAdmin getRgwAdmin() {
+    private RgwAdmin getRgwAdmin() {
         if (this.rgwAdmin == null) {
             rgwAdmin = new RgwAdminBuilder().accessKey(objectStorageConfig.getRgwAdminAccess())
                     .secretKey(objectStorageConfig.getRgwAdminSecret())
@@ -126,7 +126,7 @@ public class RGWService {
         conn.deleteObject(bucketName, object);
     }
 
-    private synchronized AmazonS3 getClient(S3Credential key) {
+    private AmazonS3 getClient(S3Credential key) {
         String accessKey = key.getAccessKey();
         String secretKey = key.getSecretKey();
 

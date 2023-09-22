@@ -90,7 +90,6 @@ public class DSController {
         }else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     /*
