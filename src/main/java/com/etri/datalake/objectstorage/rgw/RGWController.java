@@ -154,8 +154,8 @@ public class RGWController {
     @Operation(summary = "여러 유저의 전송 속도 조회", description = "사용자 이름의 배열을 입력받아 전송 속도 배열을 반환합니다.", responses = {
             @ApiResponse(responseCode = "200", description = "전송 속도 배열 조회 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = RateLimit.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
-    @GetMapping("/permission/quota/users/rate-limit/get")
-    public ResponseEntity<?> getUserRateLimitList(@Parameter(name = "uidList", description = "유저 아이디 리스트") @RequestBody List<String> userList,
+    @PostMapping("/permission/quota/users/rate-limit/get")
+    public ResponseEntity<?> getUserRateLimitList(@Parameter(name = "userName", description = "유저 아이디 리스트") @RequestParam(name="userName") List<String> userList,
                                                   @GetIdFromToken Map<String, Object> userInfo) {
         System.out.println(userList.toString());
         if(rgwService.validAccess(userInfo, PF_ADMIN)){

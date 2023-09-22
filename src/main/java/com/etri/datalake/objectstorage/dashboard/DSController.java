@@ -34,7 +34,7 @@ public class DSController {
     @Operation(summary = "유저 쿼타 정보 출력", description = "유저 id를 입력하여 유저의 쿼타 정보를 출력합니다", responses = {
             @ApiResponse(responseCode = "200", description = "유저 쿼타 정보 출력 성공", content = @Content(mediaType = "application/json",schema = @Schema(implementation = SQuota.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
-    @GetMapping("/quota/user/size/{uid}")
+    @GetMapping("/quota/user/size/{uid}/get")
     public ResponseEntity<List<HashMap>> userQuotaInfo(@Parameter(name = "uid", description = "유저 id") @PathVariable("uid") String userName, @GetIdFromToken Map<String, Object> userInfo){
         if(rgwService.validAccess(userInfo, PF_ADMIN)){
             return ResponseEntity.status(HttpStatus.OK).body(dsService.userQoutaInfo(userName));
@@ -46,7 +46,7 @@ public class DSController {
     @Operation(summary = "유저 버킷 쿼타 정보 출력", description = "유저 id를 입력하여 유저의 버킷 쿼타 정보를 출력합니다", responses = {
             @ApiResponse(responseCode = "200", description = "유저 버킷 쿼타 정보 출력 성공", content = @Content(mediaType = "application/json",schema = @Schema(implementation = SQuota.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스 접근")})
-    @GetMapping("/quota/bucket/size/{uid}")
+    @GetMapping("/quota/bucket/size/{uid}/get")
     public ResponseEntity<List<HashMap>> bucketQuotaInfo(@Parameter(name = "uid", description = "유저 id") @PathVariable("uid") String userName, @GetIdFromToken Map<String, Object> userInfo){
         if(rgwService.validAccess(userInfo, PF_ADMIN)){
             return ResponseEntity.status(HttpStatus.OK).body(dsService.bucketQoutaInfo(userName));
@@ -90,7 +90,6 @@ public class DSController {
         }else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     /*
