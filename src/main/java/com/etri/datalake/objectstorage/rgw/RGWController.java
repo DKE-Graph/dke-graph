@@ -221,7 +221,6 @@ public class RGWController {
                                                            @Parameter(name = "uid", description = "유저 아이디") @PathVariable String uid,
                                                            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "할당량") @RequestBody SQuota quota,
                                                            @GetIdFromToken Map<String, Object> userInfo) {
-
         if (rgwService.validAccess(userInfo, PF_ADMIN)) {
             return ResponseEntity.ok(rgwService.setIndividualBucketQuota(uid, bucketName, quota));
         } else {
