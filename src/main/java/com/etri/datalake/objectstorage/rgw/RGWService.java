@@ -96,14 +96,6 @@ public class RGWService {
         AmazonS3 conn = getClient(key);
         Bucket newBucket = conn.createBucket(bucketName);
 
-        SQuota bucketQuota = new SQuota("true", "100", "100000000", "bucket");
-        SQuota userQuota = new SQuota("true", "100", "100000000", "user");
-        dsService.quotaConfigOperation(conn.getS3AccountOwner().getId(), bucketQuota);
-        dsService.quotaConfigOperation(conn.getS3AccountOwner().getId(), userQuota);
-
-        SQuota temp = new SQuota("true", "2", "1", "bucket");
-        setIndividualBucketQuota(conn.getS3AccountOwner().getId(), bucketName, temp);
-
         return newBucket;
     }
 
