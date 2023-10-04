@@ -107,7 +107,7 @@ public class RGWService {
         return newBucket;
     }
 
-    public void deleteBucket(S3Credential key, String bucketName) {
+    public void removeBucket(S3Credential key, String bucketName) {
         AmazonS3 conn = getClient(key);
 
         List<BObject> objectList = getObjects(key, bucketName);
@@ -119,7 +119,7 @@ public class RGWService {
         conn.deleteBucket(bucketName);
     }
 
-    public void deleteObject(S3Credential key, String bucketName, String object) {
+    public void removeObject(S3Credential key, String bucketName, String object) {
         AmazonS3 conn = getClient(key);
 
         conn.deleteObject(bucketName, object);
@@ -334,7 +334,7 @@ public class RGWService {
         return userInfoMap;
     }
 
-    public void deleteSubUser(String uid, String subUid, Key key) {
+    public void removeSubUser(String uid, String subUid, Key key) {
         RgwAdmin rgwAdmin = getRgwAdmin();
         rgwAdmin.removeS3CredentialFromSubUser(uid, subUid, key.getAccessKey());
         rgwAdmin.removeSubUser(uid, subUid);
@@ -359,7 +359,7 @@ public class RGWService {
         return rgwAdmin.createS3Credential(uid);
     }
 
-    public void deleteS3Credential(String uid, String accessKey){
+    public void removeS3Credential(String uid, String accessKey){
         RgwAdmin rgwAdmin = getRgwAdmin();
         rgwAdmin.removeS3Credential(uid, accessKey);
     }
@@ -515,7 +515,7 @@ public class RGWService {
         return rgwAdmin.createUser(user.getUid(), userParameters);
     }
 
-    public Map<String, String> deleteUser(String userId) {
+    public Map<String, String> removeUser(String userId) {
         RgwAdmin rgwAdmin = getRgwAdmin();
 
         rgwAdmin.removeUser(userId);

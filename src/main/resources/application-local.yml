@@ -14,7 +14,7 @@ springdoc:
   api-docs:
     enabled: true
   swagger-ui:
-    path: /swagger-ui/index.html
+    path: /index.html
     groups-order: DESC
     doc-expansion: list
     tags-sorter: alpha
