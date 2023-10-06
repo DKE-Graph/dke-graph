@@ -143,7 +143,8 @@ public class RGWService {
 
         List<PartETag> partETags = new ArrayList<>();
 
-        String uploadId = initiateMultipartUpload(bucketName,objectKeyName, conn);
+        String uploadId = initiateMultipartUpload(bucketName, objectKeyName, conn);
+
 
         for (int i = 0; i < partCount; i++) {
             long start = i * partSize;
@@ -171,6 +172,7 @@ public class RGWService {
             }
         }
 
+
         CompleteMultipartUploadRequest completeRequest = new CompleteMultipartUploadRequest()
                 .withBucketName(bucketName)
                 .withKey(objectKeyName)
@@ -178,11 +180,6 @@ public class RGWService {
                 .withPartETags(partETags);
 
         conn.completeMultipartUpload(completeRequest);
-
-
-        //        PutObjectRequest request = new PutObjectRequest(bucketName, file.getOriginalFilename(), file.getInputStream(), null)
-//        System.out.println(conn.putObject(bucketName, file.getOriginalFilename(), bytes, new ObjectMetadata()));
-//        System.out.println(conn.putObject(request));
 
         addUserPermissionToObject(conn, bucketName, objectKeyName);
     }
@@ -229,7 +226,7 @@ public class RGWService {
 
         individualBucketQuota.put("max-size-kb", bucketInfo1.getBucketQuota().getMaxSizeKb());
         individualBucketQuota.put("max-objects", bucketInfo1.getBucketQuota().getMaxObjects());
-        individualBucketQuota.put("actual-size", bucketInfo1.getUsage().getRgwMain().getSize_actual());
+        //individualBucketQuota.put("actual-size", bucketInfo1.getUsage().getRgwMain().getSize_actual());
 
         return individualBucketQuota;
     }
@@ -244,10 +241,10 @@ public class RGWService {
     public SQuota setIndividualBucketQuota(String uid, String bucketName, SQuota quota){
         RgwAdmin rgwAdmin = getRgwAdmin();
 
-        if(rgwAdmin.getUserQuota(uid).get().getMaxSizeKb() >= Long.parseLong(quota.getMax_size_kb())
-            && rgwAdmin.getUserQuota(uid).get().getMaxObjects() >= Long.parseLong(quota.getMax_objects())){
-            rgwAdmin.setIndividualBucketQuota(uid, bucketName, Long.parseLong(quota.getMax_objects()), Long.parseLong(quota.getMax_size_kb()));
-        }
+        //if(rgwAdmin.getUserQuota(uid).get().getMaxSizeKb() >= Long.parseLong(quota.getMax_size_kb())
+        //    && rgwAdmin.getUserQuota(uid).get().getMaxObjects() >= Long.parseLong(quota.getMax_objects())){
+        rgwAdmin.setIndividualBucketQuota(uid, bucketName, Long.parseLong(quota.getMax_objects()), Long.parseLong(quota.getMax_size_kb()));
+        //}
 
         return quota;
     }

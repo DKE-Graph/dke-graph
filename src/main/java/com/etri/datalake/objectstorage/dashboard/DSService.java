@@ -22,7 +22,7 @@ public class DSService {
 
     private HttpHeaders headers;
 
-    public List<HashMap> userQoutaInfo(String userName) {
+    public HashMap userQoutaInfo(String userName) {
         getToken();
 
         URI uri = UriComponentsBuilder
@@ -41,17 +41,14 @@ public class DSService {
 
         ResponseEntity<HashMap> responseEntity = restTemplate.exchange(requestEntity, HashMap.class);
 
-        List<HashMap> quotaList = new ArrayList<>();
-        quotaList.add((HashMap<String, Object>) responseEntity.getBody().get("user_quota"));
-
-        return quotaList;
+        return new HashMap<String, Object>((HashMap<String, Object>) responseEntity.getBody().get("user_quota"));
     }
 
-    public void qoutaConfig(String userName, SQuota quota) {
+    public void quotaConfig(String userName, SQuota quota) {
         quotaConfigOperation(userName, quota);
     }
 
-    public void qoutaDisable(String userName, String quotaType) {
+    public void quotaDisable(String userName, String quotaType) {
         System.out.println(quotaType);
         SQuota quota = new SQuota("false", "0", "0", quotaType);
         quotaConfigOperation(userName, quota);

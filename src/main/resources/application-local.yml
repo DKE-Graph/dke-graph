@@ -43,5 +43,3 @@ spring:
     password: rootroot
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
-
-
