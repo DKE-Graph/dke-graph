@@ -1,5 +1,6 @@
 package com.etri.datalake.auth;
 
+import com.etri.datalake.exception.UnauthorizedException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.MethodParameter;
@@ -32,7 +33,7 @@ public class GetIdFromTokenArgumentResolver implements HandlerMethodArgumentReso
 
         String authorizationHeader = request.getHeader("Authorization");
         if(authorizationHeader == null){
-//            throw new BaseException(BaseExceptionCode.AUTHORIZATION_HEADER_NULL);
+            throw new UnauthorizedException("Authorization header is missing");
         }
 
         return keycloakAdapter.getUserPk(authorizationHeader.substring(7));
