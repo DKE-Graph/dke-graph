@@ -3,6 +3,7 @@ package com.etri.datalake.objectstorage.rgw;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.Bucket;
 import com.etri.datalake.auth.GetIdFromToken;
+import com.etri.datalake.auth.KeycloakFilter;
 import com.etri.datalake.objectstorage.constants.*;
 import com.etri.datalake.objectstorage.dashboard.DSService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,6 +13,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +36,7 @@ public class RGWController {
     private final DSService dsService;
     private final RGWService rgwService;
     private final String PF_ADMIN = "/organization/default_org/roles/platform_admin";
+    private static final Logger logger = LoggerFactory.getLogger(RGWController.class);
 
     @Operation(summary = "유저 쿼타 정보 출력", description = "유저 id를 입력하여 유저의 쿼타 정보를 출력합니다", responses = {
             @ApiResponse(responseCode = "200", description = "유저 쿼타 정보 출력 성공", content = @Content(mediaType = "application/json",schema = @Schema(implementation = SQuota.class))),
@@ -460,6 +464,7 @@ public class RGWController {
                                            @GetIdFromToken Map<String, Object> userInfo) {
 
         if (rgwService.validAccess(userInfo, PF_ADMIN)) {
+
             return ResponseEntity.ok(rgwService.getS3CredentialList(uid));
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

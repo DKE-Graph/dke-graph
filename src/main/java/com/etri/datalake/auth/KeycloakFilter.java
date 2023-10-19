@@ -22,13 +22,14 @@ public class KeycloakFilter implements Filter {
         String jwt = resolveToken(httpServletRequest);
         String requestURI = httpServletRequest.getRequestURI();
 
+
         if(jwt != null){
             AccessToken accessToken = keycloakAdapter.verifyToken(jwt);
             if (StringUtils.hasText(jwt) && accessToken != null) {
                 logger.info("인증된 사용자 입니다. ");
                 chain.doFilter(request, response);
             }else {
-                logger.info("유효한 토큰이 아닙니다, uri: {}", requestURI);
+                logger.info("인증되지 않은 사용자입니다., uri: {}", requestURI);
             }
         }
         else {
