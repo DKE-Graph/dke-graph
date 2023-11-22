@@ -1,0 +1,59 @@
+body {
+background-color: #f1f1f1;
+font-family: Arial, Helvetica, sans-serif;
+}
+#header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 20px;
+background-color: #333;
+color: #fff;
+}
+#header h1 {
+margin: 0;
+font-size: 24px;
+}
+#header .btn-group {
+display: flex;
+gap: 10px;
+}
+#header button {
+padding: 10px 20px;
+border: none;x1
+border-radius: 5px;
+background-color: #fff;
+color: #333;
+font-size: 16px;
+cursor: pointer;
+transition: background-color 0.3s ease;
+}
+#header button:hover {
+background-color: #f1f1f1;
+}
+.movie-container {
+display: flex;
+flex-wrap: wrap;
+justify-content: center;
+align-items: center;
+margin-top: 200px;
+}
+.movie-card {
+width: 300px;
+margin: 20px;
+padding: 30px;
+background-color: #fff;
+box-shadow: 0px 0px 10px rgba(0,0,0,0.2);
+border-radius: 5px;
+text-align: center;
+}
+.movie-card img {
+width: 100%;
+height: 350px;
+object-fit: cover;
+border-radius: 5px;
+}
+.movie-card h2 {
+margin: 10px 0 0 0;
+font-size: 20px;
+}
