@@ -1,0 +1,45 @@
+object-storage:
+  mgrEndpoint:
+    http://dashboard.rook.221.154.134.31.traefik.me:10017
+  rgwEndpoint:
+    http://object-storage.rook.221.154.134.31.traefik.me:10017
+  rgwAdminAccess:
+    sodas_dev_access
+  rgwAdminSecret:
+    sodas_dev_secret
+  rgwAdminUid:
+    sodas_dev_user
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    path: /index.html
+    groups-order: DESC
+    doc-expansion: list
+    tags-sorter: alpha
+    operationsSorter: alpha
+    disable-swagger-default-url: true
+    display-request-duration: true
+
+keycloak:
+  realm: master-i
+  authServerUrl: http://keycloak.221.154.134.31.traefik.me:10017/
+  sslRequired: none
+  resource: platform
+  credentials:
+    secret: ae46ef1b-f7bc-47db-8096-d821ffb999e1
+  confidentialPort: 0
+
+spring:
+  data:
+    web:
+      pageable:
+        default-page-size: 10
+  datasource:
+    driver-class-name: com.clickhouse.jdbc.ClickHouseDriver
+    url: jdbc:clickhouse://localhost:8123/test_db
+    username: root
+    password: rootroot
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect

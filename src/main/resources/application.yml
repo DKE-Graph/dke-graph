@@ -1,0 +1,32 @@
+object-storage:
+  mgrEndpoint:
+    ${MGR_ENDPOINT}
+  rgwEndpoint:
+    ${RGW_ENDPOINT}
+  rgwAdminAccess:
+    ${RGW_ADMIN_ACCESS}
+  rgwAdminSecret:
+    ${RGW_ADMIN_SECRET}
+  rgwAdminUid:
+    ${RGW_ADMIN_UID}
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui/index.html
+    groups-order: DESC
+    doc-expansion: list
+    tags-sorter: method
+    operationsSorter: alpha
+    disable-swagger-default-url: true
+    display-request-duration: true
+
+keycloak:
+  realm: ${KEYCLOAK_REALM}
+  authServerUrl: ${KEYCLOAK_AUTH_URL}
+  sslRequired: none
+  resource: ${KEYCLOAK_RESOURCE}
+  credentials:
+    secret: ${KEYCLOAK_CREDENTIAL_SECRET}
+  confidentialPort: 0
