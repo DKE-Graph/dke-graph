@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/boardStyle.css">
+    <title>게시글 상세 페이지</title>
+    <script type="text/javascript">
+	function openPopUp() {
+		// 함수 동작 테스트
+		//alert("팝업 테스트");
+
+		//window.open("[팝업을 띄울 파일명 path]", "[별칭]", "[팝업 옵션]")
+		 window.open("test1", "mypopup", "width=650, height=850, top=150, left=200");
+	}
+
+	function showHidden() {
+		alert(document.testForm.flag.value);
+	}
+    </script>
+</head>
+
+<body>
+<div class="board-wrap">
+    <div class="board-title">
+        <strong>문제 게시판</strong>
+        <p>문제를 등록하는 페이지입니다.</p>
+        <input class="answer" type="button" value="답안 제출" style="cursor:pointer" onclick="openPopUp()"><br>
+    </div>
+    <form th:action="@{/board/delete/{id}(id= ${board.id})}" method="post">
+        <div class="board-view">
+            <div class="title" >
+                <div class="parent-wrap">
+                    <h1 id="view-title" th:text="${board.title}">제목입니다.</h1>
+                    <dl class="password-wrap">
+                        <dt>비밀번호</dt>
+                        <dd>
+                            <input class="pw" type="password" id="password" name="password" size=19 placeholder="삭제하려면 비밀번호 입력" required>
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+
+            <div class="info">
+            </div>
+            <div class="cont">
+                <p style="white-space:pre-wrap" id="view-cont" th:text="${board.content}">내용이 들어갈 부분입니다.</p>
+            </div>
+            <!-- 버튼-->
+            <div class="btn-wrap">
+                <a class="btn" th:href="@{/board/modify/{id}(id = ${board.id})}">수정</a>
+                <input class="btn2" type="submit" style="cursor:pointer" value="삭제">
+            </div>
+        </div>
+    </form>
+</div>
+</body>
+</html>
