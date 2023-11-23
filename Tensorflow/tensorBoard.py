@@ -6,7 +6,7 @@ x_data = [[0 ,0],
          [0, 1],
          [1, 0],
          [1, 1]]
-# data
+# datadfdfdf
 # datadfdfd
 # data
 y_data = [[0],
