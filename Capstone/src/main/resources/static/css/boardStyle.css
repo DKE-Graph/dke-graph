@@ -1,0 +1,364 @@
+* {
+margin: 0;
+padding: 0;
+}
+
+html {
+font-size: 10px;
+}
+
+ul, li {
+list-style: none;
+}
+
+a {
+text-decoration: none;
+color: inherit;
+}
+
+.board-wrap {
+width: 1000px;
+margin: 45px auto;
+}
+
+/* 여기서부터 board-title ---------------------------------------------*/
+.board-title {
+margin-bottom: 30px;
+}
+
+.board-title strong {
+font-size: 3rem;
+}
+
+.board-title p {
+margin-top: 5px;
+font-size: 1.4rem;
+}
+
+/* 여기서부터 board-list  --------------------------------------------- */
+
+table.title {
+width: 100%;
+border-collapse: collapse;
+line-height: 24px;
+font-size: 1.15em;
+}
+
+table.title thead {
+border-top:2px solid black;
+border-bottom: 1px dashed #ddd;
+}
+
+table.title td, thead th {
+    border-bottom:1px solid black;
+    border-collapse: collapse;
+    text-align: center;
+    padding: 10px;
+    font-size: 1.4em;
+}
+
+th {
+	background-color: rgb(240, 240, 240);
+}
+
+/* 여기서부터 board-page --------------------------------------------- */
+.board-page {
+    display: inline-block;
+    margin-left: 50%;
+    margin-top: 10px;
+    text-align: center;
+    font-size: 1.3em;
+}
+
+.board-page #nowPage {
+ font-size: 1.5em;
+ color: red;
+}
+
+/* 여기서부터 button --------------------------------------------- */
+
+.btn-wrap {
+margin-top: 30px;
+text-align: center;
+font-size: 10px;
+}
+
+.btn-wrap .btn {
+background-color: white;
+display: inline-block;
+min-width: 80px;
+margin-left: 10px;
+padding: 10px;
+border: 1px solid black;
+border-radius: 2px;
+font-size: 1.4em;
+}
+
+.btn-wrap .btn2 {
+background-color: white;
+display: inline-block;
+min-width: 80px;
+margin-left: 10px;
+padding: 10px 37px 10px 37px;
+border: 1px solid black;
+border-radius: 2px;
+font-size: 1.4em;
+}
+
+
+.btn-wrap #writeBtn {
+background-color: white;
+padding: 10px 37px 10px 37px;
+display: inline-block;
+border: 1px solid black;
+border-radius: 2px;
+font-size: 1.4em;
+}
+
+/* .btn-wrap #uploadBtn {
+display: inline-block;
+text-align: center;
+float: right;
+} */
+
+.btn-wrap #search {
+display: inline;
+padding: 1.3% 3.6% 1.3% 3.6%;
+border: 1px solid black;
+border-radius: 2px;
+}
+
+.btn-wrap #row1 {
+display: inline;
+width: 80%;
+}
+
+.btn-wrap #row2 {
+display: inline-block;
+margin-top: 10px;
+}
+
+/* 여기서부터 view 부분 --------------------------------------------- */
+.board-view {
+width: 100%;
+border-top: 2px solid #000;
+}
+
+.board-view .title {
+padding: 20px 15px;
+border-bottom: 1px dashed #ddd;
+font-size: 1.6rem;
+white-space: nowrap;
+}
+
+/*
+.board-view .info {
+padding: 15px;
+border-bottom: 1px solid #999;
+font-size: 0;
+}
+
+.board-view .info dl {
+position: relative;
+display: inline-block;
+padding: 0 20px;
+}
+
+.board-view .info dl:first-child {
+padding-left: 0;
+}
+
+.board-view .info dl::before {
+content: "";
+position: absolute;
+top: 0;
+left: 0;
+display: block;
+width: 1px;
+height: 20px;
+background-color: #ddd;
+}
+
+.board-view .info dl:first-child::before {
+display: none;
+}
+
+.board-view .info dl dt,
+.board-view .info dl dd {
+display: inline-block;
+font-size: 1.4rem;
+}
+
+.board-view .info dl dd {
+margin-left: 10px;
+color: #777;
+}
+*/
+
+.board-view .cont {
+padding: 15px;
+border-bottom: 1px solid #000;
+line-height: 160%;
+font-size: 2.0rem;
+word-wrap: break-word;
+}
+
+/* 여기서부터 write 부분 --------------------------------------------- */
+.board-write {
+border-top: 2px solid #000;
+}
+
+.board-write .title,
+.board-write .info {
+padding: 15px;
+}
+
+.board-write .info {
+border-top: 1px dashed #ddd;
+border-bottom: 1px solid #000;
+font-size: 0;
+}
+
+.board-write .title dl {
+font-size: 0;
+}
+
+.board-write .info dl {
+display: inline-block;
+width: 50%;
+vertical-align: middle;
+}
+
+.board-write .title dt,
+.board-write .title dd,
+.board-write .info dt,
+.board-write .info dd {
+display: inline-block;
+vertical-align: middle;
+font-size: 1.4rem;
+}
+
+.board-write .title dt,
+.board-write .info dt {
+width: 100px;
+}
+
+.board-write .title dd {
+width: calc(100% - 100px);
+}
+
+.board-write .title input[type="text"],
+.board-write .info input[type="text"],
+.board-write .info input[type="password"] {
+padding: 10px;
+box-sizing: border-box;
+}
+
+.board-write .title input[type="text"] {
+width: 80%;
+}
+
+.board-write .cont {
+border-bottom: 1px solid #000;
+}
+
+.board-write .cont textarea {
+display: block;
+width: 100%;
+height: 300px;
+padding: 1s5px;
+box-sizing: border-box;
+border: 0;
+resize: none; /* vertical */
+}
+
+/* 여기서부터 form-select 부분 --------------------------------------------- */
+.form-select select {
+padding: 1%;
+margin-bottom: 2%;
+border: 1px solid black;
+border-radius: 2px;
+}
+
+.form-select-write select {
+margin-top: 20%;
+margin-bottom: 0.5%;
+margin-left: 78.3%;
+padding: 12% 30% 12% 30%;
+text-align: center;
+border: 1px solid black;
+border-radius: 2px;
+}
+
+#label-font {
+margin-top: 2%;
+margin-right: 1%;
+font-size: 1.3rem;
+}
+
+.parent-wrap {
+display: flex;
+align-items: center;
+}
+
+.password-wrap {
+position: fixed;
+margin-left: 705px;
+display: flex;
+align-items: center;
+}
+
+.password-wrap dt {
+margin-right: 5px;
+padding-left-right: 30px;
+white-space: nowrap;
+}
+
+.password-wrap .pw {
+margin-left: 5px;
+padding: 12px;
+border: 1px solid black;
+border-radius: 2px;
+}
+
+.answer {
+display: inline;
+float: right;
+background-color: white;
+display: inline-block;
+min-width: 80px;
+margin-left: 10px;
+margin-right: 25px;
+margin-bottom: 12px;
+padding: 9px 12px 9px 12px;
+border: 1px solid black;
+border-radius: 2px;
+font-size: 1.4em;
+}
+
+.aswSubmit {
+font-size: 2.4rem;
+margin-bottom: 10px;
+float:left;
+padding: 1%;
+display: block;
+}
+
+.chatGPTBtn button {
+float: center;
+background-color: white;
+display: inline-block;
+min-width: 80px;
+margin-top: 8px;
+margin-left: 5px;
+margin-bottom: 10px;
+padding: 9px 13px 9px 13px;
+border: 1px solid black;
+border-radius: 2px;
+font-size: 1.4em;
+float: left;
+}
+
+#keywords {
+margin-top: 10px;
+}

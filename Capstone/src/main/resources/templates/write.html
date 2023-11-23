@@ -1,0 +1,67 @@
+<!-- 문제 업로드 페이지 -->
+<!DOCTYPE HTML>
+<html lang="ko" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/boardStyle.css">
+    <title>업로드 페이지</title>
+</head>
+<body>
+<div class="board-wrap">
+    <!-- 타이틀 -->
+    <div class="board-title">
+        <strong>문제 게시판</strong>
+        <p>문제를 등록하는 페이지입니다.</p>
+    </div>
+    <form method="post" action="write">
+        <div class="board-write-wrap">
+            <div class="board-write">
+                <div class="title">
+                    <dl>
+                        <dt>제목</dt>
+                        <dd><input type="text" id="title" name="title" placeholder="제목을 입력하세요." required></dd>
+                    </dl>
+                </div>
+                <div class="info">
+                    <dl>
+                        <dt>작성자</dt>
+                        <dd><input type="text" id="writer" name="writer" placeholder="작성자명을 입력하세요." required></dd>
+                    </dl>
+                    <dl>
+                        <dt>비밀번호</dt>
+                        <dd><input type="password" id="password" name="password" placeholder="비밀번호를 입력하세요." required>
+                        </dd>
+                    </dl>
+                    <!--                    <dl>-->
+                    <!--                        <dt>언어</dt>-->
+                    <!--                        <dd><input type="text" id="boardtype" name="boardtype" placeholder="언어를 입력하세요" required>-->
+                    <!--                        </dd>-->
+                    <!--                    </dl>-->
+                    <div class="parent-wrap">
+                        <label id="label-font" for="boardtype">언어</label>
+                        <div class="form-select-write">
+                            <select id="boardtype" name="boardtype" required>
+                                <option value="C">C</option>
+                                <option value="JAVA">JAVA</option>
+                                <option value="PYTHON">PYTHON</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="cont">
+                    <textarea id="content" name="content" placeholder="내용을 입력하세요." required></textarea>
+                </div>
+            </div>
+            <!-- 버튼 영역 -->
+            <div class="btn-wrap">
+                <button id="writeBtn" type="submit" style="cursor:pointer">작성</button>
+                <a class="btn" th:href="@{/board/cancel}">취소</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+</body>
+</html>

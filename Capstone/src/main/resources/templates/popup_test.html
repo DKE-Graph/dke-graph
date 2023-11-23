@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<link rel="stylesheet" type="text/css" href="css/mystyle.css">
+<head>
+<meta charset="UTF-8">
+<title>POPUP TEST</title>
+<script type="text/javascript">
+	function openPopUp() {
+		// 함수 동작 테스트 
+		//alert("팝업 테스트");
+		
+		//window.open("[팝업을 띄울 파일명 path]", "[별칭]", "[팝업 옵션]")
+		 window.open("test1.html", "mypopup", "width=650, height=850, top=150, left=200");
+	}
+	
+	function showHidden() {
+		alert(document.testForm.flag.value);
+	}
+</script>
+</head>
+<body>
+<form name="testForm">
+	<input type="button" value="답안제출하기" onclick="openPopUp()"><br>
+</form>
+</body>
+</html>
