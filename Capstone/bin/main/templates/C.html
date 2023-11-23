@@ -1,0 +1,80 @@
+<!-- 목록 페이지 -->
+<!DOCTYPE HTML>
+<html lang="ko" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/boardStyle.css">
+    <title>문제 게시판 페이지</title>
+</head>
+<body>
+<div class="board-wrap">
+    <!-- 타이틀 -->
+    <div class="board-title">
+        <strong>문제 게시판</strong>
+        <p>문제를 등록하는 페이지입니다.</p>
+    </div>
+    <div class="form-select">
+        <select onchange="if(this.value) location.href=(this.value);">
+            <option value="">언어 선택시 해당 게시판 이동</option> <!--선택안한 비어있는값-->
+            <option value="C">C</option>
+            <option value="JAVA">JAVA</option>
+            <option value="PYTHON">PYTHON</option>
+            <option value="list">전체게시판</option>
+        </select>
+    </div>
+    <!-- 목록 영역 -->
+    <table class="title">
+        <thead>
+        <tr>
+            <th class="number" style="width:20%">번호</th>
+            <th class="mainName" style="width:50%">제목</th>
+            <th class="writer" style="width:15%">작성자</th>
+            <th class="writeDay" style="width:15%">작성일</th>
+        </tr>
+        </thead>
+        <!-- 글 번호 제목 -->
+        <tbody>
+        <tr th:each="board : ${list}" th:if="${board.boardtype == 'C'}">
+            <td id="id" th:text="${board.id}">1</td>
+            <td class="even">
+                <a th:text="${board.title}" th:href="@{/board/view(id=${board.id})}">제목입니다.</a>
+            </td>
+            <td id="writer" th:text="${board.writer}" th:href="@{/board/view(id=${board.id})}"></td>
+            <td id="date" class="even" th:text="${#temporals.format(board.createdDate, 'yyyy-MM-dd HH:mm')}" th:href="@{/board/view(id=${board.id})}"></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <!-- 페이지 번호 영역 -->
+    <div class="board-page">
+        <th:block th:each="page : ${#numbers.sequence(startPage, endPage)}">
+            <a class="num" th:if="${page != nowPage}" th:href="@{/board/C(page = ${page-1}, searchKeyword = ${param.searchKeyword})}"
+               th:text="${page}"></a>
+            <strong id="nowPage" th:if="${page == nowPage}" th:text="${page}"></strong>
+            <!--현 페이지와 누르려는 페이지 같으면 href 작동 안해도 되게끔 if문-->
+        </th:block>
+    </div>
+
+    <div class="btn-wrap">
+        <div id="row1">
+            <!-- 검색 버튼 -->
+            <form th:action="@{/board/C}" method="get" >
+                <input id="search" type="text" name="searchKeyword">
+                <button class="btn" id="searchBtn" type="submit" style="cursor:pointer">검색</button>
+            </form>
+        </div>
+        <div id="row2">
+            <!-- 버튼 영역 -->
+            <form method="get" action="/write">
+                <input class="btn" id="uploadBtn" type="submit" value="글쓰기" style="cursor:pointer">
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+</body>
+</html>
