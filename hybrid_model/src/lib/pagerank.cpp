@@ -218,6 +218,8 @@ void Pagerank::create_vertex_weight(string path, string del, vector<int>& num_ou
                 cout << "[INFO]WEIGHT = SQARE ROOT + 1.0" << endl;
     else if(cmd == "6")
                 cout << "[INFO]WEIGHT = LOG + E" << endl;
+    else if(cmd == "7")
+                cout << "[INFO]NEW METHOD" << endl;
     else{
         cout << "[INFO]WEIGHT ERROR(1 ~ 6)" << endl;
         exit(0);
@@ -304,25 +306,19 @@ void Pagerank::create_vertex_weight(string path, string del, vector<int>& num_ou
             else if(cmd == "6")
                 weight = log(num_outgoing[i]+2.71);
             else{
-                avg =15.9151;//27.528;//14.2326;//35.253;//35.253;//14.2326;//14.2326;//14.2326;//14.2362;//35.253;// 27.528;//35.253;//14.2362;//35.253;//14.2362;//15.9151;//2;//15.9151;//6.54044;//5.57058;//11.092;//35.253;//14.2362;//35.253;//35.253;//2;//35.253;//14.2362;//14.2362;//2;//14.2362;//14.2362;//35.253;//+36;
-                std = 2.98611;//2419.74;//87.0887;//36.0803;//2419.74;//30.4273;//99.915;//30.4273;//6.55653;//16.356;//2419.74;//36.0803;//2419.74;//2419.74;//99.915;//36.0803;//36.0803;//2419.74;
-                max = 20293;
-                median = 12;//3;//12;//3;//12;//0;
+                avg =15.9151;            
                 double percent_80 = 20;//20;//37;//0;//20;//18;
                 double percent_90 = 0;//33;//37;
                 double after_avg = 25;//68;//31;//9;
                 if(num_outgoing[i] <= round(avg))//pow(std,2)
-                    //if(num_outgoing[i] > percent_90)
-                        //weight = sqrt(num_outgoing[i]);
-                    //else
-                    weight = 1;//sqrt(num_outgoing[i]);// - (median - num_outgoing[i]) * (std / 2));
+                    weight = 1;
                 else{
                     if(num_outgoing[i] <= after_avg)
                         weight = sqrt(num_outgoing[i]);
                     else{
                         z_score = num_outgoing[i]-round(avg);//avg)/std;
                     //if(z_score > 1)
-                        weight = sqrt(num_outgoing[i]+z_score);//num_outgoing[i]);//((num_outgoing[i] * sqrt(z_score)) * sizeof(size_t)));//num_outgoing[i] * sqrt((num_outgoing[i]-median)));//sqrt((num_outgoing[i]+1)+(num_outgoing[i] - median));//num_outgoing[i]-median));
+                        weight = sqrt(num_outgoing[i]+z_score);
                     //else
                         //weight = sqrt(num_outgoing[i]);
                     }
