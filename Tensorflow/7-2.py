@@ -42,7 +42,7 @@ train = optimizer.minimize(cost)
 sess = tf.Session()
 sess.run(tf.global_variables_initializer())
 
-for step in range(101):
+for step in range(101): # 1-100
     cost_val, hy_val, _ = sess.run(
         [cost, hypothesis, train], feed_dict={X: x_data, Y: y_data})
     print(step, "Cost: ", cost_val, "\nPrediction:\n", hy_val)
