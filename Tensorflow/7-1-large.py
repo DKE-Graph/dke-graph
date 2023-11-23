@@ -34,3 +34,5 @@ with tf.Session() as sess:
 
     print("Prediction:", sess.run(prediction, feed_dict={X: x_test})) # prediction 할 때는 test data set을 활용
     print("Accuracy: ", sess.run(accuracy, feed_dict={X: x_test, Y: y_test})) # accuracy를 측정할 때는 test data set 활용
+
+###
