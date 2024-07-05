@@ -316,7 +316,7 @@ int main(int argc, char** argv){
             //time3 = (end3.tv_sec - begin3.tv_sec) + (end3.tv_nsec - begin3.tv_nsec) / 1000000000.0;
             //cout << time3 << endl;
 
-            if(diff < 0.00001)
+            if(diff < 1e-6)
                 send_buf_ptr[0] += 1; 
             
             
