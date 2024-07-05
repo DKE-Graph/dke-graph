@@ -494,21 +494,21 @@ int main(int argc, char** argv){
     if(rank == 0|| my_ip == node[0]){
         
         if(my_ip == node[0]){
-            printf("[INFO]AVG EXECUTION TIME:   %LFs.\n", avg_compute_time/62);
-            printf("[INFO]AVG MPI_TIME:  %Lfs.\n", mpi_time/62);
-            printf("[INFO]AVG NETWORK TIME:     %Lfs.\n", rdma_time/62);
+            printf("[INFO]AVG EXECUTION TIME:   %LFs.\n", avg_compute_time/25);
+            printf("[INFO]AVG MPI_TIME:  %Lfs.\n", mpi_time/25);
+            printf("[INFO]AVG NETWORK TIME:     %Lfs.\n", rdma_time/25);
             printf("[INFO]TOTAL EXECUTION TIME: %Lfs.\n", time2);
             cout << "=====================================================" << endl;
         }
         else{
-            printf("[INFO]AVG EXECUTION TIME:   %LFs.\n", avg_compute_time/62);
-            printf("[INFO]AVG MPI_TIME:  %Lfs.\n", mpi_time/62);
-            printf("[INFO]AVG NETWORK TIME:     %Lfs.\n", rdma_time/62);
+            printf("[INFO]AVG EXECUTION TIME:   %LFs.\n", avg_compute_time/25);
+            printf("[INFO]AVG MPI_TIME:  %Lfs.\n", mpi_time/25);
+            printf("[INFO]AVG NETWORK TIME:     %Lfs.\n", rdma_time/25);
             printf("[INFO]TOTAL EXECUTION TIME: %Lfs.\n", time2);
             cout << "=====================================================" << endl;
-            outfile << "[INFO]AVG EXECUTION TIME:   " << avg_compute_time/62 << "s." << endl;
-            outfile << "[INFO]AVG MPI_TIME:         " << mpi_time/62 << "s." << endl;
-            outfile << "[INFO]AVG NETWORK TIME:     " << rdma_time/62 << "s." << endl;
+            outfile << "[INFO]AVG EXECUTION TIME:   " << avg_compute_time/25 << "s." << endl;
+            outfile << "[INFO]AVG MPI_TIME:         " << mpi_time/25 << "s." << endl;
+            outfile << "[INFO]AVG NETWORK TIME:     " << rdma_time/25 << "s." << endl;
             outfile << "[INFO]TOTAL EXECUTION TIME: " << time2 << "s." << endl;
             outfile << "=====================================================" << endl;
 
