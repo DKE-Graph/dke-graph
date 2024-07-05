@@ -1,1 +1,0 @@
-/usr/local/bin/mpic++     CMakeFiles/pagerank.dir/test.cpp.o  -o pagerank  src/lib/liblib.a src/threadpool/libthreadpool.a src/network/libnetwork.a -lpthread -libverbs /usr/lib/gcc/x86_64-linux-gnu/9/libgomp.so /usr/lib/x86_64-linux-gnu/libpthread.so 

@@ -36,7 +36,38 @@ int start, end;
 int edge;
 int max_edge = 0;
 using namespace std;
+void normalize(std::vector<double>& vec) {
+    double norm = std::sqrt(std::inner_product(vec.begin(), vec.end(), vec.begin(), 0.0));
+    for (auto& val : vec) {
+        val /= norm;
+    }
+}
 
+void computeEigenvectorCentrality(const std::vector<std::vector<size_t>>& graph, 
+                                  std::vector<double>& centrality, 
+                                  size_t max_iterations = 100, 
+                                  double tol = 1e-6, size_t start, size_t end) {
+    //size_t num_vertices = graph.size();
+    //centrality = std::vector<double>(num_vertices, 1.0 / std::sqrt(num_vertices));
+    
+    std::vector<double> prev_centrality(num_vertices);
+    
+    //for (size_t iter = 0; iter < max_iterations; ++iter) {
+        //prev_centrality = centrality;
+        //std::cout << "=========== STEP " << iter+1 << "===========" << std::endl;
+        // Reset centrality values for the current iteration
+        std::fill(centrality.begin(), centrality.end(), 0.0);
+        
+        for (size_t i = start-start; i < end-start; ++i) {
+            for (size_t neighbor : graph[i]) {
+                centrality[neighbor] += prev_centrality[i];
+            }
+        }
+        
+        normalize(centrality);
+        
+    }
+}
 bool is_server(string ip){
   if(ip == server_ip)
     return true;
@@ -272,31 +303,21 @@ int main(int argc, char** argv){
             
         }
         dangling_pr = 0.0;
-        if(step!=0) {
-            clock_gettime(CLOCK_MONOTONIC, &begin1);
-            if(my_ip != node[0]){
-                for (size_t i=0;i<num_of_vertex;i++) {
-                    if (num_outgoing[i] == 0)
-                        dangling_pr += recv_buffer_ptr[i];   
-                }
-            }
-            else{
-                diff = 0;
-                for (size_t i=0;i<num_of_vertex;i++) 
-                    diff += fabs(prev_pr[i] - send_buf_ptr[i]);
-            }
-            clock_gettime(CLOCK_MONOTONIC, &end1);
-            time3 = (end1.tv_sec - begin1.tv_sec) + (end1.tv_nsec - begin1.tv_nsec) / 1000000000.0;
-            compute_time+=time3;
-        }
+       
         //===============================================================================
         if(my_ip != node[0]){
             //const size_t sg_size = sliced_graph.size();
             if(rank == 0)
-                cout << "[INFO]COMPUTE PAGERANK ";
+                cout << "[INFO]COMPUTE EIGENVECTOR ";
             clock_gettime(CLOCK_MONOTONIC, &begin1);
             int idx;
-            for(size_t i=start-start;i<end-start;i++){
+            //std::fill(centrality.begin(), centrality.end(), 0.0);
+            for(size_t i= start-start; i<end-start; ++i){
+                for (size_t neighbor :sliced_graph[i]) {
+                    send_buf_ptr[neighbor] += recv_buffer_ptr[i];
+            }
+            }
+            /*for(size_t i=start-start;i<end-start;i++){
                 //cout << i << endl;
                 //
                 idx = i;
@@ -309,7 +330,7 @@ int main(int argc, char** argv){
                     tmp += recv_buffer_ptr[from_page] * inv_num_outgoing;
                 }
                 send_buf_ptr[idx] = (tmp + dangling_pr * inv_num_of_vertex) * df + df_inv * inv_num_of_vertex;
-            }
+            }*/
             clock_gettime(CLOCK_MONOTONIC, &end1);
             time3 = (end1.tv_sec - begin1.tv_sec) + (end1.tv_nsec - begin1.tv_nsec) / 1000000000.0;
             compute_time += time3;
