@@ -421,7 +421,7 @@ int main(int argc, char** argv){
             cout << "[INFO]DIFF: " <<diff << endl;
        
         cout << recv1[0][0] << endl;
-        if(diff < 0.00001 || recv1[0][0] > 1){
+        if(diff < 0.00001 || recv1[0][0] >= 1){
             break;
         }
     }
