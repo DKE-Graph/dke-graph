@@ -214,7 +214,7 @@ int main(int argc, char** argv){
     std::fill(recv1[0].begin(), recv1[0].end(), 1.0 /std::sqrt(num_of_vertex));
     //EigenVector Calculation===============================================================================
     for(step =0;step<100;step++){
-        
+        cout << recv1[0][0] << endl;
         if(rank == 0 || my_ip == node[0]){
             cout <<"================STEP "<< step+1 << "================" <<endl;
             
@@ -243,10 +243,7 @@ int main(int argc, char** argv){
             for(size_t i = 0; i < end - start; ++i) {
                 for (size_t neighbor : sliced_graph[i]) {
                     //cout << send_buf_ptr[i] << ", " << recv_buffer_ptr[neighbor] << endl;
-                    if(my_ip != node[4])
-                        send[0][i] += recv1[0][neighbor];
-                    else
-                        send[0][i] = 0;
+                    send[0][i] += recv1[0][neighbor];
                 }
             }
             
