@@ -241,7 +241,7 @@ int main(int argc, char** argv){
                 std::fill(div_send.begin(), div_send.end(), 0.0);
             for(size_t i = 0; i < end - start; ++i) {
                 for (size_t neighbor : sliced_graph[i]) {
-                    send_buf_ptr[i] += recv_buffer_ptr[neighbor];
+                    send_buf_ptr[neighbor] += recv_buffer_ptr[i];
                 }
             }
             normalize(div_send);
@@ -420,7 +420,7 @@ int main(int argc, char** argv){
         if(my_ip == node[0] && rank == 0)
             cout << "[INFO]DIFF: " <<diff << endl;
        
-        
+        cout << recv1[0][0] << endl;
         if(diff < 0.00001 || recv1[0][0] > 1){
             break;
         }
