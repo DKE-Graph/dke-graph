@@ -214,10 +214,10 @@ int main(int argc, char** argv){
     std::fill(recv1[0].begin(), recv1[0].end(), 1.0 /std::sqrt(num_of_vertex));
     //EigenVector Calculation===============================================================================
     for(step =0;step<25;step++){
-        cout << recv1[0][0] << endl;
+        //cout << recv1[0][0] << endl;
         if(rank == 0 || my_ip == node[0]){
             cout <<"================STEP "<< step+1 << "================" <<endl;
-            
+            cout << "PR[2049138]: " <<recv1[0][2049138] << endl;
         }
         dangling_pr = 0.0;
         if(step!=0) {
@@ -488,7 +488,7 @@ int main(int argc, char** argv){
             cout << "PR[" <<result[i].second<<"]: " << result[i].first <<endl;
             outfile << "PR[" <<result[i].second<<"]: " << result[i].first <<endl;
         }
-        cout << "PR[2049138]: " <<recv1[0][2049138] << endl;
+        
         cout << "=====================================================" << endl;
         outfile << "=====================================================" << endl;
        
