@@ -210,67 +210,8 @@ int main(int argc, char** argv){
         cout <<"=====================================================" <<endl;      
 
     clock_gettime(CLOCK_MONOTONIC, &begin2);
-    /*for(int x=0;x<30;x++){
-        
-        int idx;
-        long double cnt = 0;
-        clock_gettime(CLOCK_MONOTONIC, &begin1);
-        for(size_t i=start-start;i<end-start;i++){
-            idx = i;
-            const double graph_size = sliced_graph[i].size();
-            for(size_t j=0; j< graph_size; j++){
-                cnt+=1;
-            }
-            send_buf_ptr[idx] =cnt/(num_of_vertex-1);
-            cnt = 0;
-        }
-        clock_gettime(CLOCK_MONOTONIC, &end1);
-        time3 = (end1.tv_sec - begin1.tv_sec) + (end1.tv_nsec - begin1.tv_nsec) / 1000000000.0;
-        sum_time3 += time3;
-        cout << "[INFO]EXECUTION TIME: " << time3 << endl;
-        if(my_ip == node[0]){
-            send[0].clear();
-        //clock_gettime(CLOCK_MONOTONIC, &begin3);
-            myrdma.recv_t("send");
-        //clock_gettime(CLOCK_MONOTONIC, &end3);
-        //long double time3 = (end3.tv_sec - begin3.tv_sec) + (end3.tv_nsec - begin3.tv_nsec) / 1000000000.0;
-        //cout << time3 << endl;
-        //myrdma.t_recv("send", nn, num_of_node, send, recv1);
-            cout << "[INFO]START RECEIVE - SUCCESS" << endl;
-            
-            //clock_gettime(CLOCK_MONOTONIC, &begin3);
-            
-            for(size_t i=0;i<num_of_node-1;i++){
-                size = nn[i];
-                //std::vector<double>::iterator iterator = recv1[i].begin();
-                send[0].insert(send[0].end(),make_move_iterator(recv1[i].begin()),make_move_iterator(recv1[i].begin() + size));
-            }   
-            //clock_gettime(CLOCK_MONOTONIC, &end3);
-            //time3 = (end3.tv_sec - begin3.tv_sec) + (end3.tv_nsec - begin3.tv_nsec) / 1000000000.0;
-            //cout << time3 << endl;
-
-            //if(diff < 0.00001)
-            //    send_buf_ptr[0] += 1; 
-            
-            
-            //myrdma.rdma_write_pagerank(0);
-            //clock_gettime(CLOCK_MONOTONIC, &begin3);
-            
-            fill(send_first, send_end, send[0]);
-            //clock_gettime(CLOCK_MONOTONIC, &end3);
-            //time3 = (end3.tv_sec - begin3.tv_sec) + (end3.tv_nsec - begin3.tv_nsec) / 1000000000.0;
-            //cout << time3 << endl;
-            cout << "[INFO]START AGGREGATE - SUCCESS" << endl;
-        }
-        else{
-            if(rank == 0){
-                cout << "[INFO]START SEND_RDMA - SUCCESS "<< endl;
-                myrdma.rdma_write_vector(0,div_buff_size);
-                //myrdma.rdma_recv_pagerank(0);
-            }       
-        }
-    }*/
-    //PageRank Calculation===============================================================================
+  
+    //EigenVector Calculation===============================================================================
     for(step =0;step<10000000;step++){
         
         if(rank == 0 || my_ip == node[0]){
@@ -287,8 +228,8 @@ int main(int argc, char** argv){
             clock_gettime(CLOCK_MONOTONIC, &begin1);
             int idx;
             std::fill(div_send.begin(), div_send.end(), 0.0);
-            for(size_t i = start-start; i < end-start; ++i){
-                for (size_t neighbor :sliced_graph[i]) {
+            for(size_t i = 0; i < end - start; ++i) {
+                for (size_t neighbor : sliced_graph[i]) {
                     send_buf_ptr[neighbor] += recv_buffer_ptr[i];
                 }
             }
