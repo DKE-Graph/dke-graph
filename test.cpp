@@ -213,11 +213,10 @@ int main(int argc, char** argv){
     std::fill(send[0].begin(), send[0].end(), 1.0 / std::sqrt(num_of_vertex));
     std::fill(recv1[0].begin(), recv1[0].end(), 1.0 /std::sqrt(num_of_vertex));
     //EigenVector Calculation===============================================================================
-    for(step =0;step<25;step++){
+    for(step =0;step<100;step++){
         //cout << recv1[0][0] << endl;
         if(rank == 0 || my_ip == node[0]){
             cout <<"================STEP "<< step+1 << "================" <<endl;
-            cout << "PR[2049138]: " <<recv1[0][2049138] << endl;
         }
         dangling_pr = 0.0;
         if(step!=0) {
@@ -320,8 +319,8 @@ int main(int argc, char** argv){
             //time3 = (end3.tv_sec - begin3.tv_sec) + (end3.tv_nsec - begin3.tv_nsec) / 1000000000.0;
             //cout << time3 << endl;
 
-            //if(diff < 1e-6)
-            //    send_buf_ptr[0] += 1; 
+            if(diff < 1e-6)
+                send_buf_ptr[0] += 1; 
             
             
             //myrdma.rdma_write_pagerank(0);
