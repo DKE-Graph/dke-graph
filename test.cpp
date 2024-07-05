@@ -239,11 +239,13 @@ int main(int argc, char** argv){
             int idx;
             
             std::fill(send[0].begin(), send[0].end(), 0.0);
-            const size_t graph_size = sliced_graph[i].size();
-            const size_t* graph_ptr = sliced_graph[i].data();
-            for(size_t j=0; j<graph_size; j++){
-                const size_t from_page = graph_ptr[j];
-                send_buf_ptr[i] += recv_buffer_ptr[from_page];
+            for(size_t i = 0; i < end - start; ++i) {
+                const size_t graph_size = sliced_graph[i].size();
+                const size_t* graph_ptr = sliced_graph[i].data();
+                for(size_t j=0; j<graph_size; j++){
+                    const size_t from_page = graph_ptr[j];
+                    send_buf_ptr[i] += recv_buffer_ptr[from_page];
+                }
             }
             
             normalize(send[0], recv1[0]);
