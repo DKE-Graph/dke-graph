@@ -238,13 +238,13 @@ int main(int argc, char** argv){
             clock_gettime(CLOCK_MONOTONIC, &begin1);
             int idx;
             if(step!=0)
-                std::fill(div_send.begin(), div_send.end(), 0.0);
+                std::fill(send[0].begin(), send[0].end(), 0.0);
             for(size_t i = 0; i < end - start; ++i) {
                 for (size_t neighbor : sliced_graph[i]) {
-                    send_buf_ptr[neighbor] += recv_buffer_ptr[i];
+                    send_buf_ptr[i] += recv_buffer_ptr[neighbor];
                 }
             }
-            normalize(div_send);
+            normalize(send[0]);
             /*for(size_t i=start-start;i<end-start;i++){
                 //cout << i << endl;
                 //
