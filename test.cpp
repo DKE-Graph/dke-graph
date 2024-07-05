@@ -219,7 +219,17 @@ int main(int argc, char** argv){
             
         }
         dangling_pr = 0.0;
-       
+        if(step!=0) {
+            clock_gettime(CLOCK_MONOTONIC, &begin1);
+            if(my_ip == node[0]){
+                diff = 0;
+                for (size_t i=0;i<num_of_vertex;i++) 
+                    diff += fabs(prev_pr[i] - send_buf_ptr[i]);
+            }
+            clock_gettime(CLOCK_MONOTONIC, &end1);
+            time3 = (end1.tv_sec - begin1.tv_sec) + (end1.tv_nsec - begin1.tv_nsec) / 1000000000.0;
+            compute_time+=time3;
+        }
         //===============================================================================
         if(my_ip != node[0]){
             //const size_t sg_size = sliced_graph.size();
@@ -227,7 +237,8 @@ int main(int argc, char** argv){
                 cout << "[INFO]COMPUTE EIGENVECTOR ";
             clock_gettime(CLOCK_MONOTONIC, &begin1);
             int idx;
-            std::fill(div_send.begin(), div_send.end(), 0.0);
+            if(step!=0)
+                std::fill(div_send.begin(), div_send.end(), 0.0);
             for(size_t i = 0; i < end - start; ++i) {
                 for (size_t neighbor : sliced_graph[i]) {
                     send_buf_ptr[i] += recv_buffer_ptr[neighbor];
