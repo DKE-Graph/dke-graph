@@ -210,7 +210,8 @@ int main(int argc, char** argv){
         cout <<"=====================================================" <<endl;      
 
     clock_gettime(CLOCK_MONOTONIC, &begin2);
-  
+    std::fill(send[0].begin(), send[0].end(), 1.0 / std::sqrt(num_of_vertex));
+    std::fill(recv1[0].begin(), recv1[0].end(), 1.0 /std::sqrt(num_of_vertex));
     //EigenVector Calculation===============================================================================
     for(step =0;step<100;step++){
         
