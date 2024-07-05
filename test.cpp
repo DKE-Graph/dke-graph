@@ -238,7 +238,7 @@ int main(int argc, char** argv){
                 cout << "[INFO]COMPUTE EIGENVECTOR ";
             clock_gettime(CLOCK_MONOTONIC, &begin1);
             int idx;
-            cout << recv1[0][2049138] << endl;
+            
             std::fill(send[0].begin(), send[0].end(), 0.0);
             for(size_t i = 0; i < end - start; ++i) {
                 for (size_t neighbor : sliced_graph[i]) {
@@ -488,7 +488,7 @@ int main(int argc, char** argv){
             cout << "PR[" <<result[i].second<<"]: " << result[i].first <<endl;
             outfile << "PR[" <<result[i].second<<"]: " << result[i].first <<endl;
         }
-        
+        cout << "PR[2049138]: " <<recv1[0][2049138] << endl;
         cout << "=====================================================" << endl;
         outfile << "=====================================================" << endl;
        
