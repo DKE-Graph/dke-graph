@@ -43,31 +43,6 @@ void normalize(std::vector<double>& vec) {
     }
 }
 
-void computeEigenvectorCentrality(const std::vector<std::vector<size_t>>& graph, 
-                                  std::vector<double>& centrality, 
-                                  size_t max_iterations = 100, 
-                                  double tol = 1e-6, size_t start, size_t end) {
-    //size_t num_vertices = graph.size();
-    //centrality = std::vector<double>(num_vertices, 1.0 / std::sqrt(num_vertices));
-    
-    std::vector<double> prev_centrality(num_vertices);
-    
-    //for (size_t iter = 0; iter < max_iterations; ++iter) {
-        //prev_centrality = centrality;
-        //std::cout << "=========== STEP " << iter+1 << "===========" << std::endl;
-        // Reset centrality values for the current iteration
-        std::fill(centrality.begin(), centrality.end(), 0.0);
-        
-        for (size_t i = start-start; i < end-start; ++i) {
-            for (size_t neighbor : graph[i]) {
-                centrality[neighbor] += prev_centrality[i];
-            }
-        }
-        
-        normalize(centrality);
-        
-    }
-}
 bool is_server(string ip){
   if(ip == server_ip)
     return true;
@@ -315,8 +290,9 @@ int main(int argc, char** argv){
             for(size_t i= start-start; i<end-start; ++i){
                 for (size_t neighbor :sliced_graph[i]) {
                     send_buf_ptr[neighbor] += recv_buffer_ptr[i];
+                }
             }
-            }
+            normalize(div_send);
             /*for(size_t i=start-start;i<end-start;i++){
                 //cout << i << endl;
                 //
