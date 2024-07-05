@@ -36,8 +36,8 @@ int start, end;
 int edge;
 int max_edge = 0;
 using namespace std;
-void normalize(std::vector<double>& vec) {
-    double norm = std::sqrt(std::inner_product(vec.begin(), vec.end(), vec.begin(), 0.0));
+void normalize(std::vector<double>& vec, std::vector<double>& vec1) {
+    double norm = std::sqrt(std::inner_product(vec1.begin(), vec1.end(), vec1.begin(), 0.0));
     for (auto& val : vec) {
         val /= norm;
     }
@@ -250,7 +250,7 @@ int main(int argc, char** argv){
                 }
             }
             
-            normalize(send[0]);
+            normalize(send[0], recv1[0]);
             /*for(size_t i=start-start;i<end-start;i++){
                 //cout << i << endl;
                 //
