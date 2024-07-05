@@ -242,6 +242,8 @@ int main(int argc, char** argv){
             std::fill(send[0].begin(), send[0].end(), 0.0);
             for(size_t i = 0; i < end - start; ++i) {
                 for (size_t neighbor : sliced_graph[i]) {
+                    if(start + i == 2049138)
+                        cout << send[0][i] <<", " << recv1[0][neighbor];
                     //cout << send_buf_ptr[i] << ", " << recv_buffer_ptr[neighbor] << endl;
                     send[0][i] += recv1[0][neighbor];
                 }
