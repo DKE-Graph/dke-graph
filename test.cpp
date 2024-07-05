@@ -467,7 +467,7 @@ int main(int argc, char** argv){
     if(my_ip != node[0] && rank == 0){
         cout << "=====================================================" << endl;
         outfile << "=====================================================" << endl;
-
+        normalize(recv1[0], recv1[0]);
         recv1[0][0] = recv1[0][0] - 1;
         cout << "[INFO]SORTING PAGERANK VALUE." << endl;
         outfile << "[INFO]SORTING PAGERANK VALUE." << endl;
