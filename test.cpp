@@ -230,7 +230,7 @@ int main(int argc, char** argv){
             std::fill(div_send.begin(), div_send.end(), 0.0);
             for(size_t i = 0; i < end - start; ++i) {
                 for (size_t neighbor : sliced_graph[i]) {
-                    send_buf_ptr[neighbor] += recv_buffer_ptr[i];
+                    send_buf_ptr[i] += recv_buffer_ptr[neighbor];
                 }
             }
             normalize(div_send);
