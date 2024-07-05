@@ -1,1 +1,1 @@
-# RDMA-EigenVector-Centrality
+# Hybrid_Model-MPI-RDMA
