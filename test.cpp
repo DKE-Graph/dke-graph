@@ -213,7 +213,7 @@ int main(int argc, char** argv){
     std::fill(send[0].begin(), send[0].end(), 1.0 / std::sqrt(num_of_vertex));
     std::fill(recv1[0].begin(), recv1[0].end(), 1.0 /std::sqrt(num_of_vertex));
     //EigenVector Calculation===============================================================================
-    for(step =0;step<100;step++){
+    for(step =0;step<25;step++){
         //cout << recv1[0][0] << endl;
         if(rank == 0 || my_ip == node[0]){
             cout <<"================STEP "<< step+1 << "================" <<endl;
