@@ -210,7 +210,7 @@ int main(int argc, char** argv){
         cout <<"=====================================================" <<endl;      
 
     clock_gettime(CLOCK_MONOTONIC, &begin2);
-    //std::fill(send[0].begin(), send[0].end(), 1.0 / std::sqrt(num_of_vertex));
+    std::fill(send[0].begin(), send[0].end(), 1.0 / std::sqrt(num_of_vertex));
     std::fill(recv1[0].begin(), recv1[0].end(), 1.0 /std::sqrt(num_of_vertex));
     //EigenVector Calculation===============================================================================
     for(step =0;step<100;step++){
@@ -513,24 +513,6 @@ int main(int argc, char** argv){
             outfile << "[INFO]TOTAL EXECUTION TIME: " << time2 << "s." << endl;
             outfile << "=====================================================" << endl;
 
-            std::vector<std::pair<size_t, double>> centrality_with_index;
-            for (size_t i = 0; i < recv1[0].size(); ++i) {
-                centrality_with_index.emplace_back(i, recv1[0][i]);
-            }
-
-            // Sort in descending order based on centrality value
-            std::partial_sort(centrality_with_index.begin(), 
-                      centrality_with_index.begin() + 10, 
-                      centrality_with_index.end(), 
-                      [](const std::pair<size_t, double>& a, const std::pair<size_t, double>& b) {
-                          return b.second < a.second; // Sort in descending order
-                      });
-
-            std::cout << "Top 10 Eigenvector Centrality:" << std::endl;
-            for (size_t i = 0; i < 10 && i < centrality_with_index.size(); ++i) {
-                std::cout << "Node " << centrality_with_index[i].first 
-                  << ": " << centrality_with_index[i].second << std::endl;
-            }
         }
     }
 
