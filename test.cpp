@@ -241,7 +241,7 @@ int main(int argc, char** argv){
                 std::fill(send[0].begin(), send[0].end(), 0.0);
             for(size_t i = 0; i < end - start; ++i) {
                 for (size_t neighbor : sliced_graph[i]) {
-                    send_buf_ptr[i] += recv_buffer_ptr[neighbor];
+                    send_buf_ptr[neighbor] += recv_buffer_ptr[i];
                 }
             }
             normalize(send[0]);
