@@ -210,7 +210,7 @@ int main(int argc, char** argv){
         cout <<"=====================================================" <<endl;      
 
     clock_gettime(CLOCK_MONOTONIC, &begin2);
-    std::fill(send[0].begin(), send[0].end(), 1.0 / std::sqrt(num_of_vertex));
+    //std::fill(send[0].begin(), send[0].end(), 1.0 / std::sqrt(num_of_vertex));
     std::fill(recv1[0].begin(), recv1[0].end(), 1.0 /std::sqrt(num_of_vertex));
     //EigenVector Calculation===============================================================================
     for(step =0;step<100;step++){
@@ -422,7 +422,7 @@ int main(int argc, char** argv){
         if(my_ip == node[0] && rank == 0)
             cout << "[INFO]DIFF: " <<diff << endl;
        
-        cout << recv1[0][0] << endl;
+        //cout << recv1[0][0] << endl;
         if(diff < 0.00001 || recv1[0][0] >= 1){
             break;
         }
