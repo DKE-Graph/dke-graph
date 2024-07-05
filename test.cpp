@@ -213,7 +213,7 @@ int main(int argc, char** argv){
     std::fill(send[0].begin(), send[0].end(), 1.0 / std::sqrt(num_of_vertex));
     std::fill(recv1[0].begin(), recv1[0].end(), 1.0 /std::sqrt(num_of_vertex));
     //EigenVector Calculation===============================================================================
-    for(step =0;step<25;step++){
+    for(step =0;step<61;step++){
         //cout << recv1[0][0] << endl;
         if(rank == 0 || my_ip == node[0]){
             cout <<"================STEP "<< step+1 << "================" <<endl;
@@ -497,21 +497,21 @@ int main(int argc, char** argv){
     if(rank == 0|| my_ip == node[0]){
         
         if(my_ip == node[0]){
-            printf("[INFO]AVG EXECUTION TIME:   %LFs.\n", avg_compute_time/25);
-            printf("[INFO]AVG MPI_TIME:  %Lfs.\n", mpi_time/25);
-            printf("[INFO]AVG NETWORK TIME:     %Lfs.\n", rdma_time/25);
+            printf("[INFO]AVG EXECUTION TIME:   %LFs.\n", avg_compute_time/61);
+            printf("[INFO]AVG MPI_TIME:  %Lfs.\n", mpi_time/61);
+            printf("[INFO]AVG NETWORK TIME:     %Lfs.\n", rdma_time/61);
             printf("[INFO]TOTAL EXECUTION TIME: %Lfs.\n", time2);
             cout << "=====================================================" << endl;
         }
         else{
-            printf("[INFO]AVG EXECUTION TIME:   %LFs.\n", avg_compute_time/25);
-            printf("[INFO]AVG MPI_TIME:  %Lfs.\n", mpi_time/25);
-            printf("[INFO]AVG NETWORK TIME:     %Lfs.\n", rdma_time/25);
+            printf("[INFO]AVG EXECUTION TIME:   %LFs.\n", avg_compute_time/61);
+            printf("[INFO]AVG MPI_TIME:  %Lfs.\n", mpi_time/61);
+            printf("[INFO]AVG NETWORK TIME:     %Lfs.\n", rdma_time/61);
             printf("[INFO]TOTAL EXECUTION TIME: %Lfs.\n", time2);
             cout << "=====================================================" << endl;
-            outfile << "[INFO]AVG EXECUTION TIME:   " << avg_compute_time/25 << "s." << endl;
-            outfile << "[INFO]AVG MPI_TIME:         " << mpi_time/25 << "s." << endl;
-            outfile << "[INFO]AVG NETWORK TIME:     " << rdma_time/25 << "s." << endl;
+            outfile << "[INFO]AVG EXECUTION TIME:   " << avg_compute_time/61 << "s." << endl;
+            outfile << "[INFO]AVG MPI_TIME:         " << mpi_time/61 << "s." << endl;
+            outfile << "[INFO]AVG NETWORK TIME:     " << rdma_time/61 << "s." << endl;
             outfile << "[INFO]TOTAL EXECUTION TIME: " << time2 << "s." << endl;
             outfile << "=====================================================" << endl;
 
