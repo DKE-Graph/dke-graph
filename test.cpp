@@ -225,7 +225,7 @@ int main(int argc, char** argv){
             if(my_ip == node[0]){
                 diff = 0;
                 for (size_t i=0;i<num_of_vertex;i++) 
-                    diff += fabs(prev_pr[i] - send_buf_ptr[i]);
+                    diff += fabs(prev_pr[i] - send[0][i]);
             }
             clock_gettime(CLOCK_MONOTONIC, &end1);
             time3 = (end1.tv_sec - begin1.tv_sec) + (end1.tv_nsec - begin1.tv_nsec) / 1000000000.0;
@@ -243,9 +243,13 @@ int main(int argc, char** argv){
             for(size_t i = 0; i < end - start; ++i) {
                 for (size_t neighbor : sliced_graph[i]) {
                     //cout << send_buf_ptr[i] << ", " << recv_buffer_ptr[neighbor] << endl;
-                    send[0][i] += recv1[0][neighbor];
+                    if(my_ip != node[4])
+                        send[0][i] += recv1[0][neighbor];
+                    else
+                        send[0][i] = 0;
                 }
             }
+            
             normalize(send[0]);
             /*for(size_t i=start-start;i<end-start;i++){
                 //cout << i << endl;
