@@ -212,7 +212,7 @@ int main(int argc, char** argv){
     clock_gettime(CLOCK_MONOTONIC, &begin2);
   
     //EigenVector Calculation===============================================================================
-    for(step =0;step<10000000;step++){
+    for(step =0;step<100;step++){
         
         if(rank == 0 || my_ip == node[0]){
             cout <<"================STEP "<< step+1 << "================" <<endl;
