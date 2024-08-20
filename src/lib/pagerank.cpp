@@ -18,6 +18,21 @@ vector<int> n2;
 vector<int> nn;
 //int number_outgoing = 0;
 
+double min_max(double x, double min_x, double max_x){
+    return (x-min_x)/(max_x-min_x);
+}
+double unit_step_func(double x){
+    if(x < 0)
+        return 0;
+    else
+        return 1;
+}
+double ReLU(double x, double y){
+    if (x<y)
+        return y;
+    else
+        return x;
+}
 vector<string> split(string str, char Delimiter) {
     istringstream iss(str);             
     string buffer;                     
@@ -168,6 +183,8 @@ void Pagerank::create_sliced_graph(string path, string del, int start, int end, 
     size_t line_num = 0;
     //std::vector<std::vector<size_t>>* slice_graph = new std::vector<std::vector<size_t>>();
 	sliced_graph.resize(end-start);
+    cout << end <<", " << start << endl;
+    cout << end-start << endl;
     bool ret =false;
     size_t x;
     size_t y;
@@ -203,7 +220,7 @@ void Pagerank::create_sliced_graph(string path, string del, int start, int end, 
 void Pagerank::create_vertex_weight(string path, string del, vector<int>& num_outgoing, 
                                 int& num_of_vertex, int& start, int& end, int* nn,int num_of_node, 
                                 int size,string* node, string my_ip, int rank, int* displs, 
-                                int* recvcounts,vector<double> *send, vector<double> *recv1,string cmd)
+                                int* recvcounts,vector<double> *send, vector<double> *recv1,string cmd, string alpha1)
 {
     
     if(rank == 0){
@@ -217,6 +234,8 @@ void Pagerank::create_vertex_weight(string path, string del, vector<int>& num_ou
                 cout << "[INFO]WEIGHT = EQUI-EDGE" << endl;
         else if(cmd == "6")
                 cout << "[INFO]WEIGHT = LOG + E" << endl;
+        else if (cmd == "7")
+            cout << "[INFO]DEWP-PRIME" << endl;
         else{
             cout << "[INFO]WEIGHT ERROR(1 ~ 5)" << endl;
             exit(0);
@@ -228,7 +247,7 @@ void Pagerank::create_vertex_weight(string path, string del, vector<int>& num_ou
     string line;
     int num_vertex = 0;
     int temp;
-	//int edge;
+	int edge;
 
 	if(infile){
         while(getline(*infile, line)) {
@@ -253,7 +272,7 @@ void Pagerank::create_vertex_weight(string path, string del, vector<int>& num_ou
 		}
 	} 
     //num_of_vertex = num_vertex;
-    //edge = line_num;
+    edge = line_num;
     delete infile;
     
     double std_deviation = calculateStandardDeviation(num_outgoing, num_vertex);
@@ -270,6 +289,7 @@ void Pagerank::create_vertex_weight(string path, string del, vector<int>& num_ou
     size_t index = 0;
     int a,b;
     double xxxxx = 1.0/(num_of_node-1);
+    struct timespec begin2, end2;
     //int edge_part = ceil((edge/(num_of_node-1)));
     //int vertex_part = ceil((num_of_vertex/(num_of_node-1))*argvv);
     //int part = ceil((edge+num_of_vertex)/(num_of_node-1));
@@ -278,6 +298,7 @@ void Pagerank::create_vertex_weight(string path, string del, vector<int>& num_ou
     //long long buf_part = buffer_size/(num_of_node-1);
     //int ttt = 1;
     //cout << "ve: " << ve << endl;
+    clock_gettime(CLOCK_MONOTONIC, &begin2);
     if (my_ip != "192.168.0.102"){
         double weight;
         vector<double> vertex_weight;
@@ -305,6 +326,24 @@ void Pagerank::create_vertex_weight(string path, string del, vector<int>& num_ou
                 weight = num_outgoing[i];//sqrt(num_outgoing[i]+6.0);
             else if(cmd == "5")
                 weight = log(num_outgoing[i]+2.71);
+            else if(cmd == "7"){
+                avg = std::max(10, edge/num_vertex);
+                
+                //max = 2997469;
+                double alpha = 127;
+                z_score = num_outgoing[i]-round(avg);
+
+                //size_t vm = num_outgoing[i] * sizeof(size_t);
+                
+                double n_diff = 0;
+                n_diff = pow((num_outgoing[i]/round(avg)), stod(alpha1)) * sizeof(size_t);
+                double unit_step_val = 1 / (1 + exp(-5 * (num_outgoing[i]-avg)));
+                weight = 1.0 + sqrt(n_diff)*unit_step_val;
+                
+                
+                //weight = 1 + (sqrt(num_outgoing[i]+(z_score*unit_step_func(num_outgoing[i]-max1)))-1)*unit_step_func(num_outgoing[i]-round(avg));// + sqrt(num_outgoing[i]+avg)*unit_step_func(0.95 - num_outgoing[i]/max);
+                //weight = 1 + (sqrt(num_outgoing[i]+(num_outgoing[i]-round(avg))*unit_step_func(num_outgoing[i]-alpha))-1)*unit_step_func(z_score);
+            }
             else{
                 avg =14.2326;//35.253;//14.2326;//15.9151;//27.528;//14.2326;//35.253;//35.253;//14.2326;//14.2326;//14.2326;//14.2362;//35.253;// 27.528;//35.253;//14.2362;//35.253;//14.2362;//15.9151;//2;//15.9151;//6.54044;//5.57058;//11.092;//35.253;//14.2362;//35.253;//35.253;//2;//35.253;//14.2362;//14.2362;//2;//14.2362;//14.2362;//35.253;//+36;
                 std = 2.98611;//2419.74;//87.0887;//36.0803;//2419.74;//30.4273;//99.915;//30.4273;//6.55653;//16.356;//2419.74;//36.0803;//2419.74;//2419.74;//99.915;//36.0803;//36.0803;//2419.74;
@@ -312,7 +351,7 @@ void Pagerank::create_vertex_weight(string path, string del, vector<int>& num_ou
                 median = 12;//3;//12;//3;//12;//0;
                 double percent_80 = 20;//20;//37;//0;//20;//18;
                 double percent_90 = 0;//33;//37;
-                double after_avg = 127;//78;//396;//46;//146;//69;//59;//88;//127;//260;//812;//188;//403;//146;//127;//68;//31;//9;  (403: twiter 0.9) (188: twitter 0.8) (812: twitter 0.95) (260: twitter 0.85) (127: lj 0.95) (88: lj 0.9)(69: lj 0.85)(59: lj 0.8)(146: wt 0.9)
+                double after_avg = 127;//127;//78;//396;//46;//146;//69;//59;//88;//127;//260;//812;//188;//403;//146;//127;//68;//31;//9;  (403: twiter 0.9) (188: twitter 0.8) (812: twitter 0.95) (260: twitter 0.85) (127: lj 0.95) (88: lj 0.9)(69: lj 0.85)(59: lj 0.8)(146: wt 0.9)
                 if(num_outgoing[i] <= round(avg))//pow(std,2)
                     //if(num_outgoing[i] > percent_90)
                         //weight = sqrt(num_outgoing[i]);
@@ -341,6 +380,7 @@ void Pagerank::create_vertex_weight(string path, string del, vector<int>& num_ou
             vertex_weight[i] /= sum_weight;
           
         }
+        cout << "Finish Fairness" << endl;
         //cout << c << endl;
         /*vector<double> weighht;
         int max_dimm = 0;
@@ -364,6 +404,7 @@ void Pagerank::create_vertex_weight(string path, string del, vector<int>& num_ou
         /*for(int i =0; i<weighht.size();i++){
             cout << i << " " << weighht[i] << endl;
         }*/
+        cout << "doing something" << endl;
         for(int i =0; i<num_vertex;i++){
             sum += vertex_weight[i];
             if(sum >= xxxxx){
@@ -380,6 +421,8 @@ void Pagerank::create_vertex_weight(string path, string del, vector<int>& num_ou
         }
         end_arr[num_of_node-2] = num_vertex;
     }
+    cout << "finish something" << endl;
+    cout << "doing something" << endl;
     //cout << rank << " finish vertex weight" << endl;
     int div_num_of_vertex;
     if(my_ip != node[0]){
@@ -389,10 +432,13 @@ void Pagerank::create_vertex_weight(string path, string del, vector<int>& num_ou
                 start = start_arr[i-1];
                 end = end_arr[i-1];
             }
+            cout << div_num_of_vertex << endl;
+            cout << node[i] <<", " << my_ip << endl;
         }
-        //cout << rank << " start process vertex weight" << endl;
+        cout << rank << " start process vertex weight" << endl;
         //if(rank == 0){
             for(int i=0;i<num_of_node;i++){
+                cout << i << endl;
                 if(i == 0){
                     send[i].resize(div_num_of_vertex);
                     recv1[i].resize(num_vertex, 1/num_vertex);
@@ -403,8 +449,9 @@ void Pagerank::create_vertex_weight(string path, string del, vector<int>& num_ou
                     recv1[i].resize(1);
                     recv1[i].shrink_to_fit();
                 }
+                
             }
-        //cout << rank << " start process vertex weight" << endl;
+        cout << rank << " start process vertex weight" << endl;
         if(size > 1){
             vector<double> vertex_weight;
             double sum_weight = 0;
@@ -467,6 +514,9 @@ void Pagerank::create_vertex_weight(string path, string del, vector<int>& num_ou
         //num_outgoing.shrink_to_fit();
         //delete graph;
     }
+    clock_gettime(CLOCK_MONOTONIC, &end2);
+    long double time2 = (end2.tv_sec - begin2.tv_sec) + (end2.tv_nsec - begin2.tv_nsec) / 1000000000.0;
+    printf("[INFO]PARTITIONING EXECUTION TIME: %Lfs.\n", time2);
 }
 void Pagerank::create_graph(string path, string del,std::vector<std::vector<size_t>>* graph, vector<int>& num_outgoing){
     istream *infile;
