@@ -22,11 +22,11 @@
 #define df 0.85
 #define MAX 100000
 #define MAXX 50000
-#define num_of_node 8
+#define num_of_node 5
 #define port 40145
 #define server_ip "192.168.4.5"//"pod-a.svc-k8s-rdma"
 //5,9,6,7,2,3,4,8
-string node[num_of_node] = {server_ip,"192.168.4.14","192.168.4.13","192.168.4.12","192.168.4.11", "192.168.4.10","192.168.4.9","192.168.4.8"};//,"192.168.4.16"};//,"192.168.1.106","192.168.1.107","192.168.1.108","192.168.1.109"};//"pod-b.svc-k8s-rdma","pod-c.svc-k8s-rdma","pod-d.svc-k8s-rdma","pod-e.svc-k8s-rdma"};//,"192.168.1.102","192.168.1.103"};
+string node[num_of_node] = {server_ip,"192.168.4.10","192.168.4.9","192.168.4.14","192.168.4.13"};//, "192.168.4.12","192.168.4.11","192.168.4.8"};//,"192.168.4.16"};//,"192.168.1.106","192.168.1.107","192.168.1.108","192.168.1.109"};//"pod-b.svc-k8s-rdma","pod-c.svc-k8s-rdma","pod-d.svc-k8s-rdma","pod-e.svc-k8s-rdma"};//,"192.168.1.102","192.168.1.103"};
 
 string node_domain[num_of_node];
 
@@ -497,21 +497,21 @@ int main(int argc, char** argv){
     if(rank == 0|| my_ip == node[0]){
         
         if(my_ip == node[0]){
-            printf("[INFO]AVG EXECUTION TIME:   %LFs.\n", avg_compute_time/61);
-            printf("[INFO]AVG MPI_TIME:  %Lfs.\n", mpi_time/61);
-            printf("[INFO]AVG NETWORK TIME:     %Lfs.\n", rdma_time/61);
+            printf("[INFO]AVG EXECUTION TIME:   %LFs.\n", avg_compute_time/20);
+            printf("[INFO]AVG MPI_TIME:  %Lfs.\n", mpi_time/20);
+            printf("[INFO]AVG NETWORK TIME:     %Lfs.\n", rdma_time/20);
             printf("[INFO]TOTAL EXECUTION TIME: %Lfs.\n", time2);
             cout << "=====================================================" << endl;
         }
         else{
-            printf("[INFO]AVG EXECUTION TIME:   %LFs.\n", avg_compute_time/61);
-            printf("[INFO]AVG MPI_TIME:  %Lfs.\n", mpi_time/61);
-            printf("[INFO]AVG NETWORK TIME:     %Lfs.\n", rdma_time/61);
+            printf("[INFO]AVG EXECUTION TIME:   %LFs.\n", avg_compute_time/20);
+            printf("[INFO]AVG MPI_TIME:  %Lfs.\n", mpi_time/20);
+            printf("[INFO]AVG NETWORK TIME:     %Lfs.\n", rdma_time/20);
             printf("[INFO]TOTAL EXECUTION TIME: %Lfs.\n", time2);
             cout << "=====================================================" << endl;
-            outfile << "[INFO]AVG EXECUTION TIME:   " << avg_compute_time/61 << "s." << endl;
-            outfile << "[INFO]AVG MPI_TIME:         " << mpi_time/61 << "s." << endl;
-            outfile << "[INFO]AVG NETWORK TIME:     " << rdma_time/61 << "s." << endl;
+            outfile << "[INFO]AVG EXECUTION TIME:   " << avg_compute_time/20 << "s." << endl;
+            outfile << "[INFO]AVG MPI_TIME:         " << mpi_time/20 << "s." << endl;
+            outfile << "[INFO]AVG NETWORK TIME:     " << rdma_time/20 << "s." << endl;
             outfile << "[INFO]TOTAL EXECUTION TIME: " << time2 << "s." << endl;
             outfile << "=====================================================" << endl;
 
