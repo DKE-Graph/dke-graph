@@ -22,7 +22,7 @@
 #define df 0.85
 #define MAX 100000
 #define MAXX 50000
-#define num_of_node 5
+#define num_of_node 3
 #define port 40145
 #define server_ip "192.168.4.5"//"pod-a.svc-k8s-rdma"
 //5,9,6,7,2,3,4,8
