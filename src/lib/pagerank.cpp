@@ -313,7 +313,7 @@ void Pagerank::create_vertex_weight(string path, string del, vector<int>& num_ou
 
         avg = round(std::max(10, edge/num_vertex));
         double alpha1_val = stod(alpha1);
-        
+
         for(int i =0; i<num_vertex;i++){
 
             if(cmd == "1")
@@ -340,7 +340,7 @@ void Pagerank::create_vertex_weight(string path, string del, vector<int>& num_ou
                 double avg_reciprocal = 1.0 / avg;  
 
                 double ratio = num_outgoing[i] * avg_reciprocal;
-                n_diff = pow(ratio, alpha1_val) * sizeof(size_t);
+                n_diff = pow(ratio, alpha1_val) * 8;
 
                 // exp 연산 최적화
                 double diff = num_outgoing[i] - avg;
