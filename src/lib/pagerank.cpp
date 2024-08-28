@@ -330,15 +330,26 @@ void Pagerank::create_vertex_weight(string path, string del, vector<int>& num_ou
                 avg = std::max(10, edge/num_vertex);
                 
                 //max = 2997469;
-                double alpha = 127;
-                z_score = num_outgoing[i]-round(avg);
+                //double alpha = 127;
+                //z_score = num_outgoing[i]-round(avg);
 
                 //size_t vm = num_outgoing[i] * sizeof(size_t);
-                
                 double n_diff = 0;
-                n_diff = pow((num_outgoing[i]/round(avg)), stod(alpha1)) * sizeof(size_t);
-                double unit_step_val = 1 / (1 + exp(-5 * (num_outgoing[i]-avg)));
-                weight = 1.0 + sqrt(n_diff)*unit_step_val;
+                double avg_rounded = round(avg);
+                double alpha1_val = stod(alpha1);
+                double avg_reciprocal = 1.0 / avg_rounded;  
+
+                double ratio = num_outgoing[i] * avg_reciprocal;
+                n_diff = pow(ratio, alpha1_val) * sizeof(size_t);
+
+                // exp 연산 최적화
+                double diff = num_outgoing[i] - avg;
+                double exp_val = exp(-5.0 * diff);
+                double unit_step_val = 1.0 / (1.0 + exp_val);
+
+                // sqrt와 weight 계산
+                weight = 1.0 + sqrt(n_diff) * unit_step_val;
+
                 
                 
                 //weight = 1 + (sqrt(num_outgoing[i]+(z_score*unit_step_func(num_outgoing[i]-max1)))-1)*unit_step_func(num_outgoing[i]-round(avg));// + sqrt(num_outgoing[i]+avg)*unit_step_func(0.95 - num_outgoing[i]/max);
