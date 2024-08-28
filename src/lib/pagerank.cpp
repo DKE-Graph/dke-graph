@@ -310,6 +310,10 @@ void Pagerank::create_vertex_weight(string path, string del, vector<int>& num_ou
         double median;
         double max;
         int c = 0;
+
+        avg = round(std::max(10, edge/num_vertex));
+        double alpha1_val = stod(alpha1);
+        
         for(int i =0; i<num_vertex;i++){
 
             if(cmd == "1")
@@ -327,17 +331,13 @@ void Pagerank::create_vertex_weight(string path, string del, vector<int>& num_ou
             else if(cmd == "5")
                 weight = log(num_outgoing[i]+2.71);
             else if(cmd == "7"){
-                avg = std::max(10, edge/num_vertex);
-                
                 //max = 2997469;
                 //double alpha = 127;
                 //z_score = num_outgoing[i]-round(avg);
 
                 //size_t vm = num_outgoing[i] * sizeof(size_t);
                 double n_diff = 0;
-                double avg_rounded = round(avg);
-                double alpha1_val = stod(alpha1);
-                double avg_reciprocal = 1.0 / avg_rounded;  
+                double avg_reciprocal = 1.0 / avg;  
 
                 double ratio = num_outgoing[i] * avg_reciprocal;
                 n_diff = pow(ratio, alpha1_val) * sizeof(size_t);
