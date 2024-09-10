@@ -343,8 +343,8 @@ void Pagerank::create_vertex_weight(string path, string del, vector<int>& num_ou
 
                 //size_t vm = num_outgoing[i] * sizeof(size_t);
                 n_diff = 0;
-                ratio = num_outgoing[i] * avg_reciprocal;
-                n_diff = pow(ratio, alpha1_val) * 8;
+                ratio = num_outgoing[i];// * avg_reciprocal;
+                n_diff = pow(ratio, alpha1_val);// * 8;
 
                 // exp 연산 최적화
                 diff = num_outgoing[i] - avg;
