@@ -409,7 +409,7 @@ int main(int argc, char** argv){
                 network_time += time1;
                 mpi_time += time1;
                 avg_compute_time += compute_time;
-                printf("\nCOMPUTE PAGERANK:  %LFs.\n", compute_time);
+                printf("\nCOMPUTE EIGENVECTOR:  %LFs.\n", compute_time);
                 //printf("NETWORK(MPI+RDMA): %Lfs.\n", network_time);
                 printf("NETWORK(RDMA): %Lfs.\n", network_time);
                 printf("STEP %ld EXECUTION TIME: %Lfs.\n", step+1, compute_time + network_time);
@@ -467,8 +467,8 @@ int main(int argc, char** argv){
         outfile << "=====================================================" << endl;
         normalize(recv1[0], recv1[0]);
         recv1[0][0] = recv1[0][0] - 1;
-        cout << "[INFO]SORTING PAGERANK VALUE." << endl;
-        outfile << "[INFO]SORTING PAGERANK VALUE." << endl;
+        cout << "[INFO]SORTING EIGENVECTOR VALUE." << endl;
+        outfile << "[INFO]SORTING EIGENVECTOR VALUE." << endl;
 
         vector<pair<double,int>> result;
         for (int i = 0; i < num_of_vertex; ++i) {
@@ -483,8 +483,8 @@ int main(int argc, char** argv){
         cout.precision(numeric_limits<double>::digits10);
         
         for(int i=0;i<topN;i++){
-            cout << "PR[" <<result[i].second<<"]: " << result[i].first <<endl;
-            outfile << "PR[" <<result[i].second<<"]: " << result[i].first <<endl;
+            cout << "EV[" <<result[i].second<<"]: " << result[i].first <<endl;
+            outfile << "EV[" <<result[i].second<<"]: " << result[i].first <<endl;
         }
         
         cout << "=====================================================" << endl;
